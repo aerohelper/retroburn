@@ -1,0 +1,57 @@
+# SPDX-FileCopyrightText: 2026 Chetan and contributors
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+name: Bug report
+description: Something does not work as expected
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Please do not report security problems here; see SECURITY.md.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open ...
+        2. Choose ...
+        3. ...
+  - type: input
+    id: version
+    attributes:
+      label: RetroBurn version
+      description: Shown under Help → About.
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Windows 11
+        - Windows 10
+        - Ubuntu
+        - Debian
+        - Fedora
+        - Other Linux
+    validations:
+      required: true
+  - type: input
+    id: drive
+    attributes:
+      label: Drive and media
+      description: Drive model, internal or USB, and the disc type (e.g. DVD-R, CD-RW).
+  - type: textarea
+    id: log
+    attributes:
+      label: Log
+      description: Paste the text from "Show details", or attach the log file. Remove anything private.
+      render: text
