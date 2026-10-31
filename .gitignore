@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: 2026 Chetan and contributors
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+# Private planning documents — never commit
+.private/
+REQUIREMENTS.md
+
+# Build output
+target/
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+
+# OS clutter
+.DS_Store
+Thumbs.db
