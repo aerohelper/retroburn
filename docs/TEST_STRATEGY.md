@@ -46,11 +46,14 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 ## 3. Fixtures policy
 
-- Location: `src/test/resources/tool-output/<tool>/<scenario>.txt`, with a
-  sibling `<scenario>.meta` stating tool version, OS, drive/media and the exact
-  command line.
+- Location: `src/test/resources/tool-output/<tool>/<scenario>.txt`. Each file
+  starts with the exact command line; `tool-output/README.md` records the OS,
+  tool versions, drive and media of every capture.
 - Fixtures are never edited by hand except to remove personal data (paths,
-  serial numbers), which is noted in the `.meta` file.
+  serial numbers), which is noted in the README.
+- Where no capture exists yet (drive output before hardware tests), a test may
+  use lines built from the tool's documented format string, with a comment
+  naming the source; captures replace them when available.
 - When a tool version changes its output, add a new fixture; keep the old one
   so both stay supported.
 

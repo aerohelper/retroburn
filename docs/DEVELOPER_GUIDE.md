@@ -16,7 +16,7 @@ and JavaFX comes from Maven Central, so neither needs a separate install.
 ### Linux (Ubuntu / Debian)
 
 ```sh
-sudo apt install git
+sudo apt install git unzip   # the Maven wrapper needs unzip to verify its download
 # JDK 25: use your distribution's openjdk-25-jdk package if available,
 # otherwise install Eclipse Temurin 25 from https://adoptium.net/
 java -version   # must report version 25

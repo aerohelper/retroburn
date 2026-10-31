@@ -24,10 +24,15 @@ module) are added before each module is built.
 | [RELEASE.md](RELEASE.md) | CI, packaging per OS, bundled-binary compliance, release steps. |
 | [design/LLD-app.md](design/LLD-app.md) | Application shell: start-up, composition root, home screen, platform selection. |
 | [design/LLD-credits.md](design/LLD-credits.md) | Third-party component register and the About / Licenses screens. |
+| [design/LLD-tools.md](design/LLD-tools.md) | Running external programs, tool detection and feature gating. |
+| [design/LLD-pipeline.md](design/LLD-pipeline.md) | Jobs as weighted, cancellable steps; work folders; keeping the computer awake. |
+| [design/LLD-engine-and-platform.md](design/LLD-engine-and-platform.md) | Engine contracts and the platform services interface. |
+| [design/LLD-linux-platform.md](design/LLD-linux-platform.md) | Linux: xorriso, sysfs and systemd-inhibit, with what was verified and how. |
+| [DATA_MODEL.md](DATA_MODEL.md) | File formats and schema versions. |
 
 Diagrams are written in Mermaid so they render on GitHub and can be edited as
 plain text.
 
-Documents still to come (added in the milestone that needs them): data model,
-porting guide, manual test checklist, print templates, and one
-`design/LLD-<module>.md` per further module.
+Documents still to come (added in the milestone that needs them): porting
+guide, manual test checklist, print templates, and one `design/LLD-<module>.md`
+per further module.

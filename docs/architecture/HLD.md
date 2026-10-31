@@ -185,13 +185,14 @@ public interface PlatformServices {
     String displayName();                        // "Linux", "Windows"
     AppPaths appPaths();                         // per-OS folders (SAD §6)
     ToolLocator toolLocator();                   // where ffmpeg & co. live
+    Map<Feature, List<Requirement>> featureRequirements(); // feature gating table
     BurnEngine burnEngine();                     // data/ISO burn, blank, verify, drive info
-    Optional<AudioCdEngine> audioCdEngine();     // empty if the needed tool is missing
+    Optional<AudioCdEngine> audioCdEngine();     // empty if the needed tool is missing (audio CD milestone)
     DiscImageBuilder discImageBuilder();         // data/MP3 ISO and DVD-Video images
-    DriveWatcher driveWatcher();                 // hot-plug
+    DriveWatcher createDriveWatcher();           // hot-plug
     SleepInhibitor sleepInhibitor();
     PowerStatus powerStatus();                   // on battery? (unknown allowed)
-    void openFolder(Path folder);
+    void openFolder(Path folder);                // burn reel milestone
 }
 ```
 
