@@ -52,4 +52,13 @@ public final class Messages {
     public String format(String key, Object... arguments) {
         return new MessageFormat(get(key), bundle.getLocale()).format(arguments);
     }
+
+    /**
+     * Resolves a message created elsewhere, for example inside an error.
+     *
+     * @throws java.util.MissingResourceException if the key does not exist
+     */
+    public String format(UserMessage message) {
+        return format(message.key(), message.arguments().toArray());
+    }
 }
