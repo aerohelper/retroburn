@@ -1,0 +1,75 @@
+/*
+ * SPDX-FileCopyrightText: 2026 Chetan and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+/*
+ * Base of the "classic" theme. Colour tokens come from docs/ux/UX_SPEC.md;
+ * components refer to the tokens, never to raw colours.
+ */
+.root {
+    -rb-bg: #F4F5F7;
+    -rb-surface: #FFFFFF;
+    -rb-text: #1B1F24;
+    -rb-text-muted: #59636E;
+    -rb-accent: #1F5FBF;
+    -rb-accent-text: #FFFFFF;
+    -rb-focus: #1F5FBF;
+
+    -fx-background-color: -rb-bg;
+    -fx-text-fill: -rb-text;
+    -fx-accent: -rb-accent;
+    -fx-focus-color: -rb-focus;
+}
+
+.home-view {
+    -fx-padding: 48 24 24 24;
+    -fx-spacing: 32;
+}
+
+.home-heading {
+    -fx-font-size: 24px;
+    -fx-text-fill: -rb-text;
+}
+
+.home-cards {
+    -fx-hgap: 16;
+    -fx-vgap: 16;
+}
+
+.project-card {
+    -fx-background-color: -rb-surface;
+    -fx-background-radius: 6;
+    -fx-border-color: #D0D5DB;
+    -fx-border-radius: 6;
+    -fx-padding: 16;
+    -fx-pref-width: 180;
+    -fx-pref-height: 96;
+    -fx-alignment: top-left;
+}
+
+/* JavaFX fades disabled controls and their labels; undo that so the reason stays readable (WCAG AA). */
+.project-card:disabled,
+.project-card:disabled .label {
+    -fx-opacity: 1;
+}
+
+.project-card-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -rb-text;
+}
+
+.project-card-reason {
+    -fx-text-fill: -rb-text-muted;
+}
+
+.dialog-heading {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+.dialog-content {
+    -fx-spacing: 8;
+    -fx-padding: 8;
+}
