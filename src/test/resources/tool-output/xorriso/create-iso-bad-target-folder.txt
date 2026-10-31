@@ -1,0 +1,7 @@
+$ xorriso -abort_on FAILURE -return_with SORRY 32 -outdev stdio:/nonexistent-dir/out.iso -map /tmp/src/big.bin /big.bin -commit -end
+xorriso 1.5.6 : RockRidge filesystem manipulator, libburnia project.
+
+libburn : SORRY : Neither stdio-path nor its directory exist
+xorriso : FAILURE : Cannot acquire drive 'stdio:/nonexistent-dir/out.iso'
+xorriso : aborting : -abort_on 'FAILURE' encountered 'FAILURE'
+[exit 5]

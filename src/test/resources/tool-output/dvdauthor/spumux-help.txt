@@ -1,0 +1,17 @@
+$ spumux --help
+DVDAuthor::spumux, version 0.7.2.
+Build options: gnugetopt iconv freetype fribidi fontconfig
+Send bug reports to <dvdauthor-users@lists.sourceforge.net>
+
+INFO: no default video format, must explicitly specify NTSC or PAL
+spumux: unrecognized option '--help'
+WARN: Getopt returned 63
+syntax: spumux [options] script.sub < in.mpg > out.mpg
+	-m <mode>   dvd, cvd, or svcd (only the first letter is checked).
+		Default is DVD.
+	-s <stream> number of the substream to insert (default 0)
+	-v <level>  verbosity level (default 0) 
+	-P          enable progress indicator
+
+	See manpage for config file format.
+[exit 255]

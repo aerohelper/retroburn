@@ -1,0 +1,134 @@
+// SPDX-FileCopyrightText: 2026 Chetan and contributors
+// SPDX-License-Identifier: GPL-3.0-or-later
+package io.aerohelper.retroburn.tools;
+
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
+/**
+ * Everything needed to run an external program: the executable and a list of arguments, never a
+ * shell command string.
+ *
+ * <p>Line consumers are called from background threads, possibly concurrently for stdout and
+ * stderr, and must be thread-safe and quick.
+ *
+ * @param executable absolute path of the program
+ * @param arguments arguments passed as-is, without shell interpretation
+ * @param workingDirectory folder the program runs in, or the current one
+ * @param totalTimeout maximum run time
+ * @param idleTimeout maximum time without any output, which catches hung devices
+ * @param charset encoding of the program's output
+ * @param stdoutLines receives each stdout line
+ * @param stderrLines receives each stderr line
+ */
+public record ProcessRequest(
+        Path executable,
+        List<String> arguments,
+        Optional<Path> workingDirectory,
+        Optional<Duration> totalTimeout,
+        Optional<Duration> idleTimeout,
+        Charset charset,
+        Consumer<String> stdoutLines,
+        Consumer<String> stderrLines) {
+
+    public ProcessRequest {
+        Objects.requireNonNull(executable, "executable");
+        arguments = List.copyOf(arguments);
+        Objects.requireNonNull(workingDirectory, "workingDirectory");
+        Objects.requireNonNull(totalTimeout, "totalTimeout");
+        Objects.requireNonNull(idleTimeout, "idleTimeout");
+        Objects.requireNonNull(charset, "charset");
+        Objects.requireNonNull(stdoutLines, "stdoutLines");
+        Objects.requireNonNull(stderrLines, "stderrLines");
+    }
+
+    public static Builder builder(Path executable, List<String> arguments) {
+        return new Builder(executable, arguments);
+    }
+
+    /** The executable followed by its arguments. */
+    public List<String> command() {
+        List<String> command = new ArrayList<>();
+        command.add(executable.toString());
+        command.addAll(arguments);
+        return command;
+    }
+
+    /**
+     * The command as one readable line for logs and "Show details". Arguments with spaces are quoted
+     * for readability only; this text is never executed.
+     */
+    public String commandLine() {
+        return command().stream()
+                .map(part -> part.isEmpty() || part.contains(" ") ? "'" + part + "'" : part)
+                .collect(Collectors.joining(" "));
+    }
+
+    /** Builds a {@link ProcessRequest} with optional settings. */
+    public static final class Builder {
+
+        private final Path executable;
+        private final List<String> arguments;
+        private Path workingDirectory;
+        private Duration totalTimeout;
+        private Duration idleTimeout;
+        private Charset charset = StandardCharsets.UTF_8;
+        private Consumer<String> stdoutLines = line -> {};
+        private Consumer<String> stderrLines = line -> {};
+
+        private Builder(Path executable, List<String> arguments) {
+            this.executable = executable;
+            this.arguments = arguments;
+        }
+
+        public Builder workingDirectory(Path folder) {
+            this.workingDirectory = folder;
+            return this;
+        }
+
+        public Builder totalTimeout(Duration timeout) {
+            this.totalTimeout = timeout;
+            return this;
+        }
+
+        public Builder idleTimeout(Duration timeout) {
+            this.idleTimeout = timeout;
+            return this;
+        }
+
+        public Builder charset(Charset outputCharset) {
+            this.charset = outputCharset;
+            return this;
+        }
+
+        public Builder onStdoutLine(Consumer<String> consumer) {
+            this.stdoutLines = consumer;
+            return this;
+        }
+
+        public Builder onStderrLine(Consumer<String> consumer) {
+            this.stderrLines = consumer;
+            return this;
+        }
+
+        public ProcessRequest build() {
+            return new ProcessRequest(
+                    executable,
+                    arguments,
+                    Optional.ofNullable(workingDirectory),
+                    Optional.ofNullable(totalTimeout),
+                    Optional.ofNullable(idleTimeout),
+                    charset,
+                    stdoutLines,
+                    stderrLines);
+        }
+    }
+}
