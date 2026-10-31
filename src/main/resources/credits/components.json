@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "components": [
+    {
+      "id": "openjdk",
+      "name": "OpenJDK",
+      "role": "Java runtime packaged with RetroBurn",
+      "authors": "Oracle and/or its affiliates and the OpenJDK community",
+      "license": "GPL-2.0-only WITH Classpath-exception-2.0",
+      "homepage": "https://openjdk.org/",
+      "provision": "BUNDLED_RUNTIME",
+      "platforms": ["LINUX", "WINDOWS"],
+      "licenseFiles": ["openjdk-LICENSE.txt", "openjdk-ASSEMBLY_EXCEPTION.txt", "openjdk-ADDITIONAL_LICENSE_INFO.txt"],
+      "noticeFiles": [],
+      "mavenArtifacts": []
+    },
+    {
+      "id": "openjfx",
+      "name": "OpenJFX",
+      "role": "User interface toolkit",
+      "authors": "Oracle and/or its affiliates and the OpenJFX community",
+      "license": "GPL-2.0-only WITH Classpath-exception-2.0",
+      "homepage": "https://openjfx.io/",
+      "provision": "BUNDLED_LIBRARY",
+      "platforms": ["LINUX", "WINDOWS"],
+      "licenseFiles": ["openjfx-LICENSE.txt", "openjfx-ASSEMBLY_EXCEPTION.txt", "openjfx-ADDITIONAL_LICENSE_INFO.txt"],
+      "noticeFiles": ["openjfx-jpeg_fx.txt", "openjfx-mesa3d.txt", "openjfx-pipewire.txt"],
+      "mavenArtifacts": ["org.openjfx:javafx-base", "org.openjfx:javafx-graphics", "org.openjfx:javafx-controls"]
+    },
+    {
+      "id": "jackson-databind",
+      "name": "Jackson databind and annotations",
+      "role": "Reads and writes JSON files",
+      "authors": "Tatu Saloranta and the Jackson community (FasterXML)",
+      "license": "Apache-2.0",
+      "homepage": "https://github.com/FasterXML/jackson",
+      "provision": "BUNDLED_LIBRARY",
+      "platforms": ["LINUX", "WINDOWS"],
+      "licenseFiles": ["Apache-2.0.txt"],
+      "noticeFiles": ["jackson-NOTICE.txt"],
+      "mavenArtifacts": ["tools.jackson.core:jackson-databind", "com.fasterxml.jackson.core:jackson-annotations"]
+    },
+    {
+      "id": "jackson-core",
+      "name": "Jackson core (with FastDoubleParser and Schubfach)",
+      "role": "JSON parsing and number formatting used by Jackson",
+      "authors": "Tatu Saloranta and the Jackson community (FasterXML); FastDoubleParser by Werner Randelshofer; Schubfach by Raffaello Giulietti",
+      "license": "Apache-2.0 AND MIT AND BSL-1.0 AND BSD-2-Clause",
+      "homepage": "https://github.com/FasterXML/jackson-core",
+      "provision": "BUNDLED_LIBRARY",
+      "platforms": ["LINUX", "WINDOWS"],
+      "licenseFiles": [
+        "Apache-2.0.txt",
+        "jackson-core-FastDoubleParser-LICENSE.txt",
+        "jackson-core-FastDoubleParser-ThirdParty-LICENSE.txt",
+        "jackson-core-Schubfach-LICENSE.txt"
+      ],
+      "noticeFiles": ["jackson-core-NOTICE.txt"],
+      "mavenArtifacts": ["tools.jackson.core:jackson-core"]
+    }
+  ]
+}
