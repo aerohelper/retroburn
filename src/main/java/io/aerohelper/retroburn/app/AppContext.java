@@ -6,9 +6,18 @@ import io.aerohelper.retroburn.common.AppInfo;
 import io.aerohelper.retroburn.common.Messages;
 import io.aerohelper.retroburn.common.OperatingSystem;
 import io.aerohelper.retroburn.credits.ComponentRegistry;
+import io.aerohelper.retroburn.pipeline.PipelineRunner;
+import io.aerohelper.retroburn.pipeline.WorkFolders;
+import io.aerohelper.retroburn.platform.AppPaths;
 import io.aerohelper.retroburn.platform.PlatformDetector;
 import io.aerohelper.retroburn.platform.PlatformServices;
+import io.aerohelper.retroburn.platform.linux.LinuxAppPaths;
+import io.aerohelper.retroburn.platform.linux.LinuxPlatform;
 import io.aerohelper.retroburn.platform.simulated.SimulatedPlatform;
+import io.aerohelper.retroburn.settings.SettingsStore;
+import io.aerohelper.retroburn.tools.ProcessRunner;
+import io.aerohelper.retroburn.tools.ToolProbe;
+import java.nio.file.Path;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -22,33 +31,87 @@ import java.util.Objects;
 public final class AppContext {
 
     private final PlatformServices platform;
+    private final SettingsStore settingsStore;
     private final AppInfo appInfo;
     private final Messages messages;
     private final ComponentRegistry componentRegistry;
+    private final ToolProbe toolProbe;
+    private final WorkFolders workFolders;
+    private final PipelineRunner pipelineRunner;
 
     public AppContext(
-            PlatformServices platform, AppInfo appInfo, Messages messages, ComponentRegistry componentRegistry) {
+            PlatformServices platform,
+            SettingsStore settingsStore,
+            ProcessRunner processRunner,
+            AppInfo appInfo,
+            Messages messages,
+            ComponentRegistry componentRegistry) {
         this.platform = Objects.requireNonNull(platform, "platform");
+        this.settingsStore = Objects.requireNonNull(settingsStore, "settingsStore");
         this.appInfo = Objects.requireNonNull(appInfo, "appInfo");
         this.messages = Objects.requireNonNull(messages, "messages");
         this.componentRegistry = Objects.requireNonNull(componentRegistry, "componentRegistry");
+        this.toolProbe = new ToolProbe(platform.toolLocator(), processRunner);
+        Path workRoot = settingsStore
+                .current()
+                .workDirectory()
+                .orElse(platform.appPaths().work());
+        this.workFolders = new WorkFolders(workRoot);
+        this.pipelineRunner = new PipelineRunner(workFolders, platform.sleepInhibitor());
     }
 
     /**
-     * Builds the context for the machine the app is running on.
-     *
-     * <p>The Linux and Windows platforms do not exist yet, so the simulated platform is used on
-     * every OS; once they exist, this method picks the matching one.
+     * Builds the context for the machine the app is running on: the Linux platform on Linux, the
+     * simulated platform elsewhere until the Windows platform exists.
      */
     public static AppContext createDefault() {
         OperatingSystem operatingSystem = PlatformDetector.currentOperatingSystem();
-        PlatformServices platform = new SimulatedPlatform(operatingSystem);
-        return new AppContext(
-                platform, AppInfo.loadBundled(), Messages.load(Locale.getDefault()), ComponentRegistry.loadBundled());
+        Path home = Path.of(System.getProperty("user.home"));
+        ProcessRunner processRunner = new ProcessRunner();
+
+        AppPaths paths = operatingSystem == OperatingSystem.LINUX
+                ? LinuxAppPaths.fromEnvironment(System.getenv(), home)
+                : simulatedPaths(home);
+        paths.ensureExists();
+        LoggingSetup.writeLogsTo(paths.logs());
+        SettingsStore settingsStore = new SettingsStore(paths.settings());
+
+        PlatformServices platform = operatingSystem == OperatingSystem.LINUX
+                ? new LinuxPlatform(
+                        paths,
+                        processRunner,
+                        System.getenv("PATH"),
+                        () -> settingsStore.current().toolPaths())
+                : new SimulatedPlatform(operatingSystem, paths);
+
+        AppContext context = new AppContext(
+                platform,
+                settingsStore,
+                processRunner,
+                AppInfo.loadBundled(),
+                Messages.load(Locale.getDefault()),
+                ComponentRegistry.loadBundled());
+        // No job can be running yet, so anything left in the work folder is from an earlier run.
+        context.workFolders.deleteLeftovers();
+        return context;
+    }
+
+    private static AppPaths simulatedPaths(Path home) {
+        Path root = home.resolve(".retroburn-simulated");
+        return new AppPaths(
+                root.resolve("settings"),
+                root.resolve("data"),
+                root.resolve("logs"),
+                root.resolve("work"),
+                root.resolve("reels"));
     }
 
     public PlatformServices platform() {
         return platform;
+    }
+
+    public SettingsStore settingsStore() {
+        return settingsStore;
     }
 
     public AppInfo appInfo() {
@@ -61,5 +124,13 @@ public final class AppContext {
 
     public ComponentRegistry componentRegistry() {
         return componentRegistry;
+    }
+
+    public ToolProbe toolProbe() {
+        return toolProbe;
+    }
+
+    public PipelineRunner pipelineRunner() {
+        return pipelineRunner;
     }
 }
