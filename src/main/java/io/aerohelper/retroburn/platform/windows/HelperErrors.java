@@ -32,6 +32,7 @@ final class HelperErrors {
                 new RetroBurnException(UserMessage.of("error.sourceMissing", error.message()), detail);
             case "DRIVE_BUSY" -> new RetroBurnException(UserMessage.of("error.driveBusy"), detail);
             case "VERIFY_MISMATCH" -> new RetroBurnException(UserMessage.of("error.verifyMismatch"), detail);
+            case "TOO_MANY_TRACKS" -> new RetroBurnException(UserMessage.of("error.tooManyTracks"), detail);
             // A request RetroBurn built wrongly is a bug in RetroBurn, not a drive problem.
             case "BAD_REQUEST" -> new RetroBurnException(UserMessage.of("error.unexpected"), detail);
             default -> new ToolFailedException(UserMessage.of("error.imapiFailed", error.message()), detail);

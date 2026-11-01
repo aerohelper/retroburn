@@ -73,5 +73,6 @@ public static class TypeLibDump {
 
 [TypeLibDump]::Dump("$env:windir\System32\imapi2.dll", @(
     'DDiscMaster2Events', 'DDiscFormat2DataEvents', 'DDiscFormat2EraseEvents', 'IDiscFormat2DataEventArgs',
-    'IMAPI_MEDIA_PHYSICAL_TYPE', 'IMAPI_FORMAT2_DATA_MEDIA_STATE', 'IMAPI_FORMAT2_DATA_WRITE_ACTION'))
+    'IMAPI_MEDIA_PHYSICAL_TYPE', 'IMAPI_FORMAT2_DATA_MEDIA_STATE', 'IMAPI_FORMAT2_DATA_WRITE_ACTION',
+    'DDiscFormat2TrackAtOnceEvents', 'IDiscFormat2TrackAtOnceEventArgs', 'IMAPI_FORMAT2_TAO_WRITE_ACTION'))
 [TypeLibDump]::Dump("$env:windir\System32\imapi2fs.dll", @('FsiFileSystems'))

@@ -5,6 +5,7 @@ package io.aerohelper.retroburn.platform.windows;
 import io.aerohelper.retroburn.engine.DiscTree;
 import io.aerohelper.retroburn.engine.DriveId;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Objects;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.node.ArrayNode;
@@ -58,6 +59,17 @@ record HelperRequest(String operation, String json) {
                 .put("drive", drive.value())
                 .put("image", image.toAbsolutePath().toString())
                 .put("closeMedia", closeMedia));
+    }
+
+    static HelperRequest burnAudio(DriveId drive, List<Path> wavFiles) {
+        ObjectNode request = start("burn-audio").put("drive", drive.value());
+        ArrayNode tracks = request.putArray("tracks");
+        wavFiles.forEach(wav -> tracks.add(wav.toAbsolutePath().toString()));
+        return of(request);
+    }
+
+    static HelperRequest readToc(DriveId drive) {
+        return of(start("read-toc").put("drive", drive.value()));
     }
 
     static HelperRequest blank(DriveId drive, boolean full) {
