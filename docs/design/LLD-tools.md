@@ -22,7 +22,7 @@ capabilities, and decide which RetroBurn features are available. This is the
 | Class | Responsibility |
 |---|---|
 | `ExternalTool` (enum) | Every program RetroBurn depends on: executable name, display name, arguments that print the version, and the pattern that extracts it. |
-| `ProcessRequest` (record + builder) | What to run: executable, argument list, working folder, timeouts, line consumers, output charset. Never a shell string. |
+| `ProcessRequest` (record + builder) | What to run: executable, argument list, working folder, timeouts, line consumers or a raw stdout sink, output charset. Never a shell string. |
 | `ProcessRunner` | `run(request, cancelToken)` blocks until the process ends and returns a `ProcessResult`; `startLongRunning(request)` returns a `RunningProcess` for long-lived helpers whose stdin stays open. |
 | `ProcessResult` (record) | Exit code, the command line as text, the last 200 output lines (for "Show details"), whether it timed out. |
 | `RunningProcess` | Handle on a long-lived process: close its stdin, check if alive, wait, destroy the process tree. `AutoCloseable`. |
@@ -67,6 +67,13 @@ sequenceDiagram
   draining; its first exception is rethrown after the process ends.
 - **Lines** end at `\n` or `\r`; tools such as FFmpeg redraw progress with
   `\r`.
+- **Raw stdout:** `stdoutTo(outputStream)` copies stdout unchanged into the
+  stream instead of splitting it into lines, for tools that write data there
+  (xorriso reading a disc back for verification). Every chunk counts as
+  output for the idle timeout; the data is not part of the output tail. An
+  `IOException` from the stream is kept and rethrown like a consumer's
+  exception after the process ends; the rest of stdout is drained and
+  discarded meanwhile, so the tool never blocks.
 - **Timeouts:** `totalTimeout` bounds the whole run; `idleTimeout` fails the
   run when no output arrives for that long (catches a vanished device). Either
   may be absent.

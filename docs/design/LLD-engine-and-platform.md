@@ -7,7 +7,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 | | |
 |---|---|
-| Status | Implemented in the core milestone (M2); extended per milestone |
+| Status | Implemented in the core milestone (M2); writing added in the Windows engine milestone (M3) |
 | Packages | `io.aerohelper.retroburn.engine`, `.platform`, `.platform.simulated` |
 | Related | [HLD §4](../architecture/HLD.md), [LLD-linux-platform.md](LLD-linux-platform.md), [EXTENSIBILITY.md](../EXTENSIBILITY.md) |
 
@@ -27,13 +27,31 @@ SPDX-License-Identifier: GPL-3.0-or-later
 | `ImageOptions` (record) | Volume label (more options as features arrive). |
 | `BurnEvent` (sealed) | `Progress(fraction, speed, bufferFill)` and `LogLine(text)`. |
 | `BurnListener` | Receives `BurnEvent`s. |
-| `BurnEngine` | `listDrives()`, `readMedia(drive)`; from the Windows engine milestone (M3) also `burnImage(drive, image, options, listener, cancel)`, `blank(drive, mode, listener, cancel)`, `verifyImage(drive, image, listener, cancel)` and `eject(drive)`, on every platform. |
+| `BurnEngine` | `listDrives()`, `readMedia(drive)`, `burnImage(drive, image, options, listener, cancel)`, `blank(drive, mode, listener, cancel)`, `verifyImage(drive, image, listener, cancel)`, `eject(drive)`; section 1.1. |
 | `BurnOptions` (record) | `closeMedia`: finalise the disc so nothing more can be added. |
-| `BlankMode` (enum) | `QUICK`, `FULL`. |
+| `BlankMode` (enum) | `QUICK` (makes the disc reusable; fast), `FULL` (erases every sector; can take as long as writing the whole disc). |
 | `DiscImageBuilder` | `buildDataImage(tree, options, target, listener, cancel)`. |
 
 Disc paths start with `/`, use `/` as separator, and must not contain empty
 segments, `.` or `..`, or newline characters; `DiscEntry` rejects them.
+
+### 1.1 Writing contract
+
+Added in the Windows engine milestone (M3), on every platform at once.
+
+| Method | Contract |
+|---|---|
+| `burnImage` | Writes the image file to the disc as one data track from the start of the writable area. The caller has already checked that the medium is writable and large enough; the engine still fails clearly if not. The disc is not blanked first: a used CD-RW or DVD-RW needs `blank` beforehand, while DVD+RW, DVD-RAM and BD-RE are simply overwritten. Progress is the fraction of the image written, held at 0.99 until the drive has finished closing the track. |
+| `blank` | Makes a rewritable disc ready for writing from scratch. A blank disc is left alone. Windows cannot cancel an erase once it has started, so cancelling is only honoured before it starts there; the UI offers no cancel button while blanking. No progress is reported until it is done (drives' estimates are meaningless), so the UI shows an erase without a percentage. |
+| `verifyImage` | Reads back as many bytes as the image has, starting at the beginning of the disc, and compares them byte for byte. A difference, or a disc shorter than the image, fails with `error.verifyMismatch`; the first differing byte offset is in the technical detail. Progress is the fraction compared. |
+| `eject` | Opens the tray, or does nothing where that is impossible (a file pretending to be a drive in tests). |
+
+Every long operation honours its `CancelToken` within 5 seconds, with two
+exceptions: a started Windows erase cannot be cancelled, and a burn ends only
+once the drive has closed the partial track (7.5 s measured on Windows with a
+DVD+RW), so the UI shows "Stopping…" until the engine returns. A cancelled
+burn leaves an incomplete disc: rewritable ones can be burned or blanked
+again, write-once ones are lost; the UI says so before cancelling.
 
 ## 2. Platform services (`platform`)
 
@@ -63,7 +81,10 @@ public interface PlatformServices {
 ### Simulated platform
 
 `SimulatedPlatform` gains a fake drive (`SimulatedBurnEngine`: one USB DVD
-writer with a blank DVD+RW), an image builder that reports progress and writes
+writer with a DVD+RW that starts blank; burning makes it appendable and
+remembers the image's size, blanking makes it blank again, verifying compares
+the image's size with the remembered one, and every long operation reports
+progress in ten steps and honours cancellation), an image builder that reports progress and writes
 a small text listing instead of a real image, a no-op sleep inhibitor,
 `PowerSource.UNKNOWN`, no tool requirements (every feature available), and
 `AppPaths` given by its creator. It is used on Windows until the Windows

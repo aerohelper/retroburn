@@ -7,7 +7,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 | | |
 |---|---|
-| Status | Implemented in the core milestone (M2): drive and media info, ISO creation, hot-plug, USB detection, sleep inhibition, power status |
+| Status | Implemented in the core milestone (M2): drive and media info, ISO creation, hot-plug, USB detection, sleep inhibition, power status. Burn, blank, verify and eject added in M3. |
 | Package | `io.aerohelper.retroburn.platform.linux` |
 | Related | [LLD-engine-and-platform.md](LLD-engine-and-platform.md), [LLD-tools.md](LLD-tools.md) |
 
@@ -23,7 +23,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
 | `XorrisoProgressParser` | Parses `Writing:` progress lines into `BurnEvent.Progress`. |
 | `XorrisoErrorParser` | Picks the `FAILURE`/`SORRY` lines that explain a failed run. |
 | `PathspecListWriter` | Streams a `DiscTree` into a `-path_list` file with xorriso's escaping. |
-| `XorrisoEngine` | `BurnEngine`: lists drives and reads media. |
+| `XorrisoEngine` | `BurnEngine`: lists drives, reads media, burns, blanks, verifies and ejects. |
+| `ImageComparison` | An `OutputStream` that compares the bytes read back from a disc with the image file. |
 | `XorrisoImageBuilder` | `DiscImageBuilder`: writes ISO images to a file. |
 | `SysfsOpticalDrives` | Lists `/sys/block/sr*` (the cheap hot-plug signature) and determines the connection type. |
 | `SysfsPowerStatus` | Battery or mains from `/sys/class/power_supply`. |
@@ -98,6 +99,75 @@ Success ends with `Writing to '<target>' completed successfully.` and exit 0.
 Failures print `xorriso : FAILURE : <reason>` (or `libburn : SORRY : …`) and
 exit 5 when aborted.
 
+### Burn an image
+
+`xorriso <prefix> -as cdrecord -v dev=<drive> [-multi] <image> --`
+
+The manual's own recipe for this ("Burn an existing ISO image file to
+medium": `xorriso -as cdrecord -v dev=/dev/sr0 blank=as_needed image.iso`),
+without the implicit blanking: RetroBurn blanks only when the user asked to.
+
+| Argument | Why |
+|---|---|
+| `-as cdrecord` | cdrecord emulation; per the manual its scope is "a single data track per session to be written to blank, overwritable, or appendable media", and a track source triggers "an automatic -commit". |
+| `-v` | Verbose, so "Show details" has the drive's own messages. |
+| `dev=<drive>` | "dev= must be given as xorriso device address", i.e. `/dev/sr0` or `stdio:<file>` in tests. |
+| `-multi` | Only when `closeMedia` is false: "The medium gets closed if closing is applicable and not option -multi is present." |
+| `<image>` | The track source. Always an absolute path. |
+| `--` | Ends the cdrecord option list. |
+
+Progress: the `Writing:` lines above (the emulation writes through the same
+code as `-commit`). *To be confirmed by the integration test, which burns to
+a `stdio:` pseudo-drive in CI, and with the owner's drive.* Idle timeout 10
+minutes, because drives may stay silent while closing the track.
+
+### Blank
+
+`xorriso <prefix> -outdev <drive> -blank as_needed` (`QUICK`) or
+`-blank all` (`FULL`).
+
+From the manual: `as_needed` "cares for used CD-RW, DVD-RW and for used
+overwritable media by applying -blank "fast". It applies -format "full" to
+yet unformatted DVD-RAM and BD-RE. Other media in blank state are gracefully
+ignored." `fast` "invalidates overwritable ISO images", and `all` "might work
+more thoroughly and need more time". Because only `as_needed` ignores blank
+media, `FULL` first reads the media and does nothing when it is blank.
+Blanking progress is not parsed: the manual warns that "the progress reports
+issued by some drives while blanking are quite unrealistic" and that success
+means "no SORRY event or worse", which `-return_with SORRY 32` turns into a
+non-zero exit. Idle timeout 10 minutes.
+
+Regular files are "handled as overwritable media", so the integration test
+blanks a `stdio:` file holding an image and expects `-toc` to report it blank.
+
+### Verify
+
+`xorriso <prefix> -outdev <drive> -check_media use=outdev what=disc min_lba=0 max_lba=<N-1> event=FAILURE data_to=- --`
+
+Again the manual's own recipe (`xorriso -outdev /dev/sr0 -check_media
+data_to=- use=outdev what=disc min_lba=0 max_lba=999999 -- | sha256sum`), with
+`N` = the image size in 2048-byte blocks, rounded up.
+
+| Option | Why |
+|---|---|
+| `use=outdev` | "reads from the output drive instead of the input drive. This avoids loading the ISO image tree from media." |
+| `what=disc` | "scans the payload range of a medium without respecting track gaps". |
+| `min_lba=0 max_lba=<N-1>` | Exactly the blocks the image occupies. |
+| `event=FAILURE` | Raise a FAILURE "if data blocks were unreadable", so a bad disc ends with a non-zero exit. |
+| `data_to=-` | Copy the blocks to standard output; "the usual result messages of -check_media get redirected to the info channel" (stderr). |
+
+`XorrisoEngine` reads stdout as raw bytes (`ProcessRequest.stdoutTo`, see
+LLD-tools) into an `ImageComparison`, which compares them with the image as
+they arrive: no temporary copy of the disc is written. The first differing
+offset, or a disc that ends early, gives `error.verifyMismatch`. Progress is
+bytes compared / image size. Idle timeout 2 minutes.
+
+### Eject
+
+`xorriso <prefix> -outdev <drive> -eject out`: "Eject the medium in ...
+-outdev". The manual notes "It is not possible yet to effectively eject disk
+files", so with a `stdio:` drive this does nothing.
+
 ## 3. Hot-plug and USB detection
 
 - Signature: the sorted names in `/sys/block` starting with `sr`. Reading a
@@ -145,5 +215,7 @@ not `Device`, which marks peripherals such as a wireless mouse) that is
   rather than editing old ones.
 - `XorrisoIntegrationTest` builds real images (a 100 MB tree with awkward
   names, compared file by file after extraction), and checks replacing an
-  existing image, failure messages and cancellation. It needs xorriso and runs
-  only on Linux; CI installs it.
+  existing image, failure messages and cancellation. It also burns, verifies,
+  damages and blanks a `stdio:` pseudo-drive (a file), and prints what xorriso
+  reported so the CI log yields captures. It needs xorriso and runs only on
+  Linux; CI installs it. A real drive is tested by the owner.

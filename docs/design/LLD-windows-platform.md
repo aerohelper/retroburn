@@ -7,7 +7,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 | | |
 |---|---|
-| Status | Designed for the Windows engine milestone (M3) |
+| Status | Implemented in the Windows engine milestone (M3) |
 | Package | `io.aerohelper.retroburn.platform.windows`, helper in `src/main/resources/windows-helper/` |
 | Related | [ADR-0005](../adr/0005-windows-imapi2-bridge.md), [LLD-engine-and-platform.md](LLD-engine-and-platform.md), [LLD-tools.md](LLD-tools.md), [LLD-linux-platform.md](LLD-linux-platform.md) |
 
@@ -45,10 +45,10 @@ watching and keeping the computer awake.
 | `HelperRequest` | Builds the request JSON for each operation (static factories). |
 | `HelperEvent` (sealed) | One parsed output line: `Drive`, `Media`, `Progress`, `Drives`, `Power`, `Ready`, `Log`, `Result`, `Error`. |
 | `HelperEventParser` | Parses one stdout line into a `HelperEvent`; unknown or malformed lines become `Log` lines, never failures. |
-| `HelperClient` | Starts the helper (section 3), sends the request, feeds parsed events to a consumer, waits with timeouts and honours cancellation. Long-running sessions are returned as `HelperSession`s. |
+| `HelperClient` | Starts the helper (section 3), sends the request, feeds parsed events to a consumer, waits with timeouts and honours cancellation. Long-running helpers are returned as `RunningProcess`es. |
 | `HelperErrors` | Turns an `Error` event, a crash or a start failure into a typed `RetroBurnException` with a `UserMessage`. |
 | `Imapi2Mapping` | IMAPI2 values to engine types: physical media type → `MediaKind`, media state flags → `MediaState`, write action → progress stage, bus type → `ConnectionType`. |
-| `Imapi2Engine` | `BurnEngine` on top of `HelperClient`. |
+| `Imapi2Engine` | `BurnEngine` on top of `HelperClient`; progress mapping in section 5.7. |
 | `Imapi2ImageBuilder` | `DiscImageBuilder` on top of `HelperClient`. |
 | `HelperDriveWatcher` | `DriveWatcher` backed by a long-running `watch-drives` helper. |
 | `ExecutionStateSleepInhibitor` | `SleepInhibitor` backed by a long-running `keep-awake` helper. |
@@ -233,8 +233,14 @@ Verified:
 
 `MsftDiscRecorder2.AcquireExclusiveAccess(true, "RetroBurn")`, then
 `MsftDiscFormat2Data` with `Recorder`, `ClientName` = `RetroBurn`,
-`ForceMediaToBeClosed` = `closeMedia`; `Write(stream)` with a read-only stream
-on the image. Exclusive access is released in `finally`.
+`ForceMediaToBeClosed` = `closeMedia`, `ForceOverwrite` = true; `Write(stream)`
+with a read-only stream on the image. Exclusive access is released in
+`finally`.
+
+`ForceOverwrite` is needed for written rewritable discs: without it IMAPI2
+refuses a written DVD+RW with 0xC0AA0405, "Overwriting non-blank media is not
+allowed without the ForceOverwrite property set to VARIANT_TRUE" (verified).
+The engine contract says such discs are overwritten; the UI asks first.
 
 Progress comes from `DDiscFormat2DataEvents.Update` (DISPID 0x200) with an
 `IDiscFormat2DataEventArgs`: `stage` from `CurrentAction`, `done` =
@@ -243,21 +249,31 @@ Progress comes from `DDiscFormat2DataEvents.Update` (DISPID 0x200) with an
 `validating`, 1 `formatting`, 2 `initialising`, 3 `calibrating`, 4 `writing`,
 5 `finalising`, 6 `completed`, 7 `verifying`. Observed order: 2, 3, 4, 5, 7, 6.
 
-Measured: 32,702,464 bytes (15,968 sectors) on DVD+RW in 21 s, with updates
-about every 0.5 s.
+Measured on DVD+RW: 32,702,464 bytes (15,968 sectors) in 21 s; 68,288,512
+bytes (33,344 sectors) in 45 s, of which about 18 s initialising and
+calibrating and 8 s finalising and verifying. Updates about every 0.5 s.
+`done` stops one sector short of `total` (33,343 of 33,344).
 
-Cancel: closing stdin makes a background thread call `CancelWrite()`; the
-helper then reports `CANCELLED`. **To confirm when implementing** with a
-rewritable disc.
+Cancel (verified on DVD+RW): closing stdin makes a background thread call
+`CancelWrite()`; IMAPI2 moves to `finalising` and `Write` then fails with
+0xC0AA0002, "The request was cancelled", which the helper reports as
+`CANCELLED`. That took 7.4 s after stdin closed (7.5 s through the whole Java
+path), longer than the 5-second cancel target, because the drive closes the
+partial track first; the UI shows "Stopping…" meanwhile. `HelperClient` waits
+up to 30 s before stopping the process. Afterwards the disc reads as a
+written DVD+RW and can be burned again.
 
 ### 5.5 Blank
 
 `MsftDiscFormat2Erase` with `Recorder`, `ClientName`, `FullErase` = `full`;
 `EraseMedia()`. Progress from `DDiscFormat2EraseEvents.Update` (DISPID 0x200,
 elapsed and estimated total seconds) as stage `erasing`, `done`/`total` in
-seconds; Java caps the fraction at 0.99 until `result`.
+seconds. The estimate is useless: in the capture the estimated total always
+equalled the time elapsed, so Java shows no percentage (section 5.7).
 
-Measured: quick erase of a blank DVD+RW 0.15 s; of a written one 28 s.
+Measured: quick erase of a blank DVD+RW 0.15 s; of a written one 24 to 28 s.
+Afterwards a DVD+RW still reports media state 0x1 (overwrite-only), not
+blank, so it maps to `APPENDABLE`, like a written one.
 IMAPI2 has no way to cancel an erase, so the UI offers no cancel button while
 blanking; closing stdin is ignored until the erase ends.
 
@@ -275,10 +291,27 @@ Byte-for-byte comparison of the disc with the image, in the helper:
    `verifying`, `done`/`total` in bytes. A difference ends with
    `VERIFY_MISMATCH` and the byte offset.
 
-Verified as a standard user: the whole image (15,968 sectors) matched. Java
+Verified as a standard user: the whole image (15,968 sectors) matched; a
+68 MB image matched in 36 s; comparing an image with a disc holding older
+content stopped at byte 32,808 with `VERIFY_MISMATCH`. Java
 can open `\\.\D:` with `RandomAccessFile` too, but not through NIO paths
 (`InvalidPathException`), and could not lift the volume limit; so verify lives
 in the helper.
+
+### 5.7 Progress in the engine
+
+`Imapi2Engine` turns `progress` events into `BurnEvent.Progress`:
+
+| Operation | Fraction |
+|---|---|
+| `burn-image` | `writing`: `done`/`total`, at most 0.99; `validating`, `formatting`, `initialising`, `calibrating`: 0; `finalising`, `verifying`, `completed`: 0.99. 1.0 only after `result`. |
+| `blank` | None until `result`, then 1.0: IMAPI2's estimate is meaningless (section 5.5). |
+| `verify-image` | `done`/`total` bytes; 1.0 after `result`. |
+
+The stage of a `burn-image` event is also sent as a log line when it changes,
+so "Show details" shows calibrating and finalising. A cancel during an erase
+is not passed on: the helper ignores it anyway, and stopping the process would
+leave the erase running inside Windows with nobody watching.
 
 ## 6. Hot-plug
 
@@ -324,10 +357,11 @@ laptop on battery: `Offline`, 41 %.
 | `VERIFY_MISMATCH` | `RetroBurnException` (`error.verifyMismatch`) |
 | `IMAPI_ERROR` | `ToolFailedException` (`error.imapiFailed`) with HRESULT and IMAPI2's message |
 
-Timeouts: short operations 60 s total; `build-image` and `verify-image` have
-no total limit but a 120 s idle limit (progress lines count as activity);
-`burn-image` and `blank` have a 10-minute idle limit, because some drives stay
-silent while finalising.
+Timeouts: short operations 60 s total. The long ones have no total limit,
+only an idle limit (any output line counts as activity): `verify-image` 2
+minutes; `build-image` 10 minutes, because adding a very large folder is one
+IMAPI2FS call with no progress until it returns; `burn-image` and `blank` 10
+minutes, because some drives stay silent while finalising or erasing.
 
 ## 9. Folders
 
@@ -366,16 +400,22 @@ UI milestone (M4).
 - **Parser and mapping tests** (every OS): `HelperEventParser`,
   `Imapi2Mapping`, `HelperErrors`, `HelperRequest`, with captured helper
   output in `src/test/resources/tool-output/windows-helper/`.
-- **Client tests** (every OS): `HelperClient` against a fake helper (the
-  existing `ChildProgram` test program printing captured lines), covering
-  timeouts, cancellation and crashes.
+- **Client and engine tests** (every OS): `HelperClient` and `Imapi2Engine`
+  against `FakeHelper`, a test program that replays captured helper output,
+  covering timeouts, cancellation, crashes, and burn, cancelled burn, erase
+  and verify captures from a real DVD+RW.
 - **Integration tests** (Windows only, CI included): `probe`, `power`,
   `list-drives` (CI runners have no drive: an empty list), and `build-image`
   on a 100 MB tree with awkward names, mounted with `Mount-DiskImage` and
   compared file by file.
+- **Real disc test** (Windows, opt-in): `WindowsRealDiscTest` burns a 68 MB
+  image, verifies it, cancels a second burn and erases the disc through the
+  whole Java path. It destroys the disc's content, so it runs only with
+  `RETROBURN_ERASE_TEST_DISC=yes`, never on CI. Passed on 2026-11-01 with the
+  USB drive and a DVD+RW.
 - **Manual** (owner, before the milestone is accepted): burn, verify and blank
-  on a real DVD+RW; hot-plug; battery warning; sleep inhibition during a long
-  burn.
+  through the app on a real DVD+RW once the data-burning UI exists (M4);
+  hot-plug; battery warning; sleep inhibition during a long burn.
 
 ## 12. How to change this safely
 
