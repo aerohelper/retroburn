@@ -31,7 +31,9 @@ class SettingsStoreTest {
                 false,
                 true,
                 Optional.of(folder.resolve("work")),
-                Map.of(ExternalTool.XORRISO, folder.resolve("bin/xorriso")));
+                Map.of(ExternalTool.XORRISO, folder.resolve("bin/xorriso")),
+                false,
+                false);
         SettingsStore store = new SettingsStore(folder);
 
         store.save(changed);

@@ -18,12 +18,16 @@ import java.util.Optional;
  * @param keepTemporaryFiles keep job work folders after success or cancel
  * @param workDirectory folder for job work folders instead of the default
  * @param toolPaths user-chosen executables for external tools
+ * @param verifyAfterBurn compare the disc with what was written after each burn
+ * @param showUsbTip show the advice for USB drives before burning
  */
 public record Settings(
         boolean preventSleepWhileBurning,
         boolean keepTemporaryFiles,
         Optional<Path> workDirectory,
-        Map<ExternalTool, Path> toolPaths) {
+        Map<ExternalTool, Path> toolPaths,
+        boolean verifyAfterBurn,
+        boolean showUsbTip) {
 
     public Settings {
         Objects.requireNonNull(workDirectory, "workDirectory");
@@ -32,6 +36,15 @@ public record Settings(
 
     /** Settings for a first start. */
     public static Settings defaults() {
-        return new Settings(true, false, Optional.empty(), Map.of());
+        return new Settings(true, false, Optional.empty(), Map.of(), true, true);
+    }
+
+    public Settings withVerifyAfterBurn(boolean verify) {
+        return new Settings(preventSleepWhileBurning, keepTemporaryFiles, workDirectory, toolPaths, verify, showUsbTip);
+    }
+
+    public Settings withShowUsbTip(boolean show) {
+        return new Settings(
+                preventSleepWhileBurning, keepTemporaryFiles, workDirectory, toolPaths, verifyAfterBurn, show);
     }
 }

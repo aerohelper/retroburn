@@ -37,6 +37,8 @@ Folders are resolved per OS by `AppPaths` (see
 |---|---|---|---|
 | `schemaVersion` | integer | `1` | Format version. |
 | `burn.preventSleep` | `true`/`false` | `true` | Keep the computer awake while writing a disc. |
+| `burn.verify` | `true`/`false` | `true` | Compare the disc with what was written after each burn. |
+| `burn.showUsbTip` | `true`/`false` | `true` | Show the advice for USB drives before burning; "Don't show again" turns it off. |
 | `jobs.keepTemporaryFiles` | `true`/`false` | `false` | Keep job work folders after success or cancel. |
 | `jobs.workDirectory` | path | (platform work folder) | Where job work folders are created. |
 | `tools.path.<tool>` | path | (search) | User-chosen executable; `<tool>` is `xorriso`, `cdrskin`, `genisoimage`, `ffmpeg`, `ffprobe`, `dvdauthor` or `spumux`. Ignored if the file no longer exists. |
