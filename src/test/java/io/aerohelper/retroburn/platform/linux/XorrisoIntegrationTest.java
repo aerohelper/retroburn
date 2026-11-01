@@ -24,6 +24,7 @@ import io.aerohelper.retroburn.engine.MediaState;
 import io.aerohelper.retroburn.project.DataCompilation;
 import io.aerohelper.retroburn.project.ImageSizeEstimate;
 import io.aerohelper.retroburn.project.TreeSizeScanner;
+import io.aerohelper.retroburn.testsupport.Mp3PlanFixture;
 import io.aerohelper.retroburn.tools.ExternalTool;
 import io.aerohelper.retroburn.tools.PathSearchToolLocator;
 import io.aerohelper.retroburn.tools.ProcessRequest;
@@ -256,6 +257,20 @@ class XorrisoIntegrationTest {
         List<String> toc = tableOfContents(image);
         toc.forEach(line -> System.out.println("[label] " + line));
         assertTrue(toc.stream().anyMatch(line -> line.contains("'Holiday 2026'")), toc.toString());
+    }
+
+    @Test
+    void anMp3DiscImageHasCarNamesAndTheMp3sUnchanged() throws IOException {
+        Mp3PlanFixture fixture = Mp3PlanFixture.create(folder.resolve("music"));
+        assertEquals(
+                Mp3PlanFixture.expectedPaths(), List.copyOf(fixture.expected().keySet()));
+        Path image = folder.resolve("mp3.iso");
+
+        builder().buildDataImage(fixture.tree(), new ImageOptions("MP3 DISC"), image, event -> {}, new CancelToken());
+
+        Map<String, String> expected = new TreeMap<>();
+        fixture.expected().forEach((discPath, source) -> expected.put(discPath, sha256(source)));
+        assertEquals(expected, checksums(extract(image), ""));
     }
 
     /** Prints what an operation reported, so CI logs give real output for the fixtures. */
