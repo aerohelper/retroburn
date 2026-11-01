@@ -47,3 +47,9 @@ Notes:
   `ForceOverwrite`, on a written disc; `verify-image-mismatch.txt` compared
   that image with the disc's older content. `burn-image-cancelled.txt` closed
   the helper's input after a few writing updates.
+- `ffmpeg/ffprobe-flac-tagged.txt` and `ffmpeg/convert-to-cd-pcm-progress.txt`
+  come from the GitHub Actions Ubuntu runner (FFmpeg 6.1.1, `Lavf60.16.100`),
+  2026-11-01: `AudioToolsIntegrationTest` printed them for a 5.5-second
+  48 kHz mono FLAC tone made with FFmpeg's `sine` source and tagged `title`,
+  `ARTIST`, `album` and `album_artist`. Temporary folders are shortened to
+  `/tmp/`; the command lines were rebuilt from `FfmpegAudio`.

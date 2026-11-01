@@ -177,13 +177,24 @@ class AudioToolsIntegrationTest {
         Path toc = folder.resolve("disc.toc");
         CdrdaoTocWriter.write(disc, toc);
 
+        // show-toc lists the tracks with their gaps (cdrdao 1.2.4 on Ubuntu 24.04 does not print
+        // CD-Text there); each track has one 2-second gap and the last ends at the disc's length.
+        long expected = CdAudio.discSectors(disc.audioSectors(), tracks.size());
         List<String> shown = run(cdrdao, List.of("show-toc", toc.getFileName().toString()));
         System.out.println("cdrdao show-toc:\n" + String.join("\n", shown));
-        assertTrue(shown.stream().anyMatch(line -> line.contains("Song of Joy")), "CD-Text missing");
+        assertEquals(
+                2,
+                shown.stream()
+                        .filter(line -> line.strip().equals("PREGAP 00:02:00(   150)"))
+                        .count());
+        // For example "END    00:13:01(   976)".
+        assertTrue(shown.getLast().matches("\\s*END\\s.*\\(\\s*" + expected + "\\)"), shown.getLast());
+
+        List<String> info = run(cdrdao, List.of("toc-info", toc.getFileName().toString()));
+        System.out.println("cdrdao toc-info:\n" + String.join("\n", info));
 
         List<String> size = run(cdrdao, List.of("toc-size", toc.getFileName().toString()));
         System.out.println("cdrdao toc-size:\n" + String.join("\n", size));
-        long expected = CdAudio.discSectors(disc.audioSectors(), tracks.size());
         assertTrue(
                 size.stream().anyMatch(line -> line.matches(".*\\b" + expected + "\\b.*")),
                 "expected " + expected + " blocks");

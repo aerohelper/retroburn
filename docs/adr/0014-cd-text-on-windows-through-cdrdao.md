@@ -44,6 +44,8 @@ way to write CD-Text. Can Windows users get CD-Text, and how?
 | Does that drive access need administrator rights? | No. As a normal user, opening `\\.\D:` with read and write access and sending a read-only SCSI INQUIRY through `IOCTL_SCSI_PASS_THROUGH_DIRECT` returned status 0 and "Slimtype eBAU108 7 L". With read access only, Windows refused (error 5). | Spike script on the owner's USB writer, not elevated |
 | Is the TOC format suitable? | Yes. `CD_DA`, a global `CD_TEXT { LANGUAGE_MAP { 0 : EN } LANGUAGE 0 { TITLE … PERFORMER … } }`, then per track `TRACK AUDIO`, `CD_TEXT { LANGUAGE 0 { … } }`, `PREGAP 0:2:0`, `FILE "x.wav" 0`. Strings take `\"`, `\\` and `\ooo` escapes; if TITLE or PERFORMER is set anywhere, it must be set for the disc and every track. | `cdrdao.1` and `trackdb/TocParser.g` at `rel_1_2_6` |
 
+| Does cdrdao accept the TOC RetroBurn writes? | Yes, on Linux CI with Ubuntu 24.04's cdrdao 1.2.4: `show-toc` lists both tracks with one 2-second gap each (`PREGAP 00:02:00(150)`, the first track included) and ends at 976 blocks, exactly 2 × 150 plus the two tracks' sectors. That version does not print CD-Text in `show-toc`, and it predates 1.2.6's UTF-8 handling, so the CD-Text bytes themselves are checked only on a real disc. | `AudioToolsIntegrationTest` |
+
 Still open:
 
 1. Build cdrdao 1.2.6 from source in Windows CI (MSYS2) and check that our
