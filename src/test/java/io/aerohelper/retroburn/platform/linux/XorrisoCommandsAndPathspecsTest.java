@@ -123,7 +123,8 @@ class XorrisoCommandsAndPathspecsTest {
             // The rest of the last 2048-byte block is ignored.
             same.write(new byte[2288]);
             assertTrue(same.complete());
-            assertEquals(BurnEvent.Progress.of(1.0), events.getLast());
+            // Under one 4 MiB progress step, and completion is the engine's to report.
+            assertTrue(events.isEmpty(), events.toString());
         }
 
         byte[] damaged = content.clone();

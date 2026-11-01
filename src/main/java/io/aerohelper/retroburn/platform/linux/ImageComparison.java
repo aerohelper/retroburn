@@ -86,9 +86,10 @@ final class ImageComparison extends OutputStream {
             position += chunk;
             remaining -= chunk;
         }
-        if (compared >= nextProgress || compared == imageSize) {
+        // Completion (1.0) is reported by the engine once xorriso has finished.
+        if (compared >= nextProgress && compared < imageSize) {
             nextProgress = compared + PROGRESS_STEP;
-            listener.onEvent(BurnEvent.Progress.of(imageSize == 0 ? 1.0 : (double) compared / imageSize));
+            listener.onEvent(BurnEvent.Progress.of((double) compared / imageSize));
         }
         return false;
     }
