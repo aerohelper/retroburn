@@ -40,6 +40,11 @@ Folders are resolved per OS by `AppPaths` (see
 | `burn.verify` | `true`/`false` | `true` | Compare the disc with what was written after each burn. |
 | `burn.showUsbTip` | `true`/`false` | `true` | Show the advice for USB drives before burning; "Don't show again" turns it off. |
 | `audio.cdText` | `true`/`false` | `true` | Write CD-Text (album and track names) on audio CDs where the system can. |
+| `mp3.layout` | `KEEP_FOLDERS`/`ARTIST_ALBUM`/`FLAT` | `KEEP_FOLDERS` | Where MP3 disc files go. |
+| `mp3.carCompat` | `true`/`false` | `true` | Car stereo naming: safe short names, track-number prefixes, two folder levels. |
+| `mp3.convert` | `true`/`false` | `true` | Convert other formats to MP3; otherwise they are left out. |
+| `mp3.bitrate` | `CBR_128`/`CBR_192`/`CBR_256`/`CBR_320`/`VBR_2` | `CBR_192` | Bitrate of converted files. |
+| `mp3.playlists` | `true`/`false` | `false` | Write one playlist per folder. |
 | `audio.normalizeLoudness` | `true`/`false` | `false` | Even out loudness (FFmpeg `loudnorm`, −16 LUFS) while converting audio CD tracks. |
 | `jobs.keepTemporaryFiles` | `true`/`false` | `false` | Keep job work folders after success or cancel. |
 | `jobs.workDirectory` | path | (platform work folder) | Where job work folders are created. |

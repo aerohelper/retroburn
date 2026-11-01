@@ -34,7 +34,8 @@ class SettingsStoreTest {
                 Map.of(ExternalTool.XORRISO, folder.resolve("bin/xorriso")),
                 false,
                 false,
-                new Settings.Audio(false, true));
+                new Settings.Audio(false, true),
+                new Settings.Mp3("FLAT", false, false, "VBR_2", true));
         SettingsStore store = new SettingsStore(folder);
 
         store.save(changed);
