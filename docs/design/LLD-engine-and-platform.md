@@ -17,7 +17,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 |---|---|
 | `DriveId` (record) | Opaque drive address: `/dev/sr0` on Linux, the IMAPI2 unique id on Windows. |
 | `ConnectionType` (enum) | `USB`, `OTHER` (known not to be USB), `UNKNOWN`. The UI shows a badge only for `USB`. |
-| `DriveInfo` (record) | Id, vendor, product, connection type. |
+| `DriveInfo` (record) | Id, vendor, product, connection type, and `location`: what the user knows the drive by (`D:` on Windows, `/dev/sr0` on Linux, empty if unknown). `displayNameWithLocation()` gives "Vendor Product (D:)". |
 | `MediaFamily` (enum) | `CD`, `DVD`, `BD`. |
 | `MediaKind` (enum) | Inserted medium (`CD_R`, `DVD_PLUS_RW`, `BD_RE`, `NONE`, `UNKNOWN`, …) with family, writable and rewritable flags. |
 | `MediaState` (enum) | `BLANK`, `APPENDABLE`, `CLOSED`, `NO_MEDIA`, `UNKNOWN`. |
