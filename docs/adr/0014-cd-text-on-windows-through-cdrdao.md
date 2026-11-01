@@ -46,12 +46,14 @@ way to write CD-Text. Can Windows users get CD-Text, and how?
 
 | Does cdrdao accept the TOC RetroBurn writes? | Yes, on Linux CI with Ubuntu 24.04's cdrdao 1.2.4: `show-toc` lists both tracks with one 2-second gap each (`PREGAP 00:02:00(150)`, the first track included) and ends at 976 blocks, exactly 2 × 150 plus the two tracks' sectors. That version does not print CD-Text in `show-toc`, and it predates 1.2.6's UTF-8 handling, so the CD-Text bytes themselves are checked only on a real disc. | `AudioToolsIntegrationTest` |
 
+| Can we build it ourselves from pinned source? | Yes. `windows-tools/build-cdrdao.sh` in the "Windows tools" workflow builds 1.2.6 from the release tarball (SHA-256 checked) in MSYS2's POSIX environment, configured as `x86_64-pc-cygwin` so `configure.ac` picks `ScsiIf-nt.o`, with `-include cstdint` for current GCC. A native UCRT64 build fails: the CDDB code needs `netdb.h`. The program needs `msys-2.0.dll`, `msys-iconv-2.dll`, `msys-stdc++-6.dll` and `msys-gcc_s-seh-1.dll`, the same set as upstream's zip; each needs its licence and source when bundled. | Workflow run on 2026-11-01 |
+| Does that build read our CD-Text TOC? | Yes: `show-toc` and `toc-size` on a TOC like `CdrdaoTocWriter`'s, with "Café" as UTF-8 and escaped quotes, give one track with a 150-sector gap and 525 blocks. | Same run |
+
 Still open:
 
-1. Build cdrdao 1.2.6 from source in Windows CI (MSYS2) and check that our
-   TOC files parse (`cdrdao show-toc`). Running the upstream zip on the
-   owner's machine was not done: binaries from outside our build are not
-   run there.
+1. ~~Build cdrdao from source in CI and check our TOC files.~~ Done (above).
+   The upstream zip was not run on the owner's machine: binaries from
+   outside our build are not run there.
 2. Burn a CD-R with CD-Text through that build, without elevation, on the
    owner's USB writer; read the CD-Text back on Linux
    (`cdrskin -v dev=… cdtext_to_v07t=…`) or on a CD-Text player.
