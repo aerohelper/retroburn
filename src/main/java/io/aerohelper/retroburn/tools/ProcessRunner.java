@@ -9,6 +9,7 @@ import io.aerohelper.retroburn.common.UserMessage;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
@@ -69,9 +70,9 @@ public final class ProcessRunner {
     public RunningProcess startLongRunning(ProcessRequest request) {
         Process process = start(request.executable().getFileName().toString(), request);
         OutputPump pump = new OutputPump(OUTPUT_TAIL_LINES);
-        pump.drain(process.getInputStream(), request.charset(), request.stdoutLines(), "stdout");
-        pump.drain(process.getErrorStream(), request.charset(), request.stderrLines(), "stderr");
-        return new RunningProcess(process, pump, request.commandLine());
+        Thread stdout = pump.drain(process.getInputStream(), request.charset(), request.stdoutLines(), "stdout");
+        Thread stderr = pump.drain(process.getErrorStream(), request.charset(), request.stderrLines(), "stderr");
+        return new RunningProcess(process, pump, List.of(stdout, stderr), request.commandLine());
     }
 
     private static Process start(String programName, ProcessRequest request) {
