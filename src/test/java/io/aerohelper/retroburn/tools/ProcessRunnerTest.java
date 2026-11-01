@@ -10,6 +10,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import io.aerohelper.retroburn.common.CancelToken;
 import io.aerohelper.retroburn.common.OperationCancelledException;
 import io.aerohelper.retroburn.common.ToolFailedException;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
@@ -159,6 +163,43 @@ class ProcessRunnerTest {
                 .build();
 
         assertEquals("tool -a 'two words' ''", request.commandLine());
+    }
+
+    @Test
+    void copiesRawStdoutUnchangedIntoASink() {
+        ByteArrayOutputStream sink = new ByteArrayOutputStream();
+        List<String> stderr = Collections.synchronizedList(new ArrayList<>());
+
+        ProcessResult result = runner.run(
+                request("binary", "100000")
+                        .stdoutTo(sink)
+                        .onStderrLine(stderr::add)
+                        .build(),
+                CancelToken.none());
+
+        assertTrue(result.succeeded());
+        byte[] data = sink.toByteArray();
+        assertEquals(100_000, data.length);
+        for (int i = 0; i < data.length; i++) {
+            assertEquals((byte) (i % 251), data[i], "byte " + i);
+        }
+        assertEquals(List.of("binary done"), stderr);
+    }
+
+    @Test
+    void rethrowsAFailingSinkAfterTheProgramHasFinished() {
+        OutputStream failing = new OutputStream() {
+            @Override
+            public void write(int value) throws IOException {
+                throw new IOException("disk full");
+            }
+        };
+
+        UncheckedIOException error = assertThrows(
+                UncheckedIOException.class,
+                () -> runner.run(request("binary", "1000000").stdoutTo(failing).build(), CancelToken.none()));
+
+        assertEquals("disk full", error.getCause().getMessage());
     }
 
     private static ProcessRequest.Builder request(String... arguments) {

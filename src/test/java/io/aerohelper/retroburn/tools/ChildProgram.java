@@ -46,6 +46,16 @@ public final class ChildProgram {
                     System.out.println("[" + args[i] + "]");
                 }
             }
+            case "binary" -> {
+                // Every byte value, including line breaks, which a line reader would change.
+                byte[] data = new byte[Integer.parseInt(args[1])];
+                for (int i = 0; i < data.length; i++) {
+                    data[i] = (byte) (i % 251);
+                }
+                System.out.write(data);
+                System.out.flush();
+                System.err.println("binary done");
+            }
             case "wait-for-stdin-end" -> {
                 System.out.println("waiting");
                 System.out.flush();

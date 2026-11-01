@@ -5,7 +5,9 @@ package io.aerohelper.retroburn.tools;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.Reader;
+import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.time.Instant;
 import java.util.ArrayDeque;
@@ -43,6 +45,14 @@ final class OutputPump {
                 .start(() -> readLines(new InputStreamReader(stream, charset), consumer, streamName));
     }
 
+    /**
+     * Starts a virtual thread that copies {@code stream} into {@code sink} until it ends. After the
+     * sink fails, the rest is read and discarded so the process never blocks on a full pipe.
+     */
+    Thread copy(InputStream stream, OutputStream sink, String streamName) {
+        return Thread.ofVirtual().name("process-" + streamName).start(() -> copyBytes(stream, sink, streamName));
+    }
+
     Instant lastOutput() {
         return lastOutput;
     }
@@ -51,7 +61,7 @@ final class OutputPump {
         return List.copyOf(tail);
     }
 
-    /** The first exception a line consumer threw, if any; output kept draining regardless. */
+    /** The first exception a line consumer or byte sink threw, if any; output kept draining regardless. */
     synchronized RuntimeException consumerFailure() {
         return consumerFailure;
     }
@@ -84,6 +94,36 @@ final class OutputPump {
         }
     }
 
+    private void copyBytes(InputStream stream, OutputStream sink, String streamName) {
+        byte[] buffer = new byte[64 * 1024];
+        boolean sinkWorks = true;
+        try (stream) {
+            int read;
+            while ((read = stream.read(buffer)) != -1) {
+                lastOutput = Instant.now();
+                if (sinkWorks) {
+                    try {
+                        sink.write(buffer, 0, read);
+                    } catch (IOException e) {
+                        sinkWorks = false;
+                        recordFailure(new UncheckedIOException("Could not take the output of " + streamName, e));
+                    } catch (RuntimeException e) {
+                        sinkWorks = false;
+                        recordFailure(e);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            LOG.log(Level.FINE, "Stopped reading " + streamName, e);
+        }
+    }
+
+    private synchronized void recordFailure(RuntimeException e) {
+        if (consumerFailure == null) {
+            consumerFailure = e;
+        }
+    }
+
     private void accept(String line, Consumer<String> consumer, String streamName) {
         LOG.fine(() -> streamName + ": " + line);
         synchronized (this) {
@@ -95,11 +135,7 @@ final class OutputPump {
         try {
             consumer.accept(line);
         } catch (RuntimeException e) {
-            synchronized (this) {
-                if (consumerFailure == null) {
-                    consumerFailure = e;
-                }
-            }
+            recordFailure(e);
         }
     }
 }
