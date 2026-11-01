@@ -250,7 +250,9 @@ class XorrisoIntegrationTest {
         long actual = Files.size(image);
         System.out.println("[estimate] xorriso image " + actual + " bytes, estimate " + estimate);
         assertTrue(estimate >= actual, "estimate " + estimate + " < image " + actual);
-        assertTrue(estimate < actual * 2, "estimate " + estimate + " far above image " + actual);
+        // xorriso writes no UDF, so its images of small files are about half the estimate, which is
+        // sized for IMAPI2FS images with UDF.
+        assertTrue(estimate < actual * 3, "estimate " + estimate + " far above image " + actual);
         List<String> toc = tableOfContents(image);
         toc.forEach(line -> System.out.println("[label] " + line));
         assertTrue(toc.stream().anyMatch(line -> line.contains("'Holiday 2026'")), toc.toString());
