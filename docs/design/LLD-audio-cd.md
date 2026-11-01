@@ -7,7 +7,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 | | |
 |---|---|
-| Status | Designed for the audio CD milestone (M5). Part 1: models, rules, writers and FFmpeg wrappers. Part 2: engines (Linux cdrskin, Windows IMAPI2). Part 3: screen. Windows CD-Text waits for the spike in ADR-0014. |
+| Status | Built in the audio CD milestone (M5): models, rules, writers and FFmpeg wrappers; engines (Linux cdrskin, Windows IMAPI2 track-at-once); checks, pipeline and screen. Not yet tried on a real CD (no CD-R or CD-RW at hand); Windows CD-Text waits for the spike in ADR-0014. |
 | Packages | `io.aerohelper.retroburn.audio` (rules, writers, FFmpeg), `.project` (compilation, checks, steps), `.engine` (`AudioCdEngine`, `AudioDisc`), `.platform.linux`, `.platform.windows`, `.ui` |
 | Related | [ADR-0014](../adr/0014-cd-text-on-windows-through-cdrdao.md), [HLD §4.2, §5](../architecture/HLD.md), [LLD-data-burning.md](LLD-data-burning.md), [LLD-tools.md](LLD-tools.md) |
 
@@ -46,18 +46,21 @@ files.
 
 | Type | Package | Responsibility |
 |---|---|---|
-| `AudioTags` (record) | `audio` | Title, artist, album, album artist, all optional, from ffprobe. |
-| `ProbedAudio` (record) | `audio` | What ffprobe says about a file: duration, codec, codec tag, sample rate, channels, tags. |
+| `ProbedAudio` (record) | `audio` | What ffprobe says about a file: duration, codec, codec tag, sample rate, channels, and `AudioTags` (title, artist, album, album artist, all optional). |
+| `AudioTools` | `audio` | Runs ffprobe (refusing files without sound or with copy protection) and FFmpeg's conversion. |
+| `TrackListCheck` | `audio` | Compares a burned disc's table of contents with what was written (section 6.3). |
 | `FfprobeJsonParser` | `audio` | Reads `ffprobe -print_format json -show_format -show_streams` output (section 5.1). |
 | `CdTextRules` | `audio` | Cleans one CD-Text field (section 4). |
 | `CdTextBudget` | `audio` | Whether the texts fit in one CD-Text block (section 4.2). |
 | `V07tSheetWriter` | `audio` | Sony input sheet v0.7T for cdrskin (section 6.1). |
 | `CdrdaoTocWriter` | `audio` | cdrdao TOC file with `CD_TEXT` blocks (section 6.2); used only if ADR-0014 is accepted. |
 | `CdWavWriter` | `audio` | Wraps raw PCM in a 44-byte WAV header and pads it to whole sectors (section 5.3). |
-| `AudioTrackItem` (record) | `project` | One track: source file, probed facts, title, performer. |
-| `AudioCompilation` | `project` | Album title and performer, ordered tracks; add, remove, move; immutable like `DataCompilation`. |
-| `AudioDisc` (record) | `engine` | What an engine burns: the converted WAV files with their sector counts, the CD-Text (or none), gap length. |
-| `AudioCdEngine` | `engine` | `burnAudioCd(drive, disc, listener, cancel)`, `writesCdText()`, `readTrackSectors(drive)` for the check after burning. |
+| `AudioCompilation` | `project` | Album title and performer, ordered `Track`s (source file, probed facts, title, performer); add, remove, move; the cleaned CD-Text and the fields that cannot be written. Immutable like `DataCompilation`. |
+| `AudioPreCheck` | `project` | The audio rules on top of `BurnPreCheck` (section 7). |
+| `AudioJobFactory` | `project` | The pipeline (section 8). |
+| `AudioDisc` (record) | `engine` | What an engine burns: the converted WAV files with their sector counts and the CD-Text (or none). Every track gets a 2-second gap. |
+| `AudioCdEngine` | `engine` | `burnAudioCd(drive, disc, listener, cancel)`, `writesCdText()`, `readTrackLayout(drive)` for the check after burning. Every platform offers one (`PlatformServices.audioCdEngine()`); feature gating decides whether the tools are there. |
+| `TrackLayout` (record) | `engine` | A disc's table of contents: track start LBAs and the lead-out LBA. |
 
 Track titles default to the `title` tag, then the file name without its
 extension. Performers default to `artist`. The album title defaults to the
@@ -192,12 +195,24 @@ output in CI. Cancel stops the process like the other engines.
 
 ### 6.2 Windows
 
-- **Without CD-Text** (now, and the fallback): the helper's new
+- **Without CD-Text** (now, and the fallback): the helper's
   `burn-audio` operation uses `MsftDiscFormat2TrackAtOnce`:
-  `PrepareMedia`, then `AddAudioTrack` per track with a stream over the WAV
-  data after the header, then `ReleaseMedia`. Track-at-once writes a
-  2-second gap before each track. Progress comes from the format's update
-  events.
+  `PrepareMedia`, then `AddAudioTrack` per track with `PcmStream`, a COM
+  stream over the WAV data after the 44-byte header (Microsoft Learn:
+  "raw audio samples ... without the header"), then `ReleaseMedia`, which
+  closes the disc (also after a cancel, through `CancelAddTrack`).
+  Microsoft Learn: track-at-once adds a 2-second gap between tracks and
+  pads tracks shorter than 4 seconds. Progress comes from
+  `DDiscFormat2TrackAtOnceEvents` (`{2735413F-…}`, DISPID 0x200), whose
+  arguments carry `CurrentTrackNumber`, `CurrentAction` (unknown,
+  preparing, writing, finishing, verifying), `StartLba` and
+  `LastWrittenLba`; all read from the type library with
+  `tools/windows/dump-imapi2-typelib.ps1`. `read-toc` reads the table of
+  contents with `IOCTL_CDROM_READ_TOC` on the drive letter.
+- **Checked on the owner's hardware (no CD at hand):** `read-toc` on a
+  DVD+RW returns one track and the lead-out; `IsCurrentMediaSupported` of
+  the track-at-once writer is false for that disc and true for the
+  recorder, so an audio burn on a DVD stops before anything is written.
 - **With CD-Text** (if ADR-0014 is accepted): bundled `cdrdao write
   --device <drive> <work>/disc.toc`, with a TOC from `CdrdaoTocWriter`:
 
@@ -234,10 +249,15 @@ FILE "01.wav" 0
 
 ### 6.3 After burning
 
-The engine reads the disc's table of contents and compares the number of
-tracks and each track's length in sectors with what was written. A mismatch
-is reported like a failed verify. (Audio sectors have no error-free
-read-back on every drive, so the samples themselves are not compared.)
+The engine reads the disc's table of contents (`cdrskin -toc`, parsed
+after the `printf` formats in `cdrskin.c`; `read-toc` on Windows) and
+`TrackListCheck` compares it with what was written: the same number of
+tracks; each track except the last spans its sectors plus the next track's
+150-sector gap, the last one ends at the lead-out; up to 75 sectors (one
+second) off is accepted for run-out sectors. A mismatch
+(`error.trackListMismatch`) is reported like a failed verify. Audio
+sectors have no error-free read-back on every drive, so the samples
+themselves are not compared.
 
 ## 7. Pre-checks (additions to `BurnPreCheck`)
 
@@ -256,8 +276,22 @@ read-back on every drive, so the samples themselves are not compared.)
 
 The disc's length in sectors is its free 2048-byte blocks as reported by
 the engine (`MediaInfo.freeBytes / 2048`), which for a blank CD-R is the
-same count as audio sectors. Without a disc, the screen compares with
-80 minutes.
+same count as audio sectors. So the request's `bytesToWrite` for an audio
+job is the disc's sectors × 2048 (`AudioPreCheck.blocksToWrite`), and the
+generic "too big" and "work folder full" results are replaced by the audio
+ones above. Without a disc, the screen compares with 80 minutes.
+
+## 7.1 Screen (`ui.AudioCdView`)
+
+Drive bar, heading, a minutes bar (`CapacityBar.showTime`: "mm:ss of
+mm:ss"), album title and performer, the CD-Text option (or, where the
+engine cannot write CD-Text, a sentence saying so) and "Even out
+loudness", both saved as settings. The track table has #, Title and
+Performer (editable), Length and From; Add files (or drop files), Remove,
+Move up, Move down. Files are probed in the background; files that cannot
+be used and CD-Text fields that cannot be written are listed under the
+table. Burn goes through `BurnFlow` with `AudioPreCheck` as the job's
+planner.
 
 ## 8. Pipeline
 
