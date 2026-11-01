@@ -9,5 +9,7 @@ public enum JobKind {
     /** An existing image file: burn it, verify it. */
     BURN_ISO,
     /** Erase a rewritable disc. */
-    ERASE
+    ERASE,
+    /** Music files: convert to CD audio in the work folder, burn, check the track list. */
+    AUDIO_CD
 }

@@ -14,6 +14,7 @@ import io.aerohelper.retroburn.platform.DriveWatcher;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -92,7 +93,8 @@ public final class BurnJob {
     }
 
     private Outcome failureOutcome(DriveId drive, RetroBurnException error) {
-        if ("error.verifyMismatch".equals(error.userMessage().key())) {
+        if (Set.of("error.verifyMismatch", "error.trackListMismatch")
+                .contains(error.userMessage().key())) {
             return Outcome.VERIFY_FAILED;
         }
         return driveIsGone(drive) ? Outcome.DRIVE_LOST : Outcome.FAILED;
