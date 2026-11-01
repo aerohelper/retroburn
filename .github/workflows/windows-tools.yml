@@ -1,0 +1,57 @@
+# SPDX-FileCopyrightText: 2026 Chetan and contributors
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+# Builds the external tools RetroBurn may bundle on Windows from pinned source (ADR-0006), and
+# checks them against the files RetroBurn writes. For now: cdrdao, for the CD-Text spike (ADR-0014).
+
+name: Windows tools
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "windows-tools/**"
+      - ".github/workflows/windows-tools.yml"
+      - "src/main/java/io/aerohelper/retroburn/audio/CdrdaoTocWriter.java"
+
+permissions:
+  contents: read
+
+jobs:
+  cdrdao:
+    name: Build cdrdao (MSYS2 UCRT64)
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            make
+            curl
+            tar
+            bzip2
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-libiconv
+            mingw-w64-ucrt-x86_64-pkgconf
+
+      - name: Build
+        run: windows-tools/build-cdrdao.sh out
+
+      - name: Parse a CD-Text TOC like the ones RetroBurn writes
+        run: |
+          cd out
+          printf 'CD_DA\nCD_TEXT {\n  LANGUAGE_MAP {\n    0 : EN\n  }\n  LANGUAGE 0 {\n    TITLE "Joyful Nights"\n    PERFORMER "United Cat Orchestra"\n  }\n}\n\nTRACK AUDIO\nCD_TEXT {\n  LANGUAGE 0 {\n    TITLE "Caf\xc3\xa9 \\"Mee\\""\n    PERFORMER "Felix"\n  }\n}\nPREGAP 0:2:0\nSILENCE 0:5:0\n' > disc.toc
+          cat disc.toc
+          ./cdrdao.exe show-toc disc.toc
+          ./cdrdao.exe toc-size disc.toc
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: cdrdao-windows
+          path: out/
