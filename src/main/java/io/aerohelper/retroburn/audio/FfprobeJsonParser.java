@@ -51,7 +51,12 @@ public final class FfprobeJsonParser {
                 integer(stream.path("sample_rate")),
                 stream.path("channels").asInt(0),
                 new ProbedAudio.AudioTags(
-                        tag(tags, "title"), tag(tags, "artist"), tag(tags, "album"), tag(tags, "album_artist"))));
+                        tag(tags, "title"),
+                        tag(tags, "artist"),
+                        tag(tags, "album"),
+                        tag(tags, "album_artist"),
+                        tag(tags, "track"),
+                        tag(tags, "disc"))));
     }
 
     private static Optional<JsonNode> firstAudioStream(JsonNode root) {

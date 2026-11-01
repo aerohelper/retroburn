@@ -93,6 +93,29 @@ public final class AudioTools {
         }
     }
 
+    /** Converts {@code source} to an MP3 file with ID3v2.3 and ID3v1 tags, reporting the fraction done. */
+    public void toMp3(
+            Path source,
+            Path mp3,
+            Duration duration,
+            Mp3Encoding.Bitrate bitrate,
+            DoubleConsumer progress,
+            CancelToken cancel) {
+        ProcessResult result = runner.run(
+                ProcessRequest.builder(tool(ExternalTool.FFMPEG), Mp3Encoding.arguments(source, mp3, bitrate))
+                        .idleTimeout(CONVERT_IDLE)
+                        .onStdoutLine(
+                                line -> FfmpegAudio.progress(line, duration).ifPresent(progress::accept))
+                        .build(),
+                cancel);
+        if (!result.succeeded()) {
+            throw new ToolFailedException(
+                    UserMessage.of(
+                            "audio.error.convertFailed", source.getFileName().toString()),
+                    result.technicalDetail());
+        }
+    }
+
     private Path tool(ExternalTool tool) {
         return locator.locate(tool).orElseThrow(() -> new ToolMissingException(tool.displayName()));
     }

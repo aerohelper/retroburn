@@ -34,10 +34,13 @@ folder, burned, then compared with the image (ADR-0013).
 
 Used for every file and folder name on the disc in car stereo mode:
 
-1. NFD-decompose and drop combining marks (`é` → `e`).
+1. Spell out letters that have no base form (`ß` → `ss`, `æ` → `ae`,
+   `ø` → `o`, `ł` → `l`, `þ` → `th` and their capitals), then
+   NFD-decompose and drop combining marks (`é` → `e`).
 2. Keep `A–Z a–z 0–9`, space and `- _ . , ( ) & ' !`; every other
-   character becomes `_`; runs of `_` and spaces collapse; trim spaces,
-   dots and underscores at both ends.
+   character becomes `_`; a run of spaces and `_` containing a space
+   becomes one space, other runs of `_` one `_`; trim spaces, dots and
+   underscores at both ends (`AC/DC: Live?` → `AC_DC Live`).
 3. Cut to the limit (default 64 characters for a file name with its
    extension, 32 for a folder), keeping the extension.
 4. Empty names become `Track` (files) or `Folder` (folders).
