@@ -59,7 +59,8 @@ public final class BurnJobFactory {
                 new BurnSteps.BuildImage(imageBuilder, tree, label, context -> target, Math.max(1, estimatedBytes)));
     }
 
-    private List<PipelineStep> writeSteps(BurnPlan plan, BurnSteps.ImageFile image) {
+    /** Erase first when needed, burn the image, verify it: the end of every image-based job. */
+    List<PipelineStep> writeSteps(BurnPlan plan, BurnSteps.ImageFile image) {
         DriveId drive = drive(plan);
         double bytes = bytes(plan);
         List<PipelineStep> steps = new ArrayList<>();
@@ -73,7 +74,7 @@ public final class BurnJobFactory {
         return steps;
     }
 
-    private static DriveId drive(BurnPlan plan) {
+    static DriveId drive(BurnPlan plan) {
         if (!plan.canStart()) {
             throw new IllegalArgumentException("The plan has blockers: " + plan.blockers());
         }
