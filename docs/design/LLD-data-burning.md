@@ -34,7 +34,7 @@ entry).
 | `VolumeLabel` (record) | A label that reads the same on Linux and Windows (section 2.1). `VolumeLabel.sanitize(text)` never fails. |
 | `DataCompilation` | The items of a data disc: an ordered list of `DiscEntry`s at the disc's root, one per file or folder added. Adding a name that is already used gets ` (2)`, ` (3)`… before the extension. Implements `DiscTree`. Immutable; every change returns a new one. |
 | `TreeSizeScanner` | Walks the sources in the background and returns a `TreeSize` (bytes, files, folders, unreadable paths), checking a `CancelToken` every entry. It never holds the file list, so 100,000 files cost no memory beyond the walk. Symbolic links are counted as the link itself, not followed. |
-| `ImageSizeEstimate` | Bytes the image will take: every file rounded up to 2048-byte blocks, 2560 bytes per folder and file entry (a 2048-byte UDF file entry plus ISO 9660 and Joliet directory records), plus a fixed 2 MiB for volume descriptors, path tables and the UDF structures (measured with one file: 1.1 MiB on Windows, 0.4 MiB on Linux; the margin keeps the estimate on the safe side). The exact size is checked again once the image exists. |
+| `ImageSizeEstimate` | Bytes the image will take: every file rounded up to 2048-byte blocks, 2560 bytes per folder and file entry (a 2048-byte UDF file entry plus ISO 9660 and Joliet directory records), plus a fixed 2 MiB for volume descriptors, path tables and the UDF structures (measured with one file: 1.1 MiB on Windows, 0.4 MiB on Linux; the margin keeps the estimate on the safe side). The exact size is checked again once the image exists. Measured with 2,000 small files plus 1 MiB: IMAPI2FS image 10.8 MB, xorriso image 6.0 MB, estimate 12.4 MB. Linux images carry no UDF, so there the estimate is about 2 KB per item too high: a nearly full disc with very many small files can be refused although it would fit. |
 | `DiscCapacity` | Bytes a burn can use on the inserted disc: `freeBytes` when blank; `freeBytes + usedBytes` for a rewritable disc with data, which will be overwritten or erased. |
 | `BurnPlan` (record) | What the confirmation dialog shows and the job needs: project kind, drive, media, bytes to write, whether the disc will be erased first, verify on/off, the warnings and the blockers. |
 | `BurnPreCheck` | Turns (project, drive, media, settings, power, tools) into a `BurnPlan`; section 3. Pure logic, fully unit-tested. |
@@ -137,14 +137,16 @@ threads and comes back through `Platform.runLater`.
 
 | View | Contents |
 |---|---|
-| `DriveBar` | Drive picker (vendor, product, drive letter or device), USB badge, media kind and state, capacity bar (`CapacityBar`: under, near full ≥ 95 %, over, calculating), refresh, "Erase disc…" for rewritable media, empty and permission states. Fed by `DriveWatcher`; reads media on selection, on window focus and on refresh. |
-| `DataDiscView` | Volume label field, item table (name, size, source path; virtualised), Add files, Add folder, Remove, drag and drop, total versus capacity, Burn and Create ISO buttons. |
+| `DriveBar` | Drive picker (vendor, product, then the drive letter or device from `DriveInfo.location`), USB badge, media kind and state (`MediaText`, for example "DVD+RW · has data · 4.7 GB usable"), refresh, "Erase disc…" (shown only for rewritable media), empty and permission states. Fed by `DriveWatcher`; reads media on selection, on window focus and on refresh, and drops a reply that a newer read has overtaken. |
+| `CapacityBar` | Below the view heading: under, near full ≥ 95 %, over, calculating. The state is in the text as well as the colour. Create ISO shows the size only. |
+| `DataDiscView` | Volume label field with a hint showing the cleaned label, item table (name on the disc and source path; virtualised; Delete removes), Add files, Add folder, Remove, drag and drop, total versus capacity, Burn and Create ISO buttons. |
 | `BurnIsoView` | Image picker with size and capacity check; Burn button. |
-| `ConfirmBurnDialog` | The `BurnPlan`: summary, blockers, warnings, verify checkbox, Burn (never the default button) and Back. |
-| `EraseDialog` | "Erase this disc? All data on it will be deleted." Quick or full; Erase is never the default. |
+| `ConfirmBurnDialog` | The `BurnPlan`: summary, blockers, warnings, verify checkbox (changing it re-plans), USB tip with "Don't show again", Burn (never the default button) and Back (the default). For an erase it is the erase confirmation: "Erase this disc? All data on it will be deleted." with Quick or Full; there is no separate erase dialog. |
 | `ProgressView` | Step list with ticks, overall percentage, speed and buffer when the engine reports them, elapsed time, Cancel with the cancel warning, "Stopping…" while a cancel completes. |
 | `ResultView` | One of the result kinds from section 4.1, "Show details" with the technical detail and log tail, Back to home. |
-| `Navigator` (`app`) | Swaps the main window's centre between home, project views, progress and result. |
+| `BurnFlow` | The shared path every job takes: pre-check in the background (media, power, work-folder space), the confirm dialog, saving the USB-tip choice, `BurnJob` on the jobs thread, then progress and result. Create ISO uses the same progress and result without a drive. |
+| `Navigation` (`ui`), implemented by `MainWindow` (`app`) | Home, open a project screen, show progress or result on top of it, back to the project, the owner window. The project screen is kept while progress and result are shown, so Back returns to the same compilation. |
+| `UiServices` (`ui`) | What the views need from `app`, passed in one record: messages, platform, settings store, pipeline runner, current tool features, work-folder root, a background executor and the single jobs thread. |
 
 ## 7. Errors
 

@@ -17,11 +17,23 @@ import io.aerohelper.retroburn.platform.simulated.SimulatedPlatform;
 import io.aerohelper.retroburn.platform.windows.WindowsAppPaths;
 import io.aerohelper.retroburn.platform.windows.WindowsPlatform;
 import io.aerohelper.retroburn.settings.SettingsStore;
+import io.aerohelper.retroburn.tools.ExternalTool;
+import io.aerohelper.retroburn.tools.Feature;
+import io.aerohelper.retroburn.tools.FeatureAvailability;
+import io.aerohelper.retroburn.tools.FeatureGate;
 import io.aerohelper.retroburn.tools.ProcessRunner;
 import io.aerohelper.retroburn.tools.ToolProbe;
+import io.aerohelper.retroburn.ui.UiServices;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The composition root: creates the application's long-lived objects and hands them out.
@@ -30,7 +42,9 @@ import java.util.Objects;
  * {@code docs/adr/0008}). This is the only class that chooses a {@link PlatformServices}
  * implementation.
  */
-public final class AppContext {
+public final class AppContext implements AutoCloseable {
+
+    private static final Logger LOG = Logger.getLogger(AppContext.class.getName());
 
     private final PlatformServices platform;
     private final SettingsStore settingsStore;
@@ -40,6 +54,16 @@ public final class AppContext {
     private final ToolProbe toolProbe;
     private final WorkFolders workFolders;
     private final PipelineRunner pipelineRunner;
+    private final Path workRoot;
+    private final AtomicReference<Map<Feature, FeatureAvailability>> features = new AtomicReference<>(Map.of());
+    /** Short background work for the screens: reading discs, scanning sizes, preparing jobs. */
+    private final ExecutorService background = Executors.newVirtualThreadPerTaskExecutor();
+    /** One job at a time, on its own thread (HLD section 7: "pipeline-runner"). */
+    private final ExecutorService jobs = Executors.newSingleThreadExecutor(runnable -> {
+        Thread thread = new Thread(runnable, "pipeline-runner");
+        thread.setDaemon(true);
+        return thread;
+    });
 
     public AppContext(
             PlatformServices platform,
@@ -58,6 +82,7 @@ public final class AppContext {
                 .current()
                 .workDirectory()
                 .orElse(platform.appPaths().work());
+        this.workRoot = workRoot;
         this.workFolders = new WorkFolders(workRoot);
         this.pipelineRunner = new PipelineRunner(workFolders, platform.sleepInhibitor());
     }
@@ -144,5 +169,34 @@ public final class AppContext {
 
     public PipelineRunner pipelineRunner() {
         return pipelineRunner;
+    }
+
+    /**
+     * Finds the external tools and works out which features are available, in the background so
+     * the window opens at once. Until it finishes, no feature is blocked; a job whose tool turns out
+     * to be missing fails with a "not installed" message instead.
+     */
+    public void checkToolsInBackground() {
+        background.execute(() -> {
+            try {
+                features.set(FeatureGate.evaluate(
+                        toolProbe.probeAll(List.of(ExternalTool.values())), platform.featureRequirements()));
+            } catch (RuntimeException e) {
+                LOG.log(Level.WARNING, "Could not check the external tools", e);
+            }
+        });
+    }
+
+    /** What the screens need, as one object. */
+    public UiServices uiServices() {
+        return new UiServices(
+                messages, platform, settingsStore, pipelineRunner, features::get, () -> workRoot, background, jobs);
+    }
+
+    /** Stops background threads; a running job's processes are stopped with the JVM. */
+    @Override
+    public void close() {
+        background.shutdownNow();
+        jobs.shutdownNow();
     }
 }
