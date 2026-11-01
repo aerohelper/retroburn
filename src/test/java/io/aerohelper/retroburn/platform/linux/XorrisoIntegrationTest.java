@@ -21,6 +21,9 @@ import io.aerohelper.retroburn.engine.DiscTree;
 import io.aerohelper.retroburn.engine.DriveId;
 import io.aerohelper.retroburn.engine.ImageOptions;
 import io.aerohelper.retroburn.engine.MediaState;
+import io.aerohelper.retroburn.project.DataCompilation;
+import io.aerohelper.retroburn.project.ImageSizeEstimate;
+import io.aerohelper.retroburn.project.TreeSizeScanner;
 import io.aerohelper.retroburn.tools.ExternalTool;
 import io.aerohelper.retroburn.tools.PathSearchToolLocator;
 import io.aerohelper.retroburn.tools.ProcessRequest;
@@ -229,6 +232,28 @@ class XorrisoIntegrationTest {
         assertThrows(
                 OperationCancelledException.class,
                 () -> engine().burnImage(drive, image, new BurnOptions(true), event -> {}, cancel));
+    }
+
+    @Test
+    void theSizeEstimateCoversARealImageOfManySmallFilesAndKeepsTheLabel() throws IOException {
+        Path source = Files.createDirectories(folder.resolve("small"));
+        for (int i = 0; i < 2000; i++) {
+            Files.writeString(source.resolve("note " + i + ".txt"), "note " + i);
+        }
+        writeRandom(source.resolve("one-megabyte.bin"), 1024 * 1024);
+        DataCompilation compilation = DataCompilation.empty().add(List.of(source));
+        Path image = folder.resolve("small.iso");
+
+        builder().buildDataImage(compilation, new ImageOptions("Holiday 2026"), image, event -> {}, new CancelToken());
+
+        long estimate = ImageSizeEstimate.bytes(new TreeSizeScanner().scan(compilation, new CancelToken()));
+        long actual = Files.size(image);
+        System.out.println("[estimate] xorriso image " + actual + " bytes, estimate " + estimate);
+        assertTrue(estimate >= actual, "estimate " + estimate + " < image " + actual);
+        assertTrue(estimate < actual * 2, "estimate " + estimate + " far above image " + actual);
+        List<String> toc = tableOfContents(image);
+        toc.forEach(line -> System.out.println("[label] " + line));
+        assertTrue(toc.stream().anyMatch(line -> line.contains("'Holiday 2026'")), toc.toString());
     }
 
     /** Prints what an operation reported, so CI logs give real output for the fixtures. */
