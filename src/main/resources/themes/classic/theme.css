@@ -15,6 +15,11 @@
     -rb-accent: #1F5FBF;
     -rb-accent-text: #FFFFFF;
     -rb-focus: #1F5FBF;
+    -rb-success: #1E7B34;
+    -rb-warning: #8A5A00;
+    -rb-error: #B3261E;
+    -rb-border: #D0D5DB;
+    -rb-disabled-bg: #E3E6EA;
 
     -fx-background-color: -rb-bg;
     -fx-text-fill: -rb-text;
@@ -72,4 +77,160 @@
 .dialog-content {
     -fx-spacing: 8;
     -fx-padding: 8;
+}
+
+/* Burning screens (data-burning UI) */
+
+.drive-bar {
+    -fx-background-color: -rb-surface;
+    -fx-border-color: transparent transparent -rb-border transparent;
+    -fx-padding: 8 16 8 16;
+    -fx-spacing: 12;
+    -fx-alignment: center-left;
+}
+
+.usb-badge {
+    -fx-background-color: -rb-accent;
+    -fx-text-fill: -rb-accent-text;
+    -fx-background-radius: 4;
+    -fx-padding: 2 6 2 6;
+    -fx-font-weight: bold;
+}
+
+.drive-media,
+.drive-empty {
+    -fx-text-fill: -rb-text;
+}
+
+.view-heading {
+    -fx-font-size: 20px;
+    -fx-padding: 16 16 4 16;
+    -fx-text-fill: -rb-text;
+}
+
+.view-content {
+    -fx-padding: 8 16 16 16;
+    -fx-spacing: 10;
+}
+
+.view-actions,
+.form-row,
+.result-buttons,
+.progress-bottom {
+    -fx-spacing: 8;
+    -fx-alignment: center-left;
+}
+
+.field-hint {
+    -fx-text-fill: -rb-text-muted;
+}
+
+.capacity-bar {
+    -fx-padding: 4 16 8 16;
+    -fx-spacing: 12;
+    -fx-alignment: center-left;
+}
+
+.capacity-near-full .progress-bar > .bar {
+    -fx-background-color: -rb-warning;
+}
+
+.capacity-near-full .label {
+    -fx-text-fill: -rb-warning;
+}
+
+.capacity-over .progress-bar > .bar {
+    -fx-background-color: -rb-error;
+}
+
+.capacity-over .label {
+    -fx-text-fill: -rb-error;
+    -fx-font-weight: bold;
+}
+
+.primary-button {
+    -fx-background-color: -rb-accent;
+    -fx-text-fill: -rb-accent-text;
+    -fx-font-weight: bold;
+}
+
+.primary-button:disabled {
+    -fx-opacity: 1;
+    -fx-background-color: -rb-border, -rb-disabled-bg;
+    -fx-background-insets: 0, 1;
+    -fx-text-fill: -rb-text-muted;
+    -fx-font-weight: normal;
+}
+
+.danger-button {
+    -fx-background-color: -rb-error;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-weight: bold;
+}
+
+.confirm-summary,
+.confirm-notes {
+    -fx-spacing: 6;
+}
+
+.confirm-blocker {
+    -fx-text-fill: -rb-error;
+    -fx-font-weight: bold;
+}
+
+.confirm-warning {
+    -fx-text-fill: -rb-warning;
+}
+
+.confirm-note {
+    -fx-text-fill: -rb-text-muted;
+}
+
+.progress-view,
+.result-view {
+    -fx-padding: 32;
+    -fx-spacing: 14;
+}
+
+.progress-heading,
+.result-title {
+    -fx-font-size: 22px;
+    -fx-text-fill: -rb-text;
+}
+
+.progress-percent {
+    -fx-font-size: 18px;
+    -fx-min-width: 64;
+    -fx-alignment: center-right;
+}
+
+.progress-details {
+    -fx-text-fill: -rb-text-muted;
+}
+
+.progress-steps {
+    -fx-spacing: 4;
+}
+
+.step-done {
+    -fx-text-fill: -rb-success;
+}
+
+.step-running {
+    -fx-font-weight: bold;
+}
+
+.step-waiting {
+    -fx-text-fill: -rb-text-muted;
+}
+
+.result-succeeded,
+.result-succeeded-without-verify {
+    -fx-text-fill: -rb-success;
+}
+
+.result-verify-failed,
+.result-failed,
+.result-drive-lost {
+    -fx-text-fill: -rb-error;
 }
