@@ -1,0 +1,15 @@
+$ xorriso -abort_on FAILURE -return_with SORRY 32 -report_about UPDATE -outdev stdio:/tmp/drive.bin -blank as_needed
+xorriso 1.5.6 : RockRidge filesystem manipulator, libburnia project.
+
+Drive current: -outdev 'stdio:/tmp/drive.bin'
+Media current: stdio file, overwriteable
+Media status : is written , is appendable
+Media summary: 1 session, 10267 data blocks, 20.1m data, 12.3g free
+Beginning to blank medium in mode 'fast'.
+Blanking done
+xorriso : NOTE : Re-assessing -outdev 'stdio:/tmp/drive.bin'
+Drive current: -outdev 'stdio:/tmp/drive.bin'
+Media current: stdio file, overwriteable
+Media status : is blank
+Media summary: 0 sessions, 0 data blocks, 0 data, 12.4g free
+[exit 0]

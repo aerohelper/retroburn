@@ -1,0 +1,17 @@
+$ xorriso -abort_on FAILURE -return_with SORRY 32 -report_about UPDATE -as cdrecord -v dev=stdio:/tmp/drive.bin '/tmp/disc = 1.iso' --
+xorriso 1.5.6 : RockRidge filesystem manipulator, libburnia project.
+
+Drive current: -outdev 'stdio:/tmp/drive.bin'
+Media current: stdio file, overwriteable
+Media status : is blank
+Media summary: 0 sessions, 0 data blocks, 0 data, 12.4g free
+Beginning to write data track.
+xorriso : UPDATE :    0 of   20 MB written [buf  50%]
+Writing to 'stdio:/tmp/drive.bin' completed successfully.
+
+xorriso : NOTE : Re-assessing -outdev 'stdio:/tmp/drive.bin'
+Drive current: -outdev 'stdio:/tmp/drive.bin'
+Media current: stdio file, overwriteable
+Media status : is written , is appendable
+Media summary: 1 session, 10267 data blocks, 20.1m data, 12.3g free
+[exit 0]

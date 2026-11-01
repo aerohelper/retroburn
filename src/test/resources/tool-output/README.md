@@ -27,6 +27,12 @@ Notes:
   byte.
 - `xorriso/create-iso-3gb.txt` wrote a 3 GB file of zeros to get many progress
   lines, including speed figures.
+- `xorriso/burn-image-stdio.txt`, `check-media-read-back-stdio.txt` and
+  `blank-as-needed-stdio.txt` come from the GitHub Actions Ubuntu runner
+  (xorriso 1.5.6), 2026-11-01: `XorrisoIntegrationTest` printed each line
+  xorriso reported on stdout and stderr. The command line was rebuilt from
+  `XorrisoCommandBuilder`, temporary folders are shortened to `/tmp/`, and the
+  read-back's stdout (the disc's data) is left out.
 - `xorriso/devices-none-found.txt` and the image captures ran without any
   optical drive. Output with real drives will be added from the owner's
   hardware.
