@@ -214,8 +214,13 @@ class WindowsHelperIntegrationTest {
      */
     private Map<String, String> mountedChecksums(Path image) throws IOException {
         String quoted = "'" + image.toAbsolutePath().toString().replace("'", "''") + "'";
-        String letter = powerShell("(Mount-DiskImage -ImagePath " + quoted + " -PassThru | Get-Volume).DriveLetter");
+        // Windows assigns the drive letter shortly after mounting, so ask until it appears.
+        String letter = powerShell("Mount-DiskImage -ImagePath " + quoted + " | Out-Null; "
+                + "for ($i = 0; $i -lt 60; $i++) { "
+                + "$letter = (Get-DiskImage -ImagePath " + quoted + " | Get-Volume).DriveLetter; "
+                + "if ($letter) { $letter; break }; Start-Sleep -Milliseconds 500 }");
         try {
+            assertTrue(letter.matches("[A-Za-z]"), "No drive letter for the mounted image: '" + letter + "'");
             return checksums(Path.of(letter + ":\\"), "");
         } finally {
             powerShell("Dismount-DiskImage -ImagePath " + quoted + " | Out-Null");
