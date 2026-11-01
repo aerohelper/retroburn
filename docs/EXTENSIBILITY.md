@@ -30,7 +30,7 @@ line in `AppContext` that selects it.
 |---|---|
 | `AppPaths` | The OS's conventional folders for settings, data, logs, cache, videos. |
 | `ToolLocator` | Where FFmpeg, ffprobe, dvdauthor, spumux live (bundled or system). |
-| `BurnEngine` | Drive listing, media info, burn tree, burn image, blank, verify. |
+| `BurnEngine` | Drive listing, media info, burn image, blank, verify, eject; burn tree from the data disc milestone. |
 | `DiscImageBuilder` | Data ISO and DVD-Video image (ISO 9660 + UDF 1.02). |
 | `AudioCdEngine` (optional) | Return empty if unsupported; Audio CD is then disabled with an explanation. |
 | `DriveWatcher` | Hot-plug; must pause during burns. |
@@ -42,7 +42,7 @@ line in `AppContext` that selects it.
 inhibition and `pmset` for power status — each verified against Apple's
 documentation and captured as fixtures first. The architecture tests check
 that no other package learned about macOS. A full walkthrough lives in
-`docs/PORTING.md` (added with the Windows engine).
+[PORTING.md](PORTING.md).
 
 ---
 
