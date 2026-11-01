@@ -3,7 +3,6 @@
 package io.aerohelper.retroburn.engine;
 
 import io.aerohelper.retroburn.common.CancelToken;
-import java.util.List;
 
 /**
  * Burns audio CDs. Implementations live in the platform packages (cdrskin on Linux, IMAPI2 on
@@ -21,6 +20,6 @@ public interface AudioCdEngine {
      */
     void burnAudioCd(DriveId drive, AudioDisc disc, BurnListener listener, CancelToken cancel);
 
-    /** The length in sectors of each audio track on the disc in the drive, for the check after burning. */
-    List<Long> readTrackSectors(DriveId drive);
+    /** The table of contents of the disc in the drive, for the check after burning. */
+    TrackLayout readTrackLayout(DriveId drive);
 }
