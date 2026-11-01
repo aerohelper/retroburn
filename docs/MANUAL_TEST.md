@@ -7,7 +7,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 | | |
 |---|---|
-| Status | Draft: data disc, Burn ISO, Create ISO, erase and audio CD. Extended as each project type is built. |
+| Status | Draft: data disc, Burn ISO, Create ISO, erase, audio CD and MP3 disc. Extended as each project type is built. |
 
 Automated tests cover the models, parsers, pipelines and engines (see
 [TEST_STRATEGY.md](TEST_STRATEGY.md)). This checklist covers what needs a
@@ -84,7 +84,16 @@ Needs a blank CD-R (or a CD-RW) and a few music files in different formats
 | AUDIO-8 | Cancel during writing (CD-RW). | "Stopped"; the disc can be erased and reused. |
 | AUDIO-9 | Burn with "Even out loudness". | Tracks play at similar loudness. |
 
-## 6. USB and power
+## 6. MP3 disc
+
+| # | Steps | Expected |
+|---|---|---|
+| MP3-1 | Add a folder of albums (MP3 and FLAC, some names with accents and symbols). | Names on the disc follow car stereo mode: "01 - Title.mp3", no accents, at most two folder levels; FLAC files show "Converted". |
+| MP3-2 | Switch layouts and car stereo mode off and on. | The table follows; turning conversion off lists the FLAC files as left out. |
+| MP3-3 | Burn to the DVD+RW with playlists on. | Converting, building, writing and checking tick through; the disc opens in the file manager with the names shown, and the MP3 files are identical to the originals. |
+| MP3-4 | Play the disc in a car stereo. | Folders and tracks play in order; titles show. |
+
+## 7. USB and power
 
 Run these on the DVD+RW only.
 
@@ -95,7 +104,7 @@ Run these on the DVD+RW only.
 | USB-3 | During a burn, leave the laptop idle past its sleep timeout. | The computer stays awake; the progress view shows the sleep note (Linux: a warning if sleep could not be blocked). |
 | USB-4 | Unplug the drive during a burn. | Result "The drive was disconnected or lost power…" with details; the app stays usable; replugging shows the drive again. |
 
-## 7. Results
+## 8. Results
 
 Copy this table into the pull request or release checklist.
 
@@ -103,7 +112,7 @@ Copy this table into the pull request or release checklist.
 |---|---|---|---|---|---|
 | | | | | | |
 
-## 8. Automated real-disc test
+## 9. Automated real-disc test
 
 Separate from this checklist, `WindowsRealDiscTest` burns, verifies and
 erases the inserted rewritable disc through the engine, without the screens.

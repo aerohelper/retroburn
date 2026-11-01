@@ -7,7 +7,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 | | |
 |---|---|
-| Status | Designed for the MP3 disc milestone (M6) |
+| Status | Built in the MP3 disc milestone (M6): `CarNames`, `Mp3Encoding`, `M3uWriter` (`audio`); `Mp3Compilation`, `Mp3Layout`, `Mp3DiscPlan`, `Mp3JobFactory` (`project`); `Mp3DiscView` (`ui`); `Settings.Mp3`. Not yet burned to a disc or played in a car stereo. |
 | Packages | `io.aerohelper.retroburn.audio` (naming rules, playlists, transcoding), `.project` (compilation, layout, pipeline), `.ui` |
 | Related | [ADR-0013](../adr/0013-data-discs-burned-from-an-image.md), [LLD-data-burning.md](LLD-data-burning.md), [LLD-audio-cd.md](LLD-audio-cd.md) |
 
@@ -125,6 +125,17 @@ plan without a drive.
 | `mp3.convert` | `true` |
 | `mp3.bitrate` | `CBR_192` (`CBR_128`, `CBR_256`, `CBR_320`, `VBR_2`) |
 | `mp3.playlists` | `false` |
+
+## 7.1 Screen (`ui.Mp3DiscView`)
+
+Drive bar, size bar and "N files · h:mm:ss playing time"; disc name;
+layout, car stereo mode, conversion with bitrate, playlists (all saved as
+settings). The table shows each file's name on the disc, "Copied" or
+"Converted", and its source. Add files, Add folder (every music file
+below it, by extension, probed in the background), Clear. Notes list
+files that could not be read, files left out, the two warnings, and a
+missing MP3 encoder (which also blocks Burn when conversion is needed).
+Burn and Create ISO use the shared flows.
 
 ## 8. Testing
 

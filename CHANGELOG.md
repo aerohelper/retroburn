@@ -39,3 +39,7 @@ All notable changes to RetroBurn are recorded here. The format follows
   length against 74 or 80 minutes, optional loudness levelling, CD-Text on
   Linux (cdrskin), track-at-once on Windows (IMAPI2, no CD-Text yet), and a
   check of the burned disc's track list.
+- MP3 discs on CD, DVD or Blu-ray: MP3 files copied unchanged, other formats
+  converted with FFmpeg (128 to 320 kbps or VBR), layouts by folder, by
+  artist and album or flat, car stereo mode (safe short names, track-number
+  prefixes, two folder levels, ID3v2.3 and ID3v1 tags), and playlists.
