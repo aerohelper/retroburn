@@ -27,7 +27,9 @@ SPDX-License-Identifier: GPL-3.0-or-later
 | `ImageOptions` (record) | Volume label (more options as features arrive). |
 | `BurnEvent` (sealed) | `Progress(fraction, speed, bufferFill)` and `LogLine(text)`. |
 | `BurnListener` | Receives `BurnEvent`s. |
-| `BurnEngine` | `listDrives()`, `readMedia(drive)`. Burning, blanking and verifying are added with the data-burning milestone. |
+| `BurnEngine` | `listDrives()`, `readMedia(drive)`; from the Windows engine milestone (M3) also `burnImage(drive, image, options, listener, cancel)`, `blank(drive, mode, listener, cancel)`, `verifyImage(drive, image, listener, cancel)` and `eject(drive)`, on every platform. |
+| `BurnOptions` (record) | `closeMedia`: finalise the disc so nothing more can be added. |
+| `BlankMode` (enum) | `QUICK`, `FULL`. |
 | `DiscImageBuilder` | `buildDataImage(tree, options, target, listener, cancel)`. |
 
 Disc paths start with `/`, use `/` as separator, and must not contain empty
@@ -74,7 +76,8 @@ platform exists, and in tests.
 | Detected OS | Platform |
 |---|---|
 | Linux | `LinuxPlatform` |
-| Windows, other | `SimulatedPlatform` with folders under the user's home (`.retroburn-simulated`) — replaced by `WindowsPlatform` in the Windows engine milestone |
+| Windows | `WindowsPlatform` ([LLD-windows-platform.md](LLD-windows-platform.md)) |
+| Other | `SimulatedPlatform` with folders under the user's home (`.retroburn-simulated`) |
 
 ## 4. How to change this safely
 

@@ -193,7 +193,7 @@ disc spanning, gapless audio, transliteration of non-Latin CD-Text; macOS.
 - **Language and UI:** Java (current LTS, no preview features) and OpenJFX
   ([ADR-0003](../adr/0003-java-lts-and-javafx.md)).
 - **Runtime libraries:** OpenJFX, Apache PDFBox (+ FontBox, Commons Logging),
-  Jackson, and JNA only if chosen for the Windows bridge. Anything else needs a
+  and Jackson (JNA was considered for the Windows bridge and not needed). Anything else needs a
   register entry first; JDK built-ins are preferred.
 - **External tools run as separate processes**; RetroBurn links none of their
   code ([ADR-0004](../adr/0004-external-tools-as-separate-processes.md)).
@@ -247,7 +247,7 @@ flowchart LR
             plat["Platform layer<br/>(Linux or Windows)"]
             ui --> core --> plat
         end
-        helper["Windows IMAPI2 helper<br/>(PowerShell script, Windows only,<br/>if chosen in ADR-0005)"]
+        helper["Windows IMAPI2 helper<br/>(PowerShell script + C# source,<br/>Windows only, ADR-0005)"]
         tools["External tool processes<br/>FFmpeg, ffprobe, dvdauthor, spumux,<br/>xorriso, cdrskin, genisoimage, cdrdao*"]
         inhibit["Sleep inhibitor<br/>Linux: systemd-inhibit process<br/>Windows: execution-state request"]
         data[("App data<br/>settings, sessions,<br/>logs, work folder")]
@@ -263,7 +263,7 @@ flowchart LR
 | Container | Technology | Responsibility |
 |---|---|---|
 | RetroBurn process | Java + JavaFX, packaged with a trimmed runtime (`jlink` / `jpackage`) | Everything the user sees; orchestration of all work. |
-| Windows IMAPI2 helper | PowerShell 5.1 script shipped with the app (proposed — [ADR-0005](../adr/0005-windows-imapi2-bridge.md)) | Talks to IMAPI2 COM objects; reports progress as JSON Lines. |
+| Windows IMAPI2 helper | PowerShell 5.1 script and C# source compiled at start, shipped with the app ([ADR-0005](../adr/0005-windows-imapi2-bridge.md)) | Talks to IMAPI2 COM objects; reports progress as JSON Lines. |
 | External tool processes | Native executables | Encoding, authoring, imaging and (Linux) burning. |
 | Sleep inhibitor | OS facility | Keeps the machine awake during a burn. |
 | App data | Files in per-OS standard folders | Settings, session logs, rotating logs, temporary work folders. |
@@ -337,7 +337,7 @@ elsewhere.
 | [0002](../adr/0002-project-license-gpl-3-0-or-later.md) | License RetroBurn under GPL-3.0-or-later | Accepted |
 | [0003](../adr/0003-java-lts-and-javafx.md) | Java 25 LTS + OpenJFX 25, Maven | Accepted |
 | [0004](../adr/0004-external-tools-as-separate-processes.md) | Use external tools as child processes, never linked | Accepted |
-| [0005](../adr/0005-windows-imapi2-bridge.md) | Reach IMAPI2 through a PowerShell helper (default), JNA as alternative — confirmed by spike | Proposed |
+| [0005](../adr/0005-windows-imapi2-bridge.md) | Reach IMAPI2 through a PowerShell helper (C# compiled at start for event sinks) — confirmed by spike | Accepted |
 | [0006](../adr/0006-external-tool-provisioning-per-os.md) | Linux: distro packages; Windows: bundle tools built in our CI | Proposed |
 | [0007](../adr/0007-package-root.md) | Java package root `io.aerohelper.retroburn` | Accepted |
 | [0008](../adr/0008-hand-wired-composition-root.md) | Wire objects by hand in `AppContext`; no DI framework | Accepted |
