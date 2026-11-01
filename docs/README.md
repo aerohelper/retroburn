@@ -33,6 +33,7 @@ module) are added before each module is built.
 | [design/LLD-windows-platform.md](design/LLD-windows-platform.md) | Windows: the IMAPI2 helper, drive watching and power, with what was verified and how. |
 | [design/LLD-data-burning.md](design/LLD-data-burning.md) | Data discs, Burn ISO, Create ISO and erasing: models, checks, jobs and screens. |
 | [design/LLD-audio-cd.md](design/LLD-audio-cd.md) | Audio CDs: CD-Text rules, FFmpeg conversion, cdrskin and IMAPI2 burning. |
+| [design/LLD-mp3-disc.md](design/LLD-mp3-disc.md) | MP3 discs: car stereo naming, layouts, conversion and playlists. |
 | [DATA_MODEL.md](DATA_MODEL.md) | File formats and schema versions. |
 
 Diagrams are written in Mermaid so they render on GitHub and can be edited as
