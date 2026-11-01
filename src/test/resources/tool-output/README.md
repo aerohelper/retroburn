@@ -53,3 +53,11 @@ Notes:
   48 kHz mono FLAC tone made with FFmpeg's `sine` source and tagged `title`,
   `ARTIST`, `album` and `album_artist`. Temporary folders are shortened to
   `/tmp/`; the command lines were rebuilt from `FfmpegAudio`.
+- `cdrskin/burn-data-track-stdio.txt` comes from the GitHub Actions Ubuntu
+  runner (cdrskin 1.5.6), 2026-11-01: `CdrskinCaptureIntegrationTest` wrote a
+  20 MiB data track to a `stdio:` pseudo-drive. The Java log lines that were
+  interleaved in the CI log are removed. A `stdio:` drive lists no tracks in
+  `-toc`, so the audio TOC format is taken from `cdrskin/cdrskin.c` instead.
+- `windows-helper/read-toc-dvdplusrw.txt` is the helper's `read-toc` on the
+  owner's DVD+RW (one data track), 2026-11-01. No CD was at hand for an audio
+  TOC.

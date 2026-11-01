@@ -1,0 +1,28 @@
+$ cdrskin -v --allow_emulated_drives dev=stdio:/tmp/drive.bin /tmp/track.bin
+cdrskin 1.5.6 : limited cdrecord compatibility wrapper for libburn
+cdrskin: verbosity level : 1
+cdrskin: NOTE : greying out all drives besides given dev='stdio:/tmp/drive.bin'
+cdrskin: scanning for devices ...
+cdrskin: ... scanning for devices done
+cdrskin: beginning to burn disc
+cdrskin: status 1 burn_disc_blank "The drive holds a blank disc"
+Current: stdio file
+Track 01: data    20 MB        
+Total size:       20 MB (02:18.53) = 10240 sectors
+Lout start:       20 MB (02:20/53) = 10390 sectors
+Starting to write CD/DVD at speed MAX in real TAO mode for single session.
+Last chance to quit, starting real write in   0 seconds. Operation starts.
+Waiting for reader process to fill input buffer ... input buffer ready.
+
+                                                                              
+
+Track 01:   10 of   20 MB written (fifo 100%) [buf  50%]  409.5x.
+Track 01:   16 of   20 MB written (fifo 100%) [buf  50%]  193.6x.
+Track 01:   20 of   20 MB written (fifo 100%) [buf  50%]  25.1x.
+Track 01: Total bytes read/written: 20971520/20971520 (10240 sectors).
+Writing  time:  0.181s
+Cdrskin: fifo had 10240 puts and 10240 gets.
+Cdrskin: fifo was 0 times empty and 3 times full, min fill was 99%.
+Min drive buffer fill was 50%
+cdrskin: burning done
+[exit 0]
