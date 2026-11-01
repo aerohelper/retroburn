@@ -62,6 +62,7 @@ public final class HomeView {
                 () -> navigation.openProject(new DataDiscView(services, navigation, DataDiscView.Mode.BURN));
             case "home.card.burnIso" -> () -> navigation.openProject(new BurnIsoView(services, navigation));
             case "home.card.audioCd" -> () -> navigation.openProject(new AudioCdView(services, navigation));
+            case "home.card.mp3Disc" -> () -> navigation.openProject(new Mp3DiscView(services, navigation));
             case "home.card.createIso" ->
                 () -> navigation.openProject(new DataDiscView(services, navigation, DataDiscView.Mode.CREATE_ISO));
             default -> null;
