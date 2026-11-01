@@ -3,12 +3,12 @@ SPDX-FileCopyrightText: 2026 Chetan and contributors
 SPDX-License-Identifier: GPL-3.0-or-later
 -->
 
-# LLD — Data burning (`project`, `pipeline` steps, shared burn screens)
+# LLD — Data burning (`project`, shared burn screens)
 
 | | |
 |---|---|
 | Status | Designed for the data-burning UI milestone (M4); part 1 (models, checks, steps) first, part 2 (screens) after |
-| Packages | `io.aerohelper.retroburn.project`, `.pipeline`, `.settings`, `.ui`, `.app` |
+| Packages | `io.aerohelper.retroburn.project` (models, checks, steps, job), `.settings`, `.ui`, `.app` |
 | Related | [ADR-0013](../adr/0013-data-discs-burned-from-an-image.md), [HLD §4.3, §5, §6](../architecture/HLD.md), [LLD-engine-and-platform.md](LLD-engine-and-platform.md), [LLD-pipeline.md](LLD-pipeline.md), [UX_SPEC.md](../ux/UX_SPEC.md) |
 
 ## 1. Scope
@@ -34,11 +34,11 @@ entry).
 | `VolumeLabel` (record) | A label that reads the same on Linux and Windows (section 2.1). `VolumeLabel.sanitize(text)` never fails. |
 | `DataCompilation` | The items of a data disc: an ordered list of `DiscEntry`s at the disc's root, one per file or folder added. Adding a name that is already used gets ` (2)`, ` (3)`… before the extension. Implements `DiscTree`. Immutable; every change returns a new one. |
 | `TreeSizeScanner` | Walks the sources in the background and returns a `TreeSize` (bytes, files, folders, unreadable paths), checking a `CancelToken` every entry. It never holds the file list, so 100,000 files cost no memory beyond the walk. Symbolic links are counted as the link itself, not followed. |
-| `ImageSizeEstimate` | Bytes the image will take: every file rounded up to 2048-byte blocks, 2048 bytes per folder and file entry for directory records (ISO 9660, Joliet and UDF each have one), plus a fixed 2 MiB for volume descriptors, path tables and the UDF structures (measured: 1.1 MiB on Windows, 0.3 MiB on Linux; the margin keeps the estimate on the safe side). The exact size is checked again once the image exists. |
+| `ImageSizeEstimate` | Bytes the image will take: every file rounded up to 2048-byte blocks, 2560 bytes per folder and file entry (a 2048-byte UDF file entry plus ISO 9660 and Joliet directory records), plus a fixed 2 MiB for volume descriptors, path tables and the UDF structures (measured with one file: 1.1 MiB on Windows, 0.4 MiB on Linux; the margin keeps the estimate on the safe side). The exact size is checked again once the image exists. |
 | `DiscCapacity` | Bytes a burn can use on the inserted disc: `freeBytes` when blank; `freeBytes + usedBytes` for a rewritable disc with data, which will be overwritten or erased. |
 | `BurnPlan` (record) | What the confirmation dialog shows and the job needs: project kind, drive, media, bytes to write, whether the disc will be erased first, verify on/off, the warnings and the blockers. |
 | `BurnPreCheck` | Turns (project, drive, media, settings, power, tools) into a `BurnPlan`; section 3. Pure logic, fully unit-tested. |
-| `BurnJobFactory` | Builds the `Pipeline` for a plan; section 4. |
+| `BurnJobFactory` | Builds the `Pipeline` for a plan from the steps in `BurnSteps` (package-private); section 4. |
 
 ### 2.1 Volume label rules
 
@@ -123,8 +123,8 @@ Result kinds: succeeded, succeeded without verify, verify failed (the
 
 | Key | Type | Default | Meaning |
 |---|---|---|---|
-| `verifyAfterBurn` | boolean | `true` | Add the verify step; the confirmation dialog can change it for one burn. |
-| `showUsbTip` | boolean | `true` | Show the USB tip; "Don't show again" sets it to `false`. |
+| `burn.verify` | boolean | `true` | Add the verify step; the confirmation dialog can change it for one burn. |
+| `burn.showUsbTip` | boolean | `true` | Show the USB tip; "Don't show again" sets it to `false`. |
 
 Both are added to `docs/DATA_MODEL.md`'s `settings.properties` table; the
 schema version stays 1 (new keys with defaults are compatible).
