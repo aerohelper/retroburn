@@ -556,6 +556,9 @@ namespace RetroBurn.Helper
                     "The image needs " + imageSectors + " sectors; the disc has " + freeSectors + " free");
             }
             data.ForceMediaToBeClosed = closeMedia;
+            // A written DVD+RW, DVD-RAM or BD-RE is overwritten, as the engine contract says; without
+            // this IMAPI2 refuses with 0xC0AA0405 (verified). The UI asks the user before burning.
+            data.ForceOverwrite = true;
             try
             {
                 recorder.AcquireExclusiveAccess(true, "RetroBurn");
