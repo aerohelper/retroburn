@@ -18,6 +18,7 @@ interleaved as they arrived.
 | `xorriso/` | Ubuntu 24.04.5 (Docker `ubuntu:24.04`), 2026-10-31 | xorriso 1.5.6 |
 | `cdrskin/`, `genisoimage/`, `ffmpeg/`, `dvdauthor/` | same | cdrskin 1.5.6, genisoimage 1.1.11, FFmpeg 6.1.1-3ubuntu5, dvdauthor/spumux 0.7.2 |
 | `systemd-inhibit/` | Ubuntu 22.04.3 under WSL 2, normal user (not a local desktop session), 2026-10-31 | systemd 249 |
+| `windows-helper/` | Windows 11 Pro 10.0.26200, standard user, USB drive "Slimtype eBAU108", 2026-11-01 | Windows PowerShell 5.1.26100, .NET Framework 4.8 (CLR 4.0.30319) |
 
 Notes:
 
@@ -29,3 +30,8 @@ Notes:
 - `xorriso/devices-none-found.txt` and the image captures ran without any
   optical drive. Output with real drives will be added from the owner's
   hardware.
+- `windows-helper/` files hold the helper's stdout only (JSON Lines), without
+  a command line: the request is named by the file name and the operation
+  tables in `docs/design/LLD-windows-platform.md`. The drive's serial number
+  inside its id is replaced with zeros and the Windows user name in paths with
+  `user`. `read-media-no-media.txt` was captured with the tray open.

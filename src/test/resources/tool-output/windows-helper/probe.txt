@@ -1,0 +1,2 @@
+{"event":"ready","powershell":"5.1.26100.9711","clr":"4.0.30319.42000","languageMode":"FullLanguage"}
+{"event":"result"}

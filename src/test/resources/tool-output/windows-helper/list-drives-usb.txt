@@ -1,0 +1,2 @@
+{"event":"drive","id":"\\\\?\\usbstor#cdrom\u0026ven_slimtype\u0026prod_ebau108__7_l\u0026rev_yl0m#00_000000000000\u00260#{53f56308-b6bf-11d0-94f2-00a0c91efb8b}","vendor":"Slimtype","product":"eBAU108  7 L    ","revision":"YL0M","volume":"D:","bus":"usb","accessible":true}
+{"event":"result"}

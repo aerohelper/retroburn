@@ -1,0 +1,2 @@
+{"event":"power","source":"mains"}
+{"event":"result"}

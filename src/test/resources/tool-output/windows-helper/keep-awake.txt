@@ -1,0 +1,3 @@
+{"event":"log","text":"Keeping the computer awake: Burning a disc"}
+{"event":"ready","powershell":"","clr":"4.0.30319.42000","languageMode":""}
+{"event":"result"}
