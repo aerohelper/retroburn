@@ -1,0 +1,11 @@
+{"event":"progress","stage":"initialising","done":0,"total":33344,"elapsedSeconds":0,"remainingSeconds":45}
+{"event":"progress","stage":"calibrating","done":0,"total":33344,"elapsedSeconds":0,"remainingSeconds":45}
+{"event":"progress","stage":"writing","done":0,"total":33344,"elapsedSeconds":10,"remainingSeconds":35}
+{"event":"progress","stage":"writing","done":223,"total":33344,"elapsedSeconds":10,"remainingSeconds":35}
+{"event":"progress","stage":"writing","done":223,"total":33344,"elapsedSeconds":11,"remainingSeconds":34}
+{"event":"progress","stage":"writing","done":223,"total":33344,"elapsedSeconds":11,"remainingSeconds":34}
+{"event":"progress","stage":"writing","done":991,"total":33344,"elapsedSeconds":12,"remainingSeconds":33}
+{"event":"progress","stage":"writing","done":2015,"total":33344,"elapsedSeconds":12,"remainingSeconds":33}
+{"event":"progress","stage":"writing","done":2079,"total":33344,"elapsedSeconds":12,"remainingSeconds":33}
+{"event":"progress","stage":"finalising","done":2079,"total":33344,"elapsedSeconds":12,"remainingSeconds":33}
+{"event":"error","code":"CANCELLED","message":"The request was cancelled.","hresult":"0xC0AA0002"}

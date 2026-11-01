@@ -63,6 +63,16 @@ class Imapi2MappingTest {
     }
 
     @Test
+    void aBurnIsOnlyDoneWhenTheHelperSaysSo() {
+        assertEquals(0.0, Imapi2Mapping.burnFraction(new HelperEvent.Progress("calibrating", 0, 100)));
+        assertEquals(0.25, Imapi2Mapping.burnFraction(new HelperEvent.Progress("writing", 25, 100)));
+        assertEquals(0.99, Imapi2Mapping.burnFraction(new HelperEvent.Progress("writing", 100, 100)));
+        assertEquals(0.99, Imapi2Mapping.burnFraction(new HelperEvent.Progress("finalising", 99, 100)));
+        assertEquals(0.99, Imapi2Mapping.burnFraction(new HelperEvent.Progress("completed", 99, 100)));
+        assertEquals(0.0, Imapi2Mapping.burnFraction(new HelperEvent.Progress("action-9", 50, 100)));
+    }
+
+    @Test
     void anEmptyDriveHasNoMedia() {
         assertEquals(MediaInfo.noMedia(), Imapi2Mapping.mediaInfo(new HelperEvent.Media(false, 0, 0, 0, 0)));
     }

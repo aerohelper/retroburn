@@ -35,3 +35,9 @@ Notes:
   tables in `docs/design/LLD-windows-platform.md`. The drive's serial number
   inside its id is replaced with zeros and the Windows user name in paths with
   `user`. `read-media-no-media.txt` was captured with the tray open.
+- The `burn-image-*`, `verify-image-*`, `blank-*` and `read-media-dvdplusrw`
+  captures used a DVD+RW and a 68 MB image (one random 64 MiB file).
+  `burn-image-without-force-overwrite.txt` is the helper before it set
+  `ForceOverwrite`, on a written disc; `verify-image-mismatch.txt` compared
+  that image with the disc's older content. `burn-image-cancelled.txt` closed
+  the helper's input after a few writing updates.

@@ -4,11 +4,17 @@ package io.aerohelper.retroburn.platform.simulated;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.aerohelper.retroburn.common.CancelToken;
 import io.aerohelper.retroburn.common.OperatingSystem;
+import io.aerohelper.retroburn.common.OperationCancelledException;
+import io.aerohelper.retroburn.common.RetroBurnException;
+import io.aerohelper.retroburn.engine.BlankMode;
+import io.aerohelper.retroburn.engine.BurnEngine;
 import io.aerohelper.retroburn.engine.BurnEvent;
+import io.aerohelper.retroburn.engine.BurnOptions;
 import io.aerohelper.retroburn.engine.ConnectionType;
 import io.aerohelper.retroburn.engine.DiscEntry;
 import io.aerohelper.retroburn.engine.DiscTree;
@@ -17,6 +23,7 @@ import io.aerohelper.retroburn.engine.DriveInfo;
 import io.aerohelper.retroburn.engine.ImageOptions;
 import io.aerohelper.retroburn.engine.MediaInfo;
 import io.aerohelper.retroburn.engine.MediaKind;
+import io.aerohelper.retroburn.engine.MediaState;
 import io.aerohelper.retroburn.platform.AppPaths;
 import io.aerohelper.retroburn.platform.PowerStatus.PowerSource;
 import io.aerohelper.retroburn.tools.ExternalTool;
@@ -86,6 +93,42 @@ class SimulatedPlatformTest {
 
         assertEquals(BurnEvent.Progress.of(1.0), events.getLast());
         assertTrue(Files.readString(target).contains("/a.txt"));
+    }
+
+    @Test
+    void burnVerifyAndBlankChangeThePretendDisc() throws IOException {
+        BurnEngine engine = platform(OperatingSystem.LINUX).burnEngine();
+        DriveId drive = engine.listDrives().getFirst().id();
+        Path image = Files.write(folder.resolve("image.iso"), new byte[4096]);
+        List<BurnEvent> events = new ArrayList<>();
+
+        engine.burnImage(drive, image, new BurnOptions(true), events::add, new CancelToken());
+        assertEquals(MediaState.APPENDABLE, engine.readMedia(drive).state());
+        assertEquals(4096, engine.readMedia(drive).usedBytes());
+        assertEquals(BurnEvent.Progress.of(1.0), events.getLast());
+        engine.verifyImage(drive, image, events::add, new CancelToken());
+
+        engine.blank(drive, BlankMode.QUICK, events::add, new CancelToken());
+        assertEquals(MediaState.BLANK, engine.readMedia(drive).state());
+        RetroBurnException mismatch = assertThrows(
+                RetroBurnException.class, () -> engine.verifyImage(drive, image, events::add, new CancelToken()));
+        assertEquals("error.verifyMismatch", mismatch.userMessage().key());
+        engine.eject(drive);
+    }
+
+    @Test
+    void aCancelledBurnLeavesTheDiscBlank() throws IOException {
+        BurnEngine engine = platform(OperatingSystem.LINUX).burnEngine();
+        DriveId drive = engine.listDrives().getFirst().id();
+        Path image = Files.write(folder.resolve("image.iso"), new byte[4096]);
+        CancelToken cancel = new CancelToken();
+        cancel.cancel();
+
+        assertThrows(
+                OperationCancelledException.class,
+                () -> engine.burnImage(drive, image, new BurnOptions(false), event -> {}, cancel));
+
+        assertEquals(MediaState.BLANK, engine.readMedia(drive).state());
     }
 
     @Test

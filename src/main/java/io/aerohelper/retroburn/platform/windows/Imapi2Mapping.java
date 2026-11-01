@@ -84,6 +84,21 @@ final class Imapi2Mapping {
         };
     }
 
+    /** The highest fraction shown before the helper reports success. */
+    static final double BEFORE_DONE = 0.99;
+
+    /**
+     * Progress of a burn as a whole: the written share while writing, nothing before, and {@link
+     * #BEFORE_DONE} while the drive finalises or checks its work. See the LLD section 5.7.
+     */
+    static double burnFraction(HelperEvent.Progress progress) {
+        return switch (progress.stage()) {
+            case "writing" -> Math.min(fraction(progress), BEFORE_DONE);
+            case "finalising", "verifying", "completed" -> BEFORE_DONE;
+            default -> 0.0;
+        };
+    }
+
     /** Progress of a stage as a fraction from 0 to 1; 0 when the total is unknown. */
     static double fraction(HelperEvent.Progress progress) {
         if (progress.total() <= 0) {

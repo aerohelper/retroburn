@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 package io.aerohelper.retroburn.platform.linux;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -10,11 +11,16 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import io.aerohelper.retroburn.common.CancelToken;
 import io.aerohelper.retroburn.common.OperationCancelledException;
+import io.aerohelper.retroburn.common.RetroBurnException;
 import io.aerohelper.retroburn.common.ToolFailedException;
+import io.aerohelper.retroburn.engine.BlankMode;
 import io.aerohelper.retroburn.engine.BurnEvent;
+import io.aerohelper.retroburn.engine.BurnOptions;
 import io.aerohelper.retroburn.engine.DiscEntry;
 import io.aerohelper.retroburn.engine.DiscTree;
+import io.aerohelper.retroburn.engine.DriveId;
 import io.aerohelper.retroburn.engine.ImageOptions;
+import io.aerohelper.retroburn.engine.MediaState;
 import io.aerohelper.retroburn.tools.ExternalTool;
 import io.aerohelper.retroburn.tools.PathSearchToolLocator;
 import io.aerohelper.retroburn.tools.ProcessRequest;
@@ -26,8 +32,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -46,7 +55,8 @@ import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 
 /**
- * Builds real ISO images with the installed GNU xorriso and reads them back. Runs on Linux when
+ * Builds real ISO images with the installed GNU xorriso and reads them back; burns, verifies and
+ * blanks a file standing in for a drive. Runs on Linux when
  * xorriso is installed (the Linux CI runner installs it).
  */
 @EnabledOnOs(OS.LINUX)
@@ -149,9 +159,101 @@ class XorrisoIntegrationTest {
 
     @Test
     void listingDrivesWorksWithOrWithoutDrives() {
-        XorrisoEngine engine = new XorrisoEngine(runner, locator, new SysfsOpticalDrives(Path.of("/sys/block")));
+        engine().listDrives().forEach(drive -> assertTrue(drive.id().value().startsWith("/dev/")));
+    }
 
-        engine.listDrives().forEach(drive -> assertTrue(drive.id().value().startsWith("/dev/")));
+    // A regular file given as "stdio:<path>" is a pseudo-drive that xorriso treats as overwritable
+    // media, like a DVD+RW, so writing, reading back and blanking are tested without hardware.
+
+    @Test
+    void burnsVerifiesAndBlanksAPseudoDrive() throws IOException {
+        Path image = smallImage("disc = 1.iso");
+        Path driveFile = folder.resolve("drive.bin");
+        DriveId drive = new DriveId("stdio:" + driveFile);
+        XorrisoEngine engine = engine();
+
+        List<BurnEvent> burnEvents = Collections.synchronizedList(new ArrayList<>());
+        engine.burnImage(drive, image, new BurnOptions(true), burnEvents::add, new CancelToken());
+        printForCapture("burn-image", burnEvents);
+        assertEquals(BurnEvent.Progress.of(1.0), burnEvents.getLast());
+        assertArrayEquals(Files.readAllBytes(image), prefix(driveFile, Files.size(image)));
+        assertEquals(MediaState.APPENDABLE, engine.readMedia(drive).state());
+
+        List<BurnEvent> verifyEvents = Collections.synchronizedList(new ArrayList<>());
+        engine.verifyImage(drive, image, verifyEvents::add, new CancelToken());
+        printForCapture("verify-image", verifyEvents);
+        assertEquals(BurnEvent.Progress.of(1.0), verifyEvents.getLast());
+
+        List<BurnEvent> blankEvents = Collections.synchronizedList(new ArrayList<>());
+        engine.blank(drive, BlankMode.QUICK, blankEvents::add, new CancelToken());
+        printForCapture("blank", blankEvents);
+        assertEquals(MediaState.BLANK, engine.readMedia(drive).state());
+        RetroBurnException mismatch = assertThrows(
+                RetroBurnException.class, () -> engine.verifyImage(drive, image, event -> {}, new CancelToken()));
+        assertEquals("error.verifyMismatch", mismatch.userMessage().key());
+
+        // Already blank: a full blank has nothing to do.
+        engine.blank(drive, BlankMode.FULL, event -> {}, new CancelToken());
+        engine.eject(drive);
+    }
+
+    @Test
+    void verifyNamesTheFirstDifferentByte() throws IOException {
+        Path image = smallImage("disc.iso");
+        Path driveFile = folder.resolve("drive.bin");
+        DriveId drive = new DriveId("stdio:" + driveFile);
+        XorrisoEngine engine = engine();
+        engine.burnImage(drive, image, new BurnOptions(true), event -> {}, new CancelToken());
+        try (FileChannel channel = FileChannel.open(driveFile, StandardOpenOption.READ, StandardOpenOption.WRITE)) {
+            ByteBuffer one = ByteBuffer.allocate(1);
+            channel.read(one, 1_000_000);
+            one.flip();
+            one.put(0, (byte) (one.get(0) ^ 0xFF));
+            channel.write(one, 1_000_000);
+        }
+
+        RetroBurnException error = assertThrows(
+                RetroBurnException.class, () -> engine.verifyImage(drive, image, event -> {}, new CancelToken()));
+
+        assertEquals("error.verifyMismatch", error.userMessage().key());
+        assertTrue(error.technicalDetail().contains("byte 1000000"), error.technicalDetail());
+    }
+
+    @Test
+    void cancellingABurnStopsXorriso() throws IOException {
+        Path image = smallImage("disc.iso");
+        DriveId drive = new DriveId("stdio:" + folder.resolve("drive.bin"));
+        CancelToken cancel = new CancelToken();
+        cancel.cancel();
+
+        assertThrows(
+                OperationCancelledException.class,
+                () -> engine().burnImage(drive, image, new BurnOptions(true), event -> {}, cancel));
+    }
+
+    /** Prints what an operation reported, so CI logs give real output for the fixtures. */
+    private static void printForCapture(String operation, List<BurnEvent> events) {
+        synchronized (events) {
+            events.forEach(event -> System.out.println("[xorriso " + operation + "] " + event));
+        }
+    }
+
+    private Path smallImage(String name) throws IOException {
+        Path file = folder.resolve("payload.bin");
+        writeRandom(file, 20L * 1024 * 1024);
+        Path image = folder.resolve(name);
+        build(List.of(new DiscEntry("/payload.bin", file)), image);
+        return image;
+    }
+
+    private static byte[] prefix(Path file, long length) throws IOException {
+        try (InputStream input = Files.newInputStream(file)) {
+            return input.readNBytes((int) length);
+        }
+    }
+
+    private XorrisoEngine engine() {
+        return new XorrisoEngine(runner, locator, new SysfsOpticalDrives(Path.of("/sys/block")));
     }
 
     private void build(List<DiscEntry> entries, Path image) {

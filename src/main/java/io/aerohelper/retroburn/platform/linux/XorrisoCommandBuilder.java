@@ -69,6 +69,88 @@ final class XorrisoCommandBuilder {
         return arguments;
     }
 
+    /**
+     * Writes an image file to a drive as one data track: the manual's "Burn an existing ISO image
+     * file to medium" recipe, without its implicit blanking.
+     *
+     * @param closeMedia finalise the disc; otherwise leave it appendable where the medium allows
+     */
+    static List<String> burnImage(DriveId drive, Path image, boolean closeMedia) {
+        List<String> arguments = commonPrefix();
+        // cdrecord emulation: "a single data track per session to be written to blank, overwritable,
+        // or appendable media"; a track source makes it commit automatically.
+        arguments.add("-as");
+        arguments.add("cdrecord");
+        // Verbose, so "Show details" has the drive's own messages.
+        arguments.add("-v");
+        // "dev= must be given as xorriso device address": /dev/srN, or stdio:<file> in tests.
+        arguments.add("dev=" + drive.value());
+        if (!closeMedia) {
+            // "The medium gets closed if closing is applicable and not option -multi is present."
+            arguments.add("-multi");
+        }
+        // The track source, always absolute so it can never look like an option.
+        arguments.add(image.toAbsolutePath().toString());
+        // Ends the cdrecord option list.
+        arguments.add("--");
+        return arguments;
+    }
+
+    /**
+     * Makes a rewritable disc ready for writing from scratch.
+     *
+     * @param full erase thoroughly ({@code -blank all}) rather than quickly ({@code -blank as_needed})
+     */
+    static List<String> blank(DriveId drive, boolean full) {
+        List<String> arguments = commonPrefix();
+        // -blank "affects only the -outdev", which also avoids loading the disc's ISO tree.
+        arguments.add("-outdev");
+        arguments.add(drive.value());
+        // as_needed: blanks used CD-RW, DVD-RW and overwritable media, formats new DVD-RAM and BD-RE,
+        // and leaves blank media alone. all: "might work more thoroughly and need more time".
+        arguments.add("-blank");
+        arguments.add(full ? "all" : "as_needed");
+        return arguments;
+    }
+
+    /**
+     * Copies the first {@code blocks} 2048-byte blocks of the disc to standard output: the manual's
+     * {@code -check_media data_to=- use=outdev what=disc} recipe.
+     */
+    static List<String> readBack(DriveId drive, long blocks) {
+        if (blocks < 1) {
+            throw new IllegalArgumentException("Nothing to read back: " + blocks + " blocks");
+        }
+        List<String> arguments = commonPrefix();
+        arguments.add("-outdev");
+        arguments.add(drive.value());
+        arguments.add("-check_media");
+        // Read from the output drive, which "avoids loading the ISO image tree from media".
+        arguments.add("use=outdev");
+        // "scans the payload range of a medium without respecting track gaps".
+        arguments.add("what=disc");
+        // Exactly the blocks the image occupies.
+        arguments.add("min_lba=0");
+        arguments.add("max_lba=" + (blocks - 1));
+        // Unreadable blocks raise a FAILURE at the end, so a bad disc gives a non-zero exit.
+        arguments.add("event=FAILURE");
+        // The blocks go to stdout; result messages are redirected to the info channel (stderr).
+        arguments.add("data_to=-");
+        // Ends the -check_media option list.
+        arguments.add("--");
+        return arguments;
+    }
+
+    /** Opens the tray: {@code -outdev <drive> -eject out}. Does nothing for {@code stdio:} files. */
+    static List<String> eject(DriveId drive) {
+        List<String> arguments = commonPrefix();
+        arguments.add("-outdev");
+        arguments.add(drive.value());
+        arguments.add("-eject");
+        arguments.add("out");
+        return arguments;
+    }
+
     /** Options that make every run fail clearly and report progress. */
     private static List<String> commonPrefix() {
         List<String> arguments = new ArrayList<>();
