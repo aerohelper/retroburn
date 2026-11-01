@@ -22,6 +22,7 @@ module) are added before each module is built.
 | [ux/UX_SPEC.md](ux/UX_SPEC.md) | Screens, flows, wording, theme tokens and accessibility rules. |
 | [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md) | Set up, build, run and test on Linux and Windows. |
 | [TEST_STRATEGY.md](TEST_STRATEGY.md) | Test levels, fixtures policy, coverage and hardware matrix. |
+| [MANUAL_TEST.md](MANUAL_TEST.md) | Manual checklist for the screens, real discs and USB behaviour on both systems. |
 | [RELEASE.md](RELEASE.md) | CI, packaging per OS, bundled-binary compliance, release steps. |
 | [design/LLD-app.md](design/LLD-app.md) | Application shell: start-up, composition root, home screen, platform selection. |
 | [design/LLD-credits.md](design/LLD-credits.md) | Third-party component register and the About / Licenses screens. |
