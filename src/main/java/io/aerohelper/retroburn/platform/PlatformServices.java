@@ -3,6 +3,7 @@
 package io.aerohelper.retroburn.platform;
 
 import io.aerohelper.retroburn.common.OperatingSystem;
+import io.aerohelper.retroburn.engine.AudioCdEngine;
 import io.aerohelper.retroburn.engine.BurnEngine;
 import io.aerohelper.retroburn.engine.DiscImageBuilder;
 import io.aerohelper.retroburn.tools.Feature;
@@ -35,6 +36,9 @@ public interface PlatformServices {
     Map<Feature, List<Requirement>> featureRequirements();
 
     BurnEngine burnEngine();
+
+    /** Burns audio CDs; usable only when the audio CD feature's tools are present. */
+    AudioCdEngine audioCdEngine();
 
     DiscImageBuilder discImageBuilder();
 
