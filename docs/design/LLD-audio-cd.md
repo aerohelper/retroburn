@@ -39,7 +39,7 @@ The Audio CD card becomes usable on Linux and Windows:
 | Most tracks | 99 |
 | 74-minute and 80-minute CD-R | 333,000 and 360,000 sectors |
 
-`CdTime` turns sectors into `mm:ss` for the screen and `mm:ss:ff` for TOC
+`CdAudio` also turns sectors into `mm:ss` for the screen and `mm:ss:ff` for TOC
 files.
 
 ## 3. Models
@@ -281,9 +281,9 @@ folder on failure).
 
 ## 10. Testing
 
-- Unit: `CdTextRules` (Latin-1 kept, accents stripped, Devanagari needs
+- Unit: `CdTextRules` (Latin-1 kept, other accents stripped, Devanagari needs
   Latin, punctuation, control characters, length), `CdTextBudget` at the
-  edge, `CdTime`, `FfprobeJsonParser` on captured output, `CdWavWriter`
+  edge, `CdAudio`, `FfprobeJsonParser` on captured output, `CdWavWriter`
   (header bytes, padding), sheet and TOC against golden files,
   `AudioCompilation` defaults from tags, the pre-checks.
 - Integration (Linux CI, real tools): synthetic tones with tags (FFmpeg
