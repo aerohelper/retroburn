@@ -43,8 +43,15 @@ Added in the Windows engine milestone (M3), on every platform at once.
 |---|---|
 | `burnImage` | Writes the image file to the disc as one data track from the start of the writable area. The caller has already checked that the medium is writable and large enough; the engine still fails clearly if not. The disc is not blanked first: a used CD-RW or DVD-RW needs `blank` beforehand, while DVD+RW, DVD-RAM and BD-RE are simply overwritten. Progress is the fraction of the image written, held at 0.99 until the drive has finished closing the track. |
 | `blank` | Makes a rewritable disc ready for writing from scratch. A blank disc is left alone. Windows cannot cancel an erase once it has started, so cancelling is only honoured before it starts there; the UI offers no cancel button while blanking. No progress is reported until it is done (drives' estimates are meaningless), so the UI shows an erase without a percentage. |
-| `verifyImage` | Reads back as many bytes as the image has, starting at the beginning of the disc, and compares them byte for byte. A difference, or a disc shorter than the image, fails with `error.verifyMismatch`; the first differing byte offset is in the technical detail. Progress is the fraction compared. |
+| `verifyImage` | Reads back as many bytes as the image has, starting at the beginning of the disc, and compares them byte for byte. A difference, or a disc shorter than the image, fails with `error.verifyMismatch`; the first differing byte offset is in the technical detail. If nothing at all can be read, it fails with the platform's read error instead. Progress is the fraction compared. |
 | `eject` | Opens the tray, or does nothing where that is impossible (a file pretending to be a drive in tests). |
+
+Differences from the HLD sketch (§4.2), decided here: `burnImage` takes a
+`Path` (no `ImageSource` type is needed yet); `verifyImage` returns nothing
+and throws on a mismatch instead of returning a `VerifyReport`, because the
+only outcome the UI acts on is "matches" or "does not, at byte N"; `eject` is
+added. `burnTree` (writing a `DiscTree` without an image file first) comes
+with the data disc milestone (M4).
 
 Every long operation honours its `CancelToken` within 5 seconds, with two
 exceptions: a started Windows erase cannot be cancelled, and a burn ends only

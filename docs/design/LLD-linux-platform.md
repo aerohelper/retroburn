@@ -116,9 +116,15 @@ without the implicit blanking: RetroBurn blanks only when the user asked to.
 | `<image>` | The track source. Always an absolute path. |
 | `--` | Ends the cdrecord option list. |
 
-Progress: the `Writing:` lines above (the emulation writes through the same
-code as `-commit`). *To be confirmed by the integration test, which burns to
-a `stdio:` pseudo-drive in CI, and with the owner's drive.* Idle timeout 10
+Progress: the emulation uses the manual's "cdrecord" pacifier format
+(`-pacifier`: "X of Y MB written (fifo nn%) [buf mmm%]"), not the `Writing:`
+lines. Captured on a `stdio:` pseudo-drive in CI (`burn-image-stdio.txt`):
+`xorriso : UPDATE :    0 of   20 MB written [buf  50%]`, without the fifo
+part. The fraction is X / Y, so it moves in 1 MB steps; it is held at 0.99
+until xorriso exits. Speed is not parsed: no capture with a real drive shows
+its format yet. Success ends with `Writing to '<drive>' completed
+successfully.`, then xorriso re-assesses the drive and prints the new media
+state (`is written , is appendable` on the pseudo-drive). Idle timeout 10
 minutes, because drives may stay silent while closing the track.
 
 ### Blank
@@ -139,6 +145,9 @@ non-zero exit. Idle timeout 10 minutes.
 
 Regular files are "handled as overwritable media", so the integration test
 blanks a `stdio:` file holding an image and expects `-toc` to report it blank.
+Verified in CI (`blank-as-needed-stdio.txt`): `as_needed` applied `Beginning
+to blank medium in mode 'fast'.`, then `Blanking done`, and the re-assessed
+status was `is blank`.
 
 ### Verify
 
@@ -161,6 +170,14 @@ LLD-tools) into an `ImageComparison`, which compares them with the image as
 they arrive: no temporary copy of the disc is written. The first differing
 offset, or a disc that ends early, gives `error.verifyMismatch`. Progress is
 bytes compared / image size. Idle timeout 2 minutes.
+
+Verified in CI on a `stdio:` pseudo-drive (`check-media-read-back-stdio.txt`):
+stdout carried exactly the image's blocks and nothing else, and the burned
+image matched byte for byte; stderr reported `10464 of 10464 blocks read`
+and a `Media region` table. With one byte changed on the pseudo-drive, the
+comparison stopped and named that byte. A disc that is shorter than the
+image, and unreadable blocks on real media, are still to be seen on the
+owner's drive.
 
 ### Eject
 
