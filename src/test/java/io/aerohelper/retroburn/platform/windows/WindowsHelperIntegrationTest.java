@@ -169,6 +169,10 @@ class WindowsHelperIntegrationTest {
         writeRandom(big, 400L * 1024 * 1024);
         Path image = folder.resolve("out.iso");
         CancelToken cancel = new CancelToken();
+        // Cancelled up front: the helper's input is closed while PowerShell is still starting, so the
+        // helper must notice at its first checkpoint. Cancelling on a progress event raced fast disks,
+        // which finished the image before the request arrived.
+        cancel.cancel();
 
         assertThrows(
                 OperationCancelledException.class,
@@ -177,11 +181,7 @@ class WindowsHelperIntegrationTest {
                                 DiscTree.of(List.of(new DiscEntry("/big.bin", big))),
                                 new ImageOptions("CANCELLED"),
                                 image,
-                                event -> {
-                                    if (event instanceof BurnEvent.Progress progress && progress.fraction() > 0) {
-                                        cancel.cancel();
-                                    }
-                                },
+                                event -> {},
                                 cancel));
 
         assertFalse(Files.exists(image));
