@@ -50,8 +50,9 @@ Differences from the HLD sketch (§4.2), decided here: `burnImage` takes a
 `Path` (no `ImageSource` type is needed yet); `verifyImage` returns nothing
 and throws on a mismatch instead of returning a `VerifyReport`, because the
 only outcome the UI acts on is "matches" or "does not, at byte N"; `eject` is
-added. `burnTree` (writing a `DiscTree` without an image file first) comes
-with the data disc milestone (M4).
+added. `burnTree` (writing a `DiscTree` without an image file first) is not
+needed: data discs are burned from an image ([ADR-0013](../adr/0013-data-discs-burned-from-an-image.md),
+proposed).
 
 Every long operation honours its `CancelToken` within 5 seconds, with two
 exceptions: a started Windows erase cannot be cancelled, and a burn ends only

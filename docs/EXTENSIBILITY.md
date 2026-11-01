@@ -30,7 +30,7 @@ line in `AppContext` that selects it.
 |---|---|
 | `AppPaths` | The OS's conventional folders for settings, data, logs, cache, videos. |
 | `ToolLocator` | Where FFmpeg, ffprobe, dvdauthor, spumux live (bundled or system). |
-| `BurnEngine` | Drive listing, media info, burn image, blank, verify, eject; burn tree from the data disc milestone. |
+| `BurnEngine` | Drive listing, media info, burn image, blank, verify, eject. (Data discs are burned from an image, ADR-0013.) |
 | `DiscImageBuilder` | Data ISO and DVD-Video image (ISO 9660 + UDF 1.02). |
 | `AudioCdEngine` (optional) | Return empty if unsupported; Audio CD is then disabled with an explanation. |
 | `DriveWatcher` | Hot-plug; must pause during burns. |

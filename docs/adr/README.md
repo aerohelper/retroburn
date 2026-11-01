@@ -24,6 +24,7 @@ record that supersedes the old one.
 | [0010](0010-classpath-application-on-jlinked-javafx-runtime.md) | Classpath application on a jlinked JavaFX runtime | Accepted |
 | [0011](0011-jackson-3-for-json.md) | Jackson 3 for JSON | Accepted |
 | [0012](0012-formatting-and-header-checks.md) | Automated formatting, licence headers and coverage in the build | Accepted |
+| [0013](0013-data-discs-burned-from-an-image.md) | Data discs are burned from an image and verified against it | Proposed |
 
 Statuses: **Proposed** (awaiting owner review or a spike), **Accepted**,
 **Superseded by NNNN**, **Rejected**.
