@@ -2,9 +2,12 @@
 # SPDX-FileCopyrightText: 2026 Chetan and contributors
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-# Builds cdrdao for Windows from pinned source, in an MSYS2 UCRT64 shell (see
+# Builds cdrdao for Windows from pinned source, in an MSYS2 MSYS shell (see
 # .github/workflows/windows-tools.yml and docs/adr/0014-cd-text-on-windows-through-cdrdao.md).
-# cdrdao's configure.ac selects the native Windows drive interface (ScsiIf-nt.o) for *mingw* hosts.
+# cdrdao needs POSIX networking headers (CDDB), so it builds in MSYS2's POSIX environment, like
+# upstream's own cdrdao126.zip (which ships msys-2.0.dll); a native UCRT64 build fails on netdb.h.
+# configure.ac selects the Windows drive interface (ScsiIf-nt.o) for *-pc-cygwin* hosts, which
+# MSYS2 is a fork of, so the build type is given as such.
 #
 #   windows-tools/build-cdrdao.sh <output-folder>
 
@@ -25,10 +28,12 @@ tar xjf source.tar.bz2
 cd "cdrdao-${VERSION}"
 
 # No GUI, and no OGG or MP3 input: RetroBurn hands cdrdao WAV files only.
-./configure --without-gcdmaster --without-ogg-support --without-mp3-support | tee "$out/configure.log"
+# lec.cc uses int16_t without <cstdint>, which current GCC no longer pulls in by itself.
+CXXFLAGS="-O2 -include cstdint" ./configure --build=x86_64-pc-cygwin     --without-gcdmaster --without-ogg-support --without-mp3-support | tee "$out/configure.log"
+grep -n "scsilib\|ScsiIf" config.log | head -n 5 || true
 make -j"$(nproc)" | tail -n 20
 cp dao/cdrdao.exe "$out/"
-cp source.tar.bz2 "$out/cdrdao-${VERSION}.tar.bz2" 2>/dev/null || cp ../source.tar.bz2 "$out/cdrdao-${VERSION}.tar.bz2"
+cp ../source.tar.bz2 "$out/cdrdao-${VERSION}.tar.bz2"
 cp COPYING "$out/COPYING.cdrdao"
 
 # The DLLs the program needs from MSYS2 (each must be shipped with its licence).

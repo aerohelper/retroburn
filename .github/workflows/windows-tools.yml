@@ -19,7 +19,7 @@ permissions:
 
 jobs:
   cdrdao:
-    name: Build cdrdao (MSYS2 UCRT64)
+    name: Build cdrdao (MSYS2)
     runs-on: windows-latest
     defaults:
       run:
@@ -29,16 +29,18 @@ jobs:
 
       - uses: msys2/setup-msys2@v2
         with:
-          msystem: UCRT64
+          msystem: MSYS
           update: true
           install: >-
             make
             curl
             tar
             bzip2
-            mingw-w64-ucrt-x86_64-gcc
-            mingw-w64-ucrt-x86_64-libiconv
-            mingw-w64-ucrt-x86_64-pkgconf
+            gcc
+            libiconv-devel
+            pkgconf
+            msys2-w32api-headers
+            msys2-w32api-runtime
 
       - name: Build
         run: windows-tools/build-cdrdao.sh out
