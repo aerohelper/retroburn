@@ -14,6 +14,7 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -45,5 +46,16 @@ final class SimulatedImageBuilder implements DiscImageBuilder {
         } catch (IOException e) {
             throw new UncheckedIOException("Could not write " + target, e);
         }
+    }
+
+    @Override
+    public void buildDvdVideoImage(
+            Path dvdFolder, String volumeLabel, Path target, BurnListener listener, CancelToken cancel) {
+        buildDataImage(
+                DiscTree.of(List.of(new DiscEntry("/VIDEO_TS", dvdFolder.resolve("VIDEO_TS")))),
+                new ImageOptions(volumeLabel),
+                target,
+                listener,
+                cancel);
     }
 }

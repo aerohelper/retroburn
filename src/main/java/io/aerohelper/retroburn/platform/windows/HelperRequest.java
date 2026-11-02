@@ -54,6 +54,13 @@ record HelperRequest(String operation, String json) {
         return of(request);
     }
 
+    /** A DVD-Video image: {@link #buildImage} with ISO 9660 + UDF 1.02 and no Joliet. */
+    static HelperRequest buildDvdImage(DiscTree tree, String volumeLabel, Path target) {
+        ObjectNode request = (ObjectNode)
+                MAPPER.readTree(buildImage(tree, volumeLabel, target).json());
+        return of(request.put("dvdVideo", true));
+    }
+
     static HelperRequest burnImage(DriveId drive, Path image, boolean closeMedia) {
         return of(start("burn-image")
                 .put("drive", drive.value())

@@ -21,9 +21,12 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Writes ISO 9660 images with Rock Ridge and Joliet using GNU xorriso, so the result reads well on
@@ -88,6 +91,56 @@ final class XorrisoImageBuilder implements DiscImageBuilder {
             }
         }
     }
+
+    /**
+     * genisoimage's DVD-Video mode (manual: "-dvd-video Generate a DVD-Video compliant UDF filesystem
+     * … sorting the order of the content … and adding padding"); progress lines end in "% done".
+     */
+    @Override
+    public void buildDvdVideoImage(
+            Path dvdFolder, String volumeLabel, Path target, BurnListener listener, CancelToken cancel) {
+        Path genisoimage = locator.locate(ExternalTool.GENISOIMAGE)
+                .orElseThrow(() -> new ToolMissingException(ExternalTool.GENISOIMAGE.displayName()));
+        Consumer<String> output = line -> {
+            listener.onEvent(new BurnEvent.LogLine(line));
+            Matcher done = PERCENT_DONE.matcher(line);
+            if (done.find()) {
+                listener.onEvent(BurnEvent.Progress.of(Math.min(Double.parseDouble(done.group(1)) / 100, 0.99)));
+            }
+        };
+        boolean succeeded = false;
+        try {
+            ProcessResult result = runner.run(
+                    ProcessRequest.builder(
+                                    genisoimage,
+                                    List.of(
+                                            "-dvd-video",
+                                            "-V",
+                                            volumeLabel,
+                                            "-o",
+                                            target.toString(),
+                                            dvdFolder.toString()))
+                            .idleTimeout(IDLE_TIMEOUT)
+                            .onStdoutLine(output)
+                            .onStderrLine(output)
+                            .build(),
+                    cancel);
+            if (!result.succeeded()) {
+                List<String> tail = result.outputTail();
+                throw new ToolFailedException(
+                        UserMessage.of("error.isoCreationFailed", tail.isEmpty() ? "" : tail.getLast()),
+                        result.technicalDetail());
+            }
+            listener.onEvent(BurnEvent.Progress.of(1.0));
+            succeeded = true;
+        } finally {
+            if (!succeeded) {
+                deleteQuietly(target);
+            }
+        }
+    }
+
+    private static final Pattern PERCENT_DONE = Pattern.compile("(\\d+(?:\\.\\d+)?)% done");
 
     private Path createPathList(DiscTree tree) {
         try {
