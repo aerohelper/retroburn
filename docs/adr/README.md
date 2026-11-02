@@ -26,6 +26,7 @@ record that supersedes the old one.
 | [0012](0012-formatting-and-header-checks.md) | Automated formatting, licence headers and coverage in the build | Accepted |
 | [0013](0013-data-discs-burned-from-an-image.md) | Data discs are burned from an image and verified against it | Proposed |
 | [0014](0014-cd-text-on-windows-through-cdrdao.md) | CD-Text on Windows through cdrdao | Proposed |
+| [0015](0015-video-dvd-structure.md) | Video DVD structure and images | Proposed |
 
 Statuses: **Proposed** (awaiting owner review or a spike), **Accepted**,
 **Superseded by NNNN**, **Rejected**.
