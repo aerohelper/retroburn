@@ -80,6 +80,8 @@ public final class DvdXml {
         StringBuilder xml = new StringBuilder();
         xml.append("<dvdauthor dest=\"")
                 .append(escape(authoring.output().toString()))
+                .append("\" format=\"")
+                .append(format)
                 .append("\">\n");
         xml.append("  <vmgm>\n    <menus>\n");
         xml.append("      <video format=\"").append(format).append("\" aspect=\"4:3\"/>\n");
