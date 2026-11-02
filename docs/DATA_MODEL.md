@@ -45,6 +45,10 @@ Folders are resolved per OS by `AppPaths` (see
 | `mp3.convert` | `true`/`false` | `true` | Convert other formats to MP3; otherwise they are left out. |
 | `mp3.bitrate` | `CBR_128`/`CBR_192`/`CBR_256`/`CBR_320`/`VBR_2` | `CBR_192` | Bitrate of converted files. |
 | `mp3.playlists` | `true`/`false` | `false` | Write one playlist per folder. |
+| `video.tvStandard` | `PAL`/`NTSC`/empty | empty | Video DVD standard; empty follows the computer's country. |
+| `video.chapterMinutes` | whole number | `5` | A chapter every so many minutes; `0` for none. |
+| `video.template` | `classic`/`y2k`/`minimal` | `classic` | Menu template. |
+| `video.afterTitle` | `MENU`/`NEXT` | `MENU` | What plays after a title. |
 | `audio.normalizeLoudness` | `true`/`false` | `false` | Even out loudness (FFmpeg `loudnorm`, −16 LUFS) while converting audio CD tracks. |
 | `jobs.keepTemporaryFiles` | `true`/`false` | `false` | Keep job work folders after success or cancel. |
 | `jobs.workDirectory` | path | (platform work folder) | Where job work folders are created. |
