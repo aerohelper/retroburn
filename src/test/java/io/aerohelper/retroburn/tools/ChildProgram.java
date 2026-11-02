@@ -56,6 +56,10 @@ public final class ChildProgram {
                 System.out.flush();
                 System.err.println("binary done");
             }
+            case "copy-stdin" -> {
+                System.in.transferTo(System.out);
+                System.out.flush();
+            }
             case "wait-for-stdin-end" -> {
                 System.out.println("waiting");
                 System.out.flush();
