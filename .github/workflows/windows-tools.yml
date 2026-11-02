@@ -2,7 +2,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 # Builds the external tools RetroBurn may bundle on Windows from pinned source (ADR-0006), and
-# checks them against the files RetroBurn writes. For now: cdrdao, for the CD-Text spike (ADR-0014).
+# checks them against the files RetroBurn writes: cdrdao for the CD-Text spike (ADR-0014), and
+# dvdauthor with spumux for video DVDs.
 
 name: Windows tools
 
@@ -13,6 +14,7 @@ on:
       - "windows-tools/**"
       - ".github/workflows/windows-tools.yml"
       - "src/main/java/io/aerohelper/retroburn/audio/CdrdaoTocWriter.java"
+      - "src/main/java/io/aerohelper/retroburn/video/DvdXml.java"
 
 permissions:
   contents: read
@@ -56,4 +58,54 @@ jobs:
       - uses: actions/upload-artifact@v6
         with:
           name: cdrdao-windows
+          path: out/
+
+  dvdauthor:
+    name: Build dvdauthor and spumux (MSYS2 UCRT64)
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            make
+            curl
+            tar
+            gzip
+            autoconf
+            automake
+            libtool
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-pkgconf
+            mingw-w64-ucrt-x86_64-libpng
+            mingw-w64-ucrt-x86_64-freetype
+            mingw-w64-ucrt-x86_64-libxml2
+            mingw-w64-ucrt-x86_64-fribidi
+            mingw-w64-ucrt-x86_64-fontconfig
+            mingw-w64-ucrt-x86_64-ffmpeg
+
+      - name: Build
+        run: windows-tools/build-dvdauthor.sh out
+
+      - name: Author a short title with the built dvdauthor
+        run: |
+          cd out
+          ffmpeg -nostdin -hide_banner -loglevel error -y -f lavfi -i testsrc=size=720x576:rate=25:duration=5 \
+            -f lavfi -i sine=duration=5 -target pal-dvd -c:a ac3 -b:a 192k -shortest title.mpg
+          printf '<dvdauthor dest="dvd" format="pal">\n  <vmgm/>\n  <titleset>\n    <titles>\n      <pgc>\n        <vob file="title.mpg" chapters="0,0:02"/>\n      </pgc>\n    </titles>\n  </titleset>\n</dvdauthor>\n' > dvd.xml
+          ./dvdauthor.exe -x dvd.xml
+          ls -l dvd/VIDEO_TS
+          test -f dvd/VIDEO_TS/VIDEO_TS.IFO
+          ./spumux.exe 2>&1 | head -n 3 || true
+          rm -rf dvd title.mpg
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: dvdauthor-windows
           path: out/
