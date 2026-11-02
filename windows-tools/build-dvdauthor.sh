@@ -24,7 +24,11 @@ echo "${SHA256}  source.tar.gz" | sha256sum -c -
 tar xzf source.tar.gz
 cd "dvdauthor-${VERSION}"
 
-./bootstrap
+# What upstream's ./bootstrap does (copy gettext's config.rpath, then autoreconf -i), with aclocal
+# also looking at the UCRT64 macros, where libxml2's AM_PATH_XML2 lives.
+mkdir -p autotools
+cp /usr/share/gettext/config.rpath autotools/
+ACLOCAL_PATH=/ucrt64/share/aclocal autoreconf -i
 ./configure --prefix="$work/install" | tee "$out/configure.log"
 make -j"$(nproc)" | tail -n 20
 make install | tail -n 5
