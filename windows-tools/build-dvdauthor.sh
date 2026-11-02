@@ -33,6 +33,19 @@ grep -n "libxml-2.0" configure.ac
 mkdir -p autotools
 cp /usr/share/gettext/config.rpath autotools/
 ACLOCAL_PATH=/ucrt64/share/aclocal autoreconf -i
+# configure.ac asks freetype-config, which FreeType no longer installs; answer from pkg-config.
+mkdir -p "$work/bin"
+cat > "$work/bin/freetype-config" <<'SHIM'
+#!/bin/sh
+case "$1" in
+    --cflags) exec pkg-config --cflags freetype2 ;;
+    --libs) exec pkg-config --libs freetype2 ;;
+    *) exec pkg-config --modversion freetype2 ;;
+esac
+SHIM
+chmod +x "$work/bin/freetype-config"
+export PATH="$work/bin:$PATH"
+
 ./configure --prefix="$work/install" | tee "$out/configure.log"
 make -j"$(nproc)" | tail -n 20
 make install | tail -n 5
