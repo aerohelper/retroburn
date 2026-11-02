@@ -24,8 +24,12 @@ echo "${SHA256}  source.tar.gz" | sha256sum -c -
 tar xzf source.tar.gz
 cd "dvdauthor-${VERSION}"
 
-# What upstream's ./bootstrap does (copy gettext's config.rpath, then autoreconf -i), with aclocal
-# also looking at the UCRT64 macros, where libxml2's AM_PATH_XML2 lives.
+# libxml2 2.13 and later no longer ship libxml.m4 (AM_PATH_XML2), which configure.ac needs; find
+# libxml2 with pkg-config instead, setting the XML_CPPFLAGS and XML_LIBS that src/Makefile.am uses.
+perl -0pi -e 's/ifdef\(\[AM_PATH_XML2\].*?m4_exit\(1\)AC_MSG_ERROR\(\[You must have libxml2 \(>= 2\.6\.0\) installed\]\)\]\)/PKG_CHECK_MODULES([XML], [libxml-2.0 >= 2.6.0])\nXML_CPPFLAGS="\$XML_CFLAGS"\nAC_SUBST(XML_CPPFLAGS)/s' configure.ac
+grep -n "libxml-2.0" configure.ac
+
+# What upstream's ./bootstrap does: copy gettext's config.rpath, then autoreconf -i.
 mkdir -p autotools
 cp /usr/share/gettext/config.rpath autotools/
 ACLOCAL_PATH=/ucrt64/share/aclocal autoreconf -i
