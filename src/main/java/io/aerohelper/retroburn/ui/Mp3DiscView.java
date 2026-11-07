@@ -371,6 +371,8 @@ final class Mp3DiscView implements Navigation.Screen {
                     plan.entries().isEmpty() ? 0 : plan.estimatedBytes(),
                     media == null ? 0 : DiscCapacity.usableBytes(media));
         }
+        CoverContents.publish(
+                services, CoverContents.mp3(messages.get("home.card.mp3Disc"), labelField.getText(), plan));
         boolean ready = !plan.entries().isEmpty() && pendingProbes == 0;
         burn.setDisable(!ready);
         createIso.setDisable(!ready);

@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -248,6 +249,10 @@ final class DataDiscView implements Navigation.Screen {
     /** Shows the items and recounts their size in the background. */
     private void refresh() {
         table.setItems(FXCollections.observableArrayList(compilation.list()));
+        CoverContents.publish(
+                services,
+                CoverContents.data(
+                        messages.get("home.card.dataDisc"), labelField.getText(), compilation.list(), LocalDate.now()));
         scanCancel.cancel();
         if (compilation.isEmpty()) {
             estimate = 0;

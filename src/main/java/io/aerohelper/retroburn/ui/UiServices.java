@@ -3,6 +3,7 @@
 package io.aerohelper.retroburn.ui;
 
 import io.aerohelper.retroburn.common.Messages;
+import io.aerohelper.retroburn.design.CoverContent;
 import io.aerohelper.retroburn.pipeline.PipelineRunner;
 import io.aerohelper.retroburn.platform.PlatformServices;
 import io.aerohelper.retroburn.settings.SettingsStore;
@@ -13,6 +14,7 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 /**
@@ -23,6 +25,7 @@ import java.util.function.Supplier;
  * @param workRoot where job work folders are created
  * @param background short background work: reading media, scanning sizes, preparing a burn
  * @param jobs the single thread that runs jobs, so only one burn runs at a time
+ * @param coverContent the text of the last project shown, for the cover designer's auto-fill
  */
 public record UiServices(
         Messages messages,
@@ -33,7 +36,8 @@ public record UiServices(
         Supplier<Map<Feature, FeatureAvailability>> features,
         Supplier<Path> workRoot,
         ExecutorService background,
-        ExecutorService jobs) {
+        ExecutorService jobs,
+        AtomicReference<CoverContent> coverContent) {
 
     public UiServices {
         Objects.requireNonNull(messages, "messages");
@@ -45,5 +49,6 @@ public record UiServices(
         Objects.requireNonNull(workRoot, "workRoot");
         Objects.requireNonNull(background, "background");
         Objects.requireNonNull(jobs, "jobs");
+        Objects.requireNonNull(coverContent, "coverContent");
     }
 }
