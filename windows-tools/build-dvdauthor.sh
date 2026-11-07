@@ -47,8 +47,9 @@ chmod +x "$work/bin/freetype-config"
 export PATH="$work/bin:$PATH"
 
 ./configure --prefix="$work/install" | tee "$out/configure.log"
-make -j"$(nproc)" | tail -n 20
-make install | tail -n 5
+# Only the programs: the manual pages need docbook2man, and the app does not ship them.
+make -C src -j"$(nproc)" | tail -n 20
+make -C src install | tail -n 5
 cp "$work/install/bin/dvdauthor.exe" "$work/install/bin/spumux.exe" "$out/"
 cp ../source.tar.gz "$out/dvdauthor-${VERSION}.tar.gz"
 cp COPYING "$out/COPYING.dvdauthor"
