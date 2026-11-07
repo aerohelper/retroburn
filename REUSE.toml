@@ -85,3 +85,9 @@ SPDX-License-Identifier = "OFL-1.1"
 path = ["src/main/resources/fonts/vt323/*.ttf", "src/main/resources/credits/licenses/vt323-OFL.txt"]
 SPDX-FileCopyrightText = "2011 The VT323 Project Authors"
 SPDX-License-Identifier = "OFL-1.1"
+
+# Print templates are JSON data files.
+[[annotations]]
+path = "src/main/resources/print-templates/*.json"
+SPDX-FileCopyrightText = "2026 Chetan and contributors"
+SPDX-License-Identifier = "GPL-3.0-or-later"

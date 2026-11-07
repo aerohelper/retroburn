@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "id": "cd-back",
+  "shape": "RECTANGLE",
+  "widthMm": 151,
+  "heightMm": 118,
+  "bleedMm": 3,
+  "safeMm": 3,
+  "foldsMm": [6.5, 144.5]
+}
