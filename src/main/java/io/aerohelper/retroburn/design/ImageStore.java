@@ -9,12 +9,15 @@ import java.io.UncheckedIOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 
 /**
  * The image files a design uses, by the SHA-256 of their bytes. The bytes are kept as imported, so a
@@ -71,6 +74,9 @@ public final class ImageStore {
             return Optional.empty();
         }
     }
+
+    /** About 18 000 × 6 000: far beyond 300 dpi on any cover, small enough to decode safely. */
+    static final long MAX_PIXELS = 100_000_000L;
 
     private final Map<String, byte[]> bytes = new ConcurrentHashMap<>();
     private final Map<String, BufferedImage> decoded = new ConcurrentHashMap<>();
@@ -129,13 +135,27 @@ public final class ImageStore {
         }
     }
 
+    /**
+     * Reads the size from the header first and refuses pictures larger than {@value #MAX_PIXELS}
+     * pixels, so a small file that claims a huge picture cannot exhaust memory (threat model T5).
+     */
     private static BufferedImage decode(byte[] file) {
-        try {
-            BufferedImage image = ImageIO.read(new ByteArrayInputStream(file));
-            if (image == null) {
+        try (ImageInputStream input = ImageIO.createImageInputStream(new ByteArrayInputStream(file))) {
+            Iterator<ImageReader> readers = ImageIO.getImageReaders(input);
+            if (!readers.hasNext()) {
                 throw new IllegalArgumentException("The image could not be read");
             }
-            return image;
+            ImageReader reader = readers.next();
+            try {
+                reader.setInput(input, true, true);
+                long pixels = (long) reader.getWidth(0) * reader.getHeight(0);
+                if (pixels > MAX_PIXELS) {
+                    throw new IllegalArgumentException("The image is larger than " + MAX_PIXELS + " pixels");
+                }
+                return reader.read(0);
+            } finally {
+                reader.dispose();
+            }
         } catch (IOException e) {
             throw new UncheckedIOException("The image could not be read", e);
         }

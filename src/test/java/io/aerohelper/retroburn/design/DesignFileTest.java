@@ -126,6 +126,16 @@ class DesignFileTest {
         assertEquals(2, images.image(id).getWidth());
     }
 
+    @Test
+    void refusesAPictureThatClaimsAHugeSize() throws IOException {
+        // A valid 1 x 1 PNG whose header (IHDR) is changed to claim 20 000 x 20 000 pixels.
+        byte[] png = png(1, 1);
+        java.nio.ByteBuffer.wrap(png).putInt(16, 20_000).putInt(20, 20_000);
+        ImageStore images = new ImageStore();
+        RuntimeException error = assertThrows(RuntimeException.class, () -> images.add(png));
+        assertEquals("The image is larger than 100000000 pixels", error.getMessage());
+    }
+
     record Entry(String name, byte[] bytes) {}
 
     static byte[] bytes(String text) {
