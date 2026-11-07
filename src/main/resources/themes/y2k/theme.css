@@ -1,0 +1,123 @@
+/*
+ * SPDX-FileCopyrightText: 2026 Chetan and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+/*
+ * The "y2k" theme: the classic layout with silvery-blue colours, bevelled buttons, a gradient
+ * header, a segmented LED progress bar and the VT323 display font. All original; see
+ * docs/design/LLD-themes.md for the tokens and their contrast checks.
+ */
+@import "../classic/theme.css";
+
+.root {
+    -rb-bg: #C9D6E8;
+    -rb-surface: #E6EEF8;
+    -rb-text: #0B1A33;
+    -rb-text-muted: #33476B;
+    -rb-accent: #1E5FB8;
+    -rb-accent-text: #FFFFFF;
+    -rb-focus: #FF9F1C;
+    -rb-success: #17652C;
+    -rb-warning: #7A4A00;
+    -rb-error: #A61F1F;
+    -rb-border: #7D8DA8;
+    -rb-disabled-bg: #D5DEEA;
+    -rb-led: #39FF14;
+    -rb-led-bg: #0B1A0B;
+    -rb-bevel-light: #FFFFFF;
+    -rb-bevel-dark: #5A6B85;
+}
+
+/* Gradient header: the menu bar and screen titles. */
+.menu-bar {
+    -fx-background-color: linear-gradient(to bottom, #3C7BD6 0%, #1E5FB8 55%, #164A91 100%);
+}
+
+.menu-bar > .container > .menu-button > .label {
+    -fx-text-fill: #FFFFFF;
+}
+
+.view-heading,
+.home-heading,
+.progress-heading,
+.result-title {
+    -fx-font-family: "VT323";
+    -fx-font-size: 30px;
+}
+
+.view-heading {
+    -fx-background-color: linear-gradient(to right, #E6EEF8 0%, #C9D6E8 100%);
+}
+
+/* Bevelled buttons: light top-left edge, dark bottom-right edge, swapped while pressed. */
+.button,
+.toggle-button,
+.combo-box-base,
+.project-card {
+    -fx-background-color: linear-gradient(to bottom, #F4F7FB 0%, #D5DEEA 100%);
+    -fx-background-radius: 0;
+    -fx-background-insets: 0;
+    -fx-border-color: -rb-bevel-light -rb-bevel-dark -rb-bevel-dark -rb-bevel-light;
+    -fx-border-width: 2;
+    -fx-border-radius: 0;
+    -fx-text-fill: -rb-text;
+}
+
+.button:pressed,
+.toggle-button:selected,
+.project-card:pressed {
+    -fx-background-color: linear-gradient(to bottom, #C2CEDF 0%, #DCE4EF 100%);
+    -fx-border-color: -rb-bevel-dark -rb-bevel-light -rb-bevel-light -rb-bevel-dark;
+}
+
+.button:focused,
+.project-card:focused {
+    -fx-border-color: -rb-focus;
+}
+
+.primary-button {
+    -fx-background-color: linear-gradient(to bottom, #3C7BD6 0%, #1E5FB8 100%);
+    -fx-text-fill: -rb-accent-text;
+}
+
+.danger-button {
+    -fx-background-color: linear-gradient(to bottom, #C63A3A 0%, #A61F1F 100%);
+    -fx-text-fill: #FFFFFF;
+}
+
+/* Segmented LED progress bar and an LED read-out for the percentage. */
+.progress-bar > .track {
+    -fx-background-color: -rb-bevel-dark, -rb-led-bg;
+    -fx-background-insets: 0, 2;
+    -fx-background-radius: 0;
+}
+
+.progress-bar > .bar {
+    -fx-background-color: linear-gradient(from 0px 0px to 10px 0px, repeat, -rb-led 0%, -rb-led 70%, -rb-led-bg 70%, -rb-led-bg 100%);
+    -fx-background-insets: 4;
+    -fx-background-radius: 0;
+    -fx-padding: 0.6em;
+}
+
+.progress-percent {
+    -fx-font-family: "VT323";
+    -fx-font-size: 26px;
+    -fx-text-fill: -rb-led;
+    -fx-background-color: -rb-led-bg;
+    -fx-padding: 0 8 0 8;
+}
+
+/* The disc: more colourful sheen. */
+.disc-surface {
+    -fx-fill: radial-gradient(center 50% 50%, radius 50%, #F7FBFF 0%, #B8D4F5 55%, #8FB2E3 100%);
+    -fx-stroke: #3D5A85;
+}
+
+.disc-sheen {
+    -fx-fill: rgba(192, 75, 255, 0.35);
+}
+
+.disc-sheen-2 {
+    -fx-fill: rgba(57, 255, 20, 0.25);
+}

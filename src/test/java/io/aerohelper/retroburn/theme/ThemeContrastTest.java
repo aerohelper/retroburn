@@ -8,50 +8,66 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 /**
- * The classic theme's text and background pairs meet WCAG 2.1 AA: 4.5:1 for body text. Colours are
- * read from the stylesheet's tokens, so changing a token re-checks it.
+ * Every theme's text and background pairs meet WCAG 2.1 AA: 4.5:1 for body text. Colours are read
+ * from the stylesheets' tokens (a theme's own first, then the classic ones it imports), so changing
+ * a token re-checks it.
  */
-class ClassicThemeContrastTest {
+class ThemeContrastTest {
 
-    private static final Pattern TOKEN = Pattern.compile("(-rb-[a-z-]+):\\s*(#[0-9A-Fa-f]{6})\\s*;");
+    private static final Pattern TOKEN = Pattern.compile("(-rb-[a-z0-9-]+):\\s*(#[0-9A-Fa-f]{6})\\s*;");
 
-    @ParameterizedTest(name = "{0} on {1}")
-    @CsvSource({
-        "-rb-text, -rb-bg",
-        "-rb-text, -rb-surface",
-        "-rb-text-muted, -rb-bg",
-        "-rb-text-muted, -rb-surface",
-        "-rb-accent-text, -rb-accent",
-        "-rb-success, -rb-bg",
-        "-rb-warning, -rb-bg",
-        "-rb-error, -rb-bg",
-        "-rb-warning, -rb-surface",
-        "-rb-error, -rb-surface",
-        "#FFFFFF, -rb-error",
-        "-rb-text-muted, -rb-disabled-bg",
-    })
-    void bodyTextMeetsAa(String foreground, String background) throws IOException {
-        Map<String, String> tokens = tokens();
-        double ratio = contrast(colour(foreground, tokens), colour(background, tokens));
-        assertTrue(ratio >= 4.5, foreground + " on " + background + ": " + ratio);
+    private static final List<String[]> PAIRS = List.of(
+            new String[] {"-rb-text", "-rb-bg"},
+            new String[] {"-rb-text", "-rb-surface"},
+            new String[] {"-rb-text-muted", "-rb-bg"},
+            new String[] {"-rb-text-muted", "-rb-surface"},
+            new String[] {"-rb-accent-text", "-rb-accent"},
+            new String[] {"-rb-success", "-rb-bg"},
+            new String[] {"-rb-warning", "-rb-bg"},
+            new String[] {"-rb-error", "-rb-bg"},
+            new String[] {"-rb-warning", "-rb-surface"},
+            new String[] {"-rb-error", "-rb-surface"},
+            new String[] {"#FFFFFF", "-rb-error"},
+            new String[] {"-rb-text-muted", "-rb-disabled-bg"});
+
+    static Stream<Arguments> pairs() {
+        Stream<Arguments> shared = ThemeRegistry.IDS.stream()
+                .flatMap(theme -> PAIRS.stream().map(pair -> Arguments.of(theme, pair[0], pair[1])));
+        return Stream.concat(shared, Stream.of(Arguments.of("y2k", "-rb-led", "-rb-led-bg")));
     }
 
-    private static Map<String, String> tokens() throws IOException {
-        try (InputStream input = ClassicThemeContrastTest.class.getResourceAsStream("/themes/classic/theme.css")) {
+    @ParameterizedTest(name = "{0}: {1} on {2}")
+    @MethodSource("pairs")
+    void bodyTextMeetsAa(String theme, String foreground, String background) throws IOException {
+        Map<String, String> tokens = tokens(theme);
+        double ratio = contrast(colour(foreground, tokens), colour(background, tokens));
+        assertTrue(ratio >= 4.5, theme + ": " + foreground + " on " + background + ": " + ratio);
+    }
+
+    private static Map<String, String> tokens(String theme) throws IOException {
+        Map<String, String> tokens = new HashMap<>();
+        read("/themes/" + theme + "/theme.css", tokens);
+        read("/themes/classic/theme.css", tokens);
+        return tokens;
+    }
+
+    private static void read(String resource, Map<String, String> tokens) throws IOException {
+        try (InputStream input = ThemeContrastTest.class.getResourceAsStream(resource)) {
             String css = new String(input.readAllBytes(), StandardCharsets.UTF_8);
-            Map<String, String> tokens = new HashMap<>();
             Matcher matcher = TOKEN.matcher(css);
             while (matcher.find()) {
                 tokens.putIfAbsent(matcher.group(1), matcher.group(2));
             }
-            return tokens;
         }
     }
 
