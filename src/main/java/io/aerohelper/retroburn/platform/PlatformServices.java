@@ -9,6 +9,7 @@ import io.aerohelper.retroburn.engine.DiscImageBuilder;
 import io.aerohelper.retroburn.tools.Feature;
 import io.aerohelper.retroburn.tools.Requirement;
 import io.aerohelper.retroburn.tools.ToolLocator;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
@@ -48,4 +49,7 @@ public interface PlatformServices {
     SleepInhibitor sleepInhibitor();
 
     PowerStatus powerStatus();
+
+    /** Folders with the computer's fonts, for the cover designer; missing folders are allowed. */
+    List<Path> fontFolders();
 }
