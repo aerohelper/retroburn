@@ -7,7 +7,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 | | |
 |---|---|
-| Status | Designed for the Video DVD milestone (M7) |
+| Status | Built in the Video DVD milestone (M7); hardware-player checks pending |
 | Packages | `io.aerohelper.retroburn.video` (standards, bitrate, menus, FFmpeg, dvdauthor and spumux files), `.project` (project, pipeline), `.engine` (`buildDvdVideoImage`), `.platform.linux`, `.platform.windows`, `.ui` |
 | Related | [ADR-0015](../adr/0015-video-dvd-structure.md), [HLD §5](../architecture/HLD.md), [LLD-data-burning.md](LLD-data-burning.md) |
 
@@ -55,12 +55,15 @@ disc." Capacity: the inserted disc, or 4.7 GB (DVD±R) without one.
   and one aspect ratio (the disc's).
 - Menus are 4:3 in the VMGM. One menu PGC per page; the first is the
   title menu (`entry="title"`).
-- Buttons: one per title on the page (`jump title N;`), "Play all"
-  (`g1 = 1; jump title 1;`), and "Next page"/"Previous page"
-  (`jump menu P;`) when there are more pages.
-- After title N: back to its menu page (`g1 = 0; call vmgm menu P;`), or
-  with "Play all" on or "play next" chosen, the next title
-  (`jump title N+1;`). The last title always returns to the menu.
+- Buttons: one per title on the page (`g1 = 0; jump title N;`), "Play
+  all" (`g1 = 1; jump title 1;`), and "Next page"/"Previous page"
+  (`jump menu P;`) when there are more pages. Button neighbours (`up`,
+  `down`, `left`, `right`) are written out for every button rather than
+  left to spumux's guess, so remote-control navigation follows the grid.
+- After title N: back to its menu page (`g1 = 0; call vmgm menu P;`);
+  with "play next" chosen, `jump title N+1;`; otherwise
+  `if (g1 eq 1) jump title N+1;` first, so "Play all" carries on. The
+  last title always returns to the menu.
 - Chapters: `chapters="0,5:00,10:00,…"` on each title's `<vob>`.
 
 Syntax from the dvdauthor manual: `<dvdauthor dest>` → `<vmgm><menus>`
@@ -81,15 +84,17 @@ frame:
   outline around each button in one colour, no anti-aliasing (at most four
   colours: transparent plus one), as spumux needs.
 
-`video.SpumuxXml` writes `<subpictures><stream><spu start="00:00:00.00"
+`video.DvdXml` writes the spumux file: `<subpictures><stream><spu start="00:00:00.00"
 force="yes" image highlight select>` with a `<button name x0 y0 x1 y1
 up down left right/>` per button; y coordinates are even, as the manual
 asks. Buttons are named `t1`…`t6`, `all`, `prev`, `next`.
 
 Templates (`classic`, `y2k`, `minimal`) are data: background top and
 bottom colours, text colour, highlight colour, font family and size, and
-whether thumbnails get a frame. All three use the bundled fonts only
-(no logos).
+whether thumbnails get a frame. No logos. Until bundled fonts arrive
+with the skins (M9), the templates use the JDK's logical fonts
+(`SansSerif`, `Serif`, `Monospaced`), so the menu text can look slightly
+different between systems.
 
 ## 5. FFmpeg (`video.FfmpegVideo`)
 
@@ -167,4 +172,29 @@ authored folder to the chosen place and stops.
   folder has UDF 1.02 (`NSR02`), no Joliet, and its VIDEO_TS files in DVD
   order on disc.
 - Manual: plays and navigates in VLC and a hardware DVD player, for discs
-  made on each system.
+  made on each system ([MANUAL_TEST.md](../MANUAL_TEST.md), video DVD
+  section).
+
+Results so far:
+
+- Linux CI (`DvdJobIntegrationTest`, Ubuntu packages of FFmpeg,
+  dvdauthor, spumux and genisoimage): the `VIDEO_TS` folder has 2 titles
+  with 1 chapter each, and the image has `NSR02` with the VIDEO_TS files
+  in DVD order. Passed.
+- Windows 11 (`WindowsHelperIntegrationTest`, IMAPI2FS): `NSR02`, no
+  Joliet, VIDEO_TS files in DVD order. Passed.
+- Windows build of dvdauthor and spumux 0.7.2 from pinned source in
+  MSYS2 UCRT64 (`windows-tools/build-dvdauthor.sh`, workflow "Windows
+  tools"): passed, and the built dvdauthor authored a 5-second PAL title
+  (`VIDEO_TS.IFO`, `VTS_01_0.IFO`, `VTS_01_1.VOB`). What it took:
+  libxml2 found with pkg-config (libxml2 2.13 no longer ships
+  `libxml.m4`), `freetype-config` answered from pkg-config, libdvdread,
+  bison and flex from MSYS2, and small MinGW shims (byte-order functions,
+  one-argument `mkdir`, `fsync`, `bzero`, no iconv so text subtitles are
+  read as UTF-8). Only `dvdauthor` and `spumux` are built. They need
+  about 19 UCRT64 DLLs (libxml2, libpng, freetype, fontconfig, fribidi,
+  harfbuzz, glib and their dependencies; the list is in the workflow's
+  `dlls.txt`). Bundling them with their licences is release work (M11),
+  and spumux on Windows has so far only been started, not run on the
+  app's menu files.
+- Not run yet: hardware DVD players.

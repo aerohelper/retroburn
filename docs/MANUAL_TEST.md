@@ -7,7 +7,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 | | |
 |---|---|
-| Status | Draft: data disc, Burn ISO, Create ISO, erase, audio CD and MP3 disc. Extended as each project type is built. |
+| Status | Draft: data disc, Burn ISO, Create ISO, erase, audio CD, MP3 disc and video DVD. Extended as each project type is built. |
 
 Automated tests cover the models, parsers, pipelines and engines (see
 [TEST_STRATEGY.md](TEST_STRATEGY.md)). This checklist covers what needs a
@@ -25,7 +25,7 @@ change to the screens or an engine.
   name (for example `Grüße.txt`), and one empty folder.
 - Start the app with `./mvnw javafx:run`, or from an installed build.
 - Write down the OS version, drive model and media brand in the results
-  table (section 6).
+  table (section 9).
 
 Features the drive cannot test (for example Blu-ray on a DVD writer) are
 written down as "not tested — no drive", not skipped silently.
@@ -37,7 +37,7 @@ written down as "not tested — no drive", not skipped silently.
 | DRV-1 | Start with no drive plugged in. Open Data disc. | Drive bar says "No disc drive found. Plug one in — it will show up here automatically." |
 | DRV-2 | Plug the drive in. | It appears in the drive bar within 3 s, with a USB badge and its drive letter (Windows) or device (Linux). |
 | DRV-3 | Insert the DVD+RW, then press Refresh. | Media text, for example "DVD+RW · has data · 4.7 GB usable"; capacity bar shows the right total. |
-| DRV-4 | Eject, then insert a blank CD-R. | Media text changes to the CD-R without restarting; capacity becomes about 700 MB. |
+| DRV-4 | Eject, then insert a blank CD-R. | Media text changes to the CD-R without restarting; capacity becomes about 700 MB. **Not tested: no CD-R at hand** (a blank CD-RW checks the same media change). |
 | DRV-5 | Unplug the drive while no job runs. | Drive disappears; the view shows the empty state; no error dialog. |
 | DRV-6 | Linux only: run as a user outside the `cdrom` group. | Permission message naming the group, not a generic error. |
 
@@ -50,7 +50,7 @@ written down as "not tested — no drive", not skipped silently.
 | DATA-3 | Select entries and press Delete. | They are removed; size updates. |
 | DATA-4 | Type a disc name longer than 16 characters, and one with `/` or `.` in it. | Hint explains the limit and the replacement; burned disc shows the cleaned name. |
 | DATA-5 | Add more than fits on the disc. | Capacity bar says how much too big; Burn shows the blocker in the confirm dialog and cannot start. |
-| DATA-6 | Burn the test folder to a CD-R with verify on. | Steps tick through build, burn, verify; speed and elapsed time shown; result "Done" with "The disc is ready and matches your files." Open the disc in the file manager: names (including `Grüße.txt`), folders and contents match. |
+| DATA-6 | Burn the test folder to a CD-R with verify on. | Steps tick through build, burn, verify; speed and elapsed time shown; result "Done" with "The disc is ready and matches your files." Open the disc in the file manager: names (including `Grüße.txt`), folders and contents match. **Not tested: no CD-R at hand**; run it on a CD-RW instead and note that in the results. |
 | DATA-7 | Burn to the DVD+RW that already has data. | Confirm dialog says the disc will be overwritten; burn succeeds; old content is gone. |
 | DATA-8 | Burn with verify off. | Result adds "It was not checked after burning." |
 | DATA-9 | Start a burn on the DVD+RW and press Cancel, then confirm. | "Stopping…", then the "Stopped" result within about 8 s (Windows track close, risk R18). The disc can be erased and reused. |
@@ -64,13 +64,15 @@ written down as "not tested — no drive", not skipped silently.
 | ISO-2 | Choose an image larger than the disc. | Over-capacity text; Burn blocked. |
 | ERASE-1 | Erase disc… → Quick on the DVD+RW. | Confirm says all data will be deleted; Back is the default button; the disc is reported empty afterwards (on Windows a DVD+RW may still read as "has data" — see the Windows platform LLD). |
 | ERASE-2 | Erase disc… → Full on a CD-RW or DVD-RW, if available. | Runs without a percentage; ends with success. |
-| ERASE-3 | Erase disc… with a CD-R inserted. | "Erase disc…" is not shown in the drive bar. |
+| ERASE-3 | Erase disc… with a CD-R inserted. | "Erase disc…" is not shown in the drive bar. **Not tested: no CD-R at hand** (covered by unit tests of the drive bar's media rules). |
 
 ## 5. Audio CD
 
 Needs a blank CD-R (or a CD-RW) and a few music files in different formats
 (MP3, FLAC, M4A), one with a non-Latin title and one shorter than
-4 seconds. **Not run yet: no CD at hand.**
+4 seconds. **Not run yet: a CD-RW is on order.** Steps that say CD-R can
+be run on the CD-RW; many older CD players and some car stereos cannot
+read CD-RW, so a playback failure there points at the disc type first.
 
 | # | Steps | Expected |
 |---|---|---|
@@ -93,7 +95,25 @@ Needs a blank CD-R (or a CD-RW) and a few music files in different formats
 | MP3-3 | Burn to the DVD+RW with playlists on. | Converting, building, writing and checking tick through; the disc opens in the file manager with the names shown, and the MP3 files are identical to the originals. |
 | MP3-4 | Play the disc in a car stereo. | Folders and tracks play in order; titles show. |
 
-## 7. USB and power
+## 7. Video DVD
+
+Needs two or three short video files (one 16:9, one 4:3, one in a format
+such as MKV or MOV) and, for one step, enough files for two menu pages
+(seven or more).
+
+| # | Steps | Expected |
+|---|---|---|
+| VIDEO-1 | Add the files. | Titles listed with duration; the aspect ratio follows the first file; the minutes bar shows the estimated size and the quality note when the bitrate is low. |
+| VIDEO-2 | Change TV standard, aspect, chapter interval, template and disc title. | The menu preview redraws with the chosen template and title. |
+| VIDEO-3 | Save VIDEO_TS folder, then open it in VLC as a DVD (Media → Open Disc, with "No disc menus" unchecked). | The menu shows thumbnails and names; the remote/arrow keys move between buttons in grid order; each button plays its title; "Play all" plays every title in turn; chapters skip every few minutes; after a title the menu comes back. |
+| VIDEO-4 | With seven or more titles, check page buttons in VLC. | "Next page" and "Previous page" move between pages. |
+| VIDEO-5 | Choose "play next" after a title. | Titles play one after another; after the last, the menu returns. |
+| VIDEO-6 | Create ISO, then open the image in VLC. | Same as VIDEO-3. |
+| VIDEO-7 | Burn to the DVD+RW. | Converting, menus, authoring, building, writing and verifying tick through; the disc plays in VLC as in VIDEO-3. |
+| VIDEO-8 | Play the disc from VIDEO-7 in a hardware DVD player, once for a disc made on Linux and once for one made on Windows. | Same as VIDEO-3 on a TV. A Windows disc that plays in VLC but not in the player points at the IMAPI2FS image layout (ADR-0015). |
+| VIDEO-9 | Cancel during converting. | "Stopped" quickly; no files left in the work folder unless "keep temporary files" is on. |
+
+## 8. USB and power
 
 Run these on the DVD+RW only.
 
@@ -104,7 +124,7 @@ Run these on the DVD+RW only.
 | USB-3 | During a burn, leave the laptop idle past its sleep timeout. | The computer stays awake; the progress view shows the sleep note (Linux: a warning if sleep could not be blocked). |
 | USB-4 | Unplug the drive during a burn. | Result "The drive was disconnected or lost power…" with details; the app stays usable; replugging shows the drive again. |
 
-## 8. Results
+## 9. Results
 
 Copy this table into the pull request or release checklist.
 
@@ -112,7 +132,7 @@ Copy this table into the pull request or release checklist.
 |---|---|---|---|---|---|
 | | | | | | |
 
-## 9. Automated real-disc test
+## 10. Automated real-disc test
 
 Separate from this checklist, `WindowsRealDiscTest` burns, verifies and
 erases the inserted rewritable disc through the engine, without the screens.

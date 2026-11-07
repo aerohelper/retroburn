@@ -33,6 +33,16 @@ built?
 2. A titleset per aspect ratio, menus in each titleset.
 3. Same as 1, but 16:9 menus (widescreen subpicture streams).
 
+## Findings so far (2026-11-07)
+
+| Check | Where | Result |
+|---|---|---|
+| dvdauthor accepts the generated XML: one titleset, VMGM menus, 2 titles with chapters | Linux CI, Ubuntu dvdauthor and spumux | Passed; `VIDEO_TS.IFO` lists 2 titles |
+| genisoimage `-dvd-video` image | Linux CI | `NSR02` present; VIDEO_TS files in DVD order |
+| IMAPI2FS image with ISO 9660 + UDF 1.02, files added in DVD order | Windows 11, `WindowsHelperIntegrationTest` | `NSR02` present, no Joliet, VIDEO_TS files laid out in DVD order |
+| dvdauthor and spumux 0.7.2 build for Windows from pinned source | GitHub Actions, MSYS2 UCRT64 | Passed with small MinGW shims (see LLD-video-dvd); the built dvdauthor authored a PAL title; spumux started but not yet run on menu files; about 19 DLLs to bundle |
+| Discs play on hardware DVD players | Manual checklist | Not run yet |
+
 ## Decision outcome
 
 Proposed: **option 1**. 4:3 menus with one subpicture stream are the most
