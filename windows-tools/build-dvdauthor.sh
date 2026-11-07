@@ -46,9 +46,25 @@ SHIM
 chmod +x "$work/bin/freetype-config"
 export PATH="$work/bin:$PATH"
 
-./configure --prefix="$work/install" | tee "$out/configure.log"
+# MinGW gaps: no <netinet/in.h> (the byte-order functions are in winsock2) and a one-argument
+# mkdir. Without iconv (am_cv_func_iconv=no), nl_langinfo is not needed and text subtitles are
+# read as UTF-8; the app's menus use image buttons only.
+mkdir -p "$work/compat/netinet"
+cat > "$work/compat/netinet/in.h" <<'SHIM'
+#include <winsock2.h>
+SHIM
+cat > "$work/compat/mingw-compat.h" <<'SHIM'
+#include <io.h>
+#include <direct.h>
+#define mkdir(path, mode) _mkdir(path)
+SHIM
+export CPPFLAGS="-I$work/compat -include $work/compat/mingw-compat.h"
+export LIBS="-lws2_32"
+
+./configure --prefix="$work/install" am_cv_func_iconv=no | tee "$out/configure.log"
 # Only the programs: the manual pages need docbook2man, and the app does not ship them.
-make -C src -j"$(nproc)" | tail -n 20
+# -k lists every compile error in one run.
+make -C src -k -j"$(nproc)" | tail -n 20
 make -C src install | tail -n 5
 cp "$work/install/bin/dvdauthor.exe" "$work/install/bin/spumux.exe" "$out/"
 cp ../source.tar.gz "$out/dvdauthor-${VERSION}.tar.gz"
