@@ -91,3 +91,9 @@ SPDX-License-Identifier = "OFL-1.1"
 path = "src/main/resources/print-templates/*.json"
 SPDX-FileCopyrightText = "2026 Chetan and contributors"
 SPDX-License-Identifier = "GPL-3.0-or-later"
+
+# Theme sounds: original, written by tools/sounds/GenerateSounds.java (ADR-0017).
+[[annotations]]
+path = "src/main/resources/themes/*/sounds/*.wav"
+SPDX-FileCopyrightText = "2026 Chetan and contributors"
+SPDX-License-Identifier = "GPL-3.0-or-later"
