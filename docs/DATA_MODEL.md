@@ -13,7 +13,8 @@ loading after an upgrade and newer files are refused clearly.
 | `settings.properties` | Java properties, UTF-8 | settings folder | M2 |
 | `credits/components.json` | JSON | bundled resource | M1 |
 | `.rbproj` project | JSON | where the user saves it | planned |
-| `.rbdesign` cover design | ZIP: JSON + images | where the user saves it | planned |
+| `.rbdesign` cover design | ZIP: JSON + images | where the user saves it | M8 |
+| Print templates | JSON | bundled resources (`print-templates/`) | M8 |
 | Burn session | JSON | data folder | planned |
 
 Folders are resolved per OS by `AppPaths` (see
@@ -49,6 +50,8 @@ Folders are resolved per OS by `AppPaths` (see
 | `video.chapterMinutes` | whole number | `5` | A chapter every so many minutes; `0` for none. |
 | `video.template` | `classic`/`y2k`/`minimal` | `classic` | Menu template. |
 | `video.afterTitle` | `MENU`/`NEXT` | `MENU` | What plays after a title. |
+| `design.paper` | `A4`/`LETTER`/empty | empty | Paper for covers and labels; empty follows the computer's country (Letter in the US, Canada, Mexico and the Philippines). |
+| `design.imageNoticeShown` | `true`/`false` | `false` | The note about image rights has been shown once. |
 | `audio.normalizeLoudness` | `true`/`false` | `false` | Even out loudness (FFmpeg `loudnorm`, −16 LUFS) while converting audio CD tracks. |
 | `jobs.keepTemporaryFiles` | `true`/`false` | `false` | Keep job work folders after success or cancel. |
 | `jobs.workDirectory` | path | (platform work folder) | Where job work folders are created. |
@@ -56,6 +59,33 @@ Folders are resolved per OS by `AppPaths` (see
 
 The file is written to a temporary file and then moved into place, so a crash
 cannot leave it half-written.
+
+## `.rbdesign` (schema version 1)
+
+A ZIP file with:
+
+- `design.json`: the `DesignDocument` — `schemaVersion`, `templateId`,
+  `spineMm`, `holeDiameterMm`, `preset`, `background` (`#RRGGBB`),
+  `content` (`kind`, `title`, `subtitle`, `lines`) and `elements`, each
+  with a `type` (`text`, `image`, `shape`, `trackList`, `discTitle`), an
+  `id` and a `frame` (`x`, `y`, `width`, `height` in millimetres,
+  `rotationDegrees`), plus its own fields.
+- `images/<sha256>.<png|jpg|gif|bmp>`: each picture, unchanged, named by
+  the SHA-256 of its bytes.
+
+Unknown JSON fields are ignored, so a file from a newer minor version
+opens; a higher `schemaVersion` is refused with "made with a newer
+version". Other entries, mismatched hashes and oversized entries make the
+file count as damaged. See [LLD-cover-designer.md](design/LLD-cover-designer.md)
+section 9.
+
+## Print templates (schema version 1)
+
+`src/main/resources/print-templates/<id>.json`, read into `PrintTemplate`:
+`schemaVersion`, `id`, `shape` (`RECTANGLE`/`DISC`), `widthMm`,
+`heightMm`, `bleedMm`, `safeMm`, `foldsMm`, `adjustableSpine`,
+`defaultSpineMm`, `minSpineMm`, `maxSpineMm`, `holeDiametersMm`. Unknown
+fields are rejected. Sizes are listed in [PRINT_TEMPLATES.md](PRINT_TEMPLATES.md).
 
 ## `credits/components.json` (schema version 1)
 

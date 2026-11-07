@@ -48,3 +48,10 @@ All notable changes to RetroBurn are recorded here. The format follows
   menus with thumbnails, "Play all" and pages in three templates, and
   burning, Create ISO or saving the VIDEO_TS folder (dvdauthor and spumux;
   genisoimage on Linux, IMAPI2 with UDF 1.02 on Windows).
+- Cover and label designer: CD front, back inlay with spines, slim insert,
+  DVD wrap with a chosen spine and disc labels (41 or 17 mm hole) on A4 or
+  Letter with crop marks and bleed; text, pictures, shapes, track list and
+  title elements with snapping, alignment and undo; classic, y2k and
+  minimal styles; text filled in from the last project; `.rbdesign` files;
+  PDF export with embedded fonts (Apache PDFBox), 300 dpi PNG, printing at
+  100 % and a test page. Lato and VT323 fonts are bundled.

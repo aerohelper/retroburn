@@ -61,6 +61,17 @@ Proposed: **option 1**, Apache PDFBox 3.0.8 (`pdfbox`, which brings
   shipped in the in-app credits; the fonts' `OFL.txt` files are shipped
   next to them and listed in `assets/CREDITS.md`.
 
+## Findings so far (2026-11-07)
+
+- `ExportTest` (Windows, PDFBox 3.0.8): exact A4 and Letter page sizes,
+  every font of each preset reported embedded by PDFBox, disc label cut
+  circles 118 mm ±0.5 mm, an image kept at 1200 × 900 pixels.
+- FontBox reads `fsType` from the bundled fonts and from a copy patched to
+  "restricted", which is then marked as not embeddable
+  (`FontCatalogTest`).
+- PDFBox's `clip()` writes `W n`, so clipping paths are not painted
+  (checked in its bytecode).
+
 ## More information
 
 - PDFBox: https://pdfbox.apache.org/ — `PDType0Font`, `LosslessFactory`,

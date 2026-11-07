@@ -32,9 +32,9 @@ copy's bleed). Checked by `SheetLayoutTest`.
 
 | Template | A4 | Letter |
 |---|---|---|
-| `cd-front`, `cd-slim` | 2 | 2 |
+| `cd-front`, `cd-slim` | 2 | 1 |
 | `cd-back` | 2 | 2 |
-| `dvd-wrap` | 1, landscape, no crop marks | 1, landscape, no bleed |
+| `dvd-wrap` | 1, landscape, no crop marks | 1, landscape, no bleed, needs a printer that prints within 3 mm of the edge |
 | `disc-label` | 2 | 2 |
 
 ## How to test-print

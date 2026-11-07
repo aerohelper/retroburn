@@ -7,7 +7,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 | | |
 |---|---|
-| Status | Designed for the cover and label milestone (M8) |
+| Status | Built in the cover and label milestone (M8). Not yet test-printed (see PRINT_TEMPLATES.md). |
 | Packages | `io.aerohelper.retroburn.design` (templates, documents, commands, layout, fonts, rendering, PDF/PNG export, `.rbdesign` files; no JavaFX), `.ui` (`CoverDesignerView`, printing), `.platform` (`fontFolders()`) |
 | Related | [ADR-0016](../adr/0016-pdf-export-and-fonts.md), [PRINT_TEMPLATES.md](../PRINT_TEMPLATES.md), [HLD §2](../architecture/HLD.md), [EXTENSIBILITY.md §6](../EXTENSIBILITY.md) |
 
@@ -79,7 +79,7 @@ Immutable records; every edit makes a new document.
 record DesignDocument(int schemaVersion, String templateId, double spineMm,
                       double holeDiameterMm, String preset, String background,
                       CoverContent content, List<DesignElement> elements)   // z-order: first is bottom
-record CoverContent(String kind, String title, String subtitle, List<String> lines, String date)
+record CoverContent(String kind, String title, String subtitle, List<String> lines)   // a data disc's date is its subtitle
 sealed interface DesignElement permits TextElement, ImageElement, ShapeElement,
                                        TrackListElement, DiscTitleElement {
     String id(); Frame frame();
@@ -164,8 +164,11 @@ landscape and keeping the one with more copies:
 
 If nothing fits, it tries without crop marks (warning "No room for crop
 marks"), then without bleed (warning "Bleed is cut off on this paper"),
-then gives up ("Too large for this paper"). The DVD wrap on Letter ends
-up without bleed; on A4 it fits landscape without crop marks.
+then without bleed with a 3 mm page margin (warning that the printer must
+print within 3 mm of the edge), then gives up ("Too large for this
+paper"). On A4 the DVD wrap fits landscape without crop marks; on Letter
+(279.4 mm wide) its 273 mm only fits with the 3 mm margin and no bleed.
+The counts per template are in `docs/PRINT_TEMPLATES.md`.
 
 ## 8. Export and printing
 
@@ -190,7 +193,9 @@ A ZIP with `design.json` (the document, `schemaVersion` 1) and
 only those entry names are accepted (no folders, no `..`), at most 200
 images, 50 MB per image and 200 MB in total, the hash of each image is
 checked against its name, and unknown JSON fields are ignored so newer
-files still open.
+files still open. Entries are read into memory, never extracted to disk.
+Every picture, imported or opened, has its size read from its header
+before decoding; more than 100 million pixels is refused.
 
 ## 10. Screen (`ui.CoverDesignerView`)
 
@@ -238,3 +243,9 @@ Re-sync.
 - Manual (`docs/MANUAL_TEST.md`, cover section): print the alignment test
   page and each template at 100 %, measure, and record the results in
   `docs/PRINT_TEMPLATES.md`.
+
+Results so far: the PDF acceptance tests pass on Windows (`ExportTest`:
+A4 and Letter page sizes to 0.01 pt, every font embedded for each preset,
+two 118 mm cut circles within ±0.5 mm and the 41 mm holes, a 1200 × 900
+image kept at its pixel size). The screen was opened in the real app and
+an element added, moved and selected. Not done yet: a test print.
