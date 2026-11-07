@@ -11,7 +11,12 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.RadioMenuItem;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
 import javafx.stage.Stage;
@@ -54,6 +59,7 @@ public final class ScreenTour extends Application {
                     switch (step.substring(0, step.indexOf(':'))) {
                         case "card" -> fx(() -> clickCard(value));
                         case "button" -> fx(() -> clickButton(value));
+                        case "menu" -> fx(() -> clickMenu(value));
                         case "wait" -> Thread.sleep(Long.parseLong(value));
                         case "snap" -> fx(() -> snap(out, value));
                         default -> throw new IllegalArgumentException("Unknown step " + step);
@@ -92,6 +98,32 @@ public final class ScreenTour extends Application {
             }
         }
         throw new IllegalStateException("No button " + text);
+    }
+
+    /** Chooses a menu item by its path of texts, such as {@code View>Theme>Y2K}, as a click would. */
+    private void clickMenu(String path) {
+        String[] names = path.split(">");
+        MenuBar bar = (MenuBar) stage.getScene().getRoot().lookup(".menu-bar");
+        List<MenuItem> items = new java.util.ArrayList<>(bar.getMenus());
+        for (int level = 0; level < names.length; level++) {
+            String name = names[level];
+            MenuItem found = items.stream()
+                    .filter(item -> name.equals(item.getText()))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException("No menu item " + name + " in " + path));
+            if (level < names.length - 1) {
+                items = ((Menu) found).getItems();
+                continue;
+            }
+            // A click toggles check and radio items before their action runs; fire() alone does not.
+            if (found instanceof RadioMenuItem radio) {
+                radio.setSelected(true);
+            } else if (found instanceof CheckMenuItem check) {
+                check.setSelected(!check.isSelected());
+            }
+            System.out.println("  menu " + path + " disabled=" + found.isDisable());
+            found.fire();
+        }
     }
 
     private void snap(File out, String name) {
