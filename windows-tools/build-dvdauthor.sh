@@ -4,7 +4,7 @@
 
 # Builds dvdauthor and spumux for Windows from pinned source, in an MSYS2 UCRT64 shell (see
 # .github/workflows/windows-tools.yml and docs/design/LLD-video-dvd.md). Needs autotools, libpng,
-# freetype and libxml2; fribidi and fontconfig are used when present.
+# freetype, libxml2 and libdvdread; fribidi and fontconfig are used when present.
 #
 #   windows-tools/build-dvdauthor.sh <output-folder>
 
