@@ -58,14 +58,15 @@ cat > "$work/compat/mingw-compat.h" <<'SHIM'
 #include <direct.h>
 #define mkdir(path, mode) _mkdir(path)
 SHIM
-export CPPFLAGS="-I$work/compat -include $work/compat/mingw-compat.h"
+# Given to make only: a forced include confuses configure's own checks.
+compat_flags="-I$work/compat -include $work/compat/mingw-compat.h"
 export LIBS="-lws2_32"
 
 ./configure --prefix="$work/install" am_cv_func_iconv=no | tee "$out/configure.log"
 # Only the programs: the manual pages need docbook2man, and the app does not ship them.
 # -k lists every compile error in one run.
-make -C src -k -j"$(nproc)" | tail -n 20
-make -C src install | tail -n 5
+make -C src -k -j"$(nproc)" CPPFLAGS="$compat_flags" | tail -n 20
+make -C src install CPPFLAGS="$compat_flags" | tail -n 5
 cp "$work/install/bin/dvdauthor.exe" "$work/install/bin/spumux.exe" "$out/"
 cp ../source.tar.gz "$out/dvdauthor-${VERSION}.tar.gz"
 cp COPYING "$out/COPYING.dvdauthor"
