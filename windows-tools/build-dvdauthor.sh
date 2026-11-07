@@ -74,9 +74,10 @@ compat_flags="-I$work/compat -include $work/compat/mingw-compat.h"
 # Only the two programs the app runs: the manual pages need docbook2man, and mpeg2desc needs
 # select() on pipes. -k lists every compile error in one run.
 make -C src -k -j"$(nproc)" CPPFLAGS="$compat_flags" dvdauthor.exe spumux.exe | tail -n 20
-cp src/dvdauthor.exe src/spumux.exe "$out/"
+# libtool leaves wrappers in src/; the programs themselves are in src/.libs/.
+cp src/.libs/dvdauthor.exe src/.libs/spumux.exe "$out/"
 cp ../source.tar.gz "$out/dvdauthor-${VERSION}.tar.gz"
 cp COPYING "$out/COPYING.dvdauthor"
 
 # The DLLs the programs need from MSYS2 (each must be shipped with its licence).
-{ ldd "$out/dvdauthor.exe"; ldd "$out/spumux.exe"; } | grep -iv "/c/windows" | sort -u | tee "$out/dlls.txt"
+{ ldd "$out/dvdauthor.exe"; ldd "$out/spumux.exe"; } | { grep -iv "/c/windows" || true; } | sort -u | tee "$out/dlls.txt"
