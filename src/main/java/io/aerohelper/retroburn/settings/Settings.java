@@ -24,6 +24,7 @@ import java.util.Optional;
  * @param mp3 settings for MP3 discs
  * @param video settings for video DVDs
  * @param design settings for the cover and label designer
+ * @param appearance theme, sounds and the disc animation
  */
 public record Settings(
         boolean preventSleepWhileBurning,
@@ -35,7 +36,8 @@ public record Settings(
         Audio audio,
         Mp3 mp3,
         Video video,
-        Design design) {
+        Design design,
+        Appearance appearance) {
 
     public Settings {
         Objects.requireNonNull(workDirectory, "workDirectory");
@@ -44,6 +46,7 @@ public record Settings(
         Objects.requireNonNull(mp3, "mp3");
         Objects.requireNonNull(video, "video");
         Objects.requireNonNull(design, "design");
+        Objects.requireNonNull(appearance, "appearance");
     }
 
     /**
@@ -119,6 +122,34 @@ public record Settings(
         }
     }
 
+    /**
+     * Theme, sounds and the spinning disc.
+     *
+     * @param theme theme id, such as classic or y2k
+     * @param sounds ON or OFF; empty to follow the theme's default
+     * @param animateDisc whether the disc on the progress screen moves
+     */
+    public record Appearance(String theme, String sounds, boolean animateDisc) {
+
+        public Appearance {
+            Objects.requireNonNull(theme, "theme");
+            Objects.requireNonNull(sounds, "sounds");
+        }
+
+        public static Appearance defaults() {
+            return new Appearance("classic", "", true);
+        }
+
+        /** The sound choice as a flag, or null when it follows the theme. */
+        public Boolean soundChoice() {
+            return switch (sounds) {
+                case "ON" -> Boolean.TRUE;
+                case "OFF" -> Boolean.FALSE;
+                default -> null;
+            };
+        }
+    }
+
     /** Settings for a first start. */
     public static Settings defaults() {
         return new Settings(
@@ -131,7 +162,8 @@ public record Settings(
                 Audio.defaults(),
                 Mp3.defaults(),
                 Video.defaults(),
-                Design.defaults());
+                Design.defaults(),
+                Appearance.defaults());
     }
 
     public Settings withVerifyAfterBurn(boolean verify) {
@@ -145,7 +177,8 @@ public record Settings(
                 audio,
                 mp3,
                 video,
-                design);
+                design,
+                appearance);
     }
 
     public Settings withShowUsbTip(boolean show) {
@@ -159,7 +192,8 @@ public record Settings(
                 audio,
                 mp3,
                 video,
-                design);
+                design,
+                appearance);
     }
 
     public Settings withAudio(Audio changed) {
@@ -173,7 +207,8 @@ public record Settings(
                 changed,
                 mp3,
                 video,
-                design);
+                design,
+                appearance);
     }
 
     public Settings withMp3(Mp3 changed) {
@@ -187,7 +222,8 @@ public record Settings(
                 audio,
                 changed,
                 video,
-                design);
+                design,
+                appearance);
     }
 
     public Settings withVideo(Video changed) {
@@ -201,7 +237,8 @@ public record Settings(
                 audio,
                 mp3,
                 changed,
-                design);
+                design,
+                appearance);
     }
 
     public Settings withDesign(Design changed) {
@@ -215,6 +252,22 @@ public record Settings(
                 audio,
                 mp3,
                 video,
+                changed,
+                appearance);
+    }
+
+    public Settings withAppearance(Appearance changed) {
+        return new Settings(
+                preventSleepWhileBurning,
+                keepTemporaryFiles,
+                workDirectory,
+                toolPaths,
+                verifyAfterBurn,
+                showUsbTip,
+                audio,
+                mp3,
+                video,
+                design,
                 changed);
     }
 }

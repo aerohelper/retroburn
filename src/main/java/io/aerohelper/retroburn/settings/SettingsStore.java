@@ -53,6 +53,9 @@ public final class SettingsStore {
     static final String KEY_VIDEO_AFTER = "video.afterTitle";
     static final String KEY_DESIGN_PAPER = "design.paper";
     static final String KEY_DESIGN_IMAGE_NOTICE = "design.imageNoticeShown";
+    static final String KEY_THEME = "appearance.theme";
+    static final String KEY_SOUNDS = "appearance.sounds";
+    static final String KEY_ANIMATE_DISC = "appearance.animateDisc";
 
     private static final Logger LOG = Logger.getLogger(SettingsStore.class.getName());
 
@@ -149,7 +152,13 @@ public final class SettingsStore {
                                 KEY_DESIGN_PAPER, defaults.design().paper()),
                         bool(
                                 properties.getProperty(KEY_DESIGN_IMAGE_NOTICE),
-                                defaults.design().imageNoticeShown())));
+                                defaults.design().imageNoticeShown())),
+                new Settings.Appearance(
+                        properties.getProperty(KEY_THEME, defaults.appearance().theme()),
+                        properties.getProperty(KEY_SOUNDS, defaults.appearance().sounds()),
+                        bool(
+                                properties.getProperty(KEY_ANIMATE_DISC),
+                                defaults.appearance().animateDisc())));
     }
 
     private static int integer(String value, int fallback) {
@@ -185,6 +194,10 @@ public final class SettingsStore {
         properties.setProperty(KEY_DESIGN_PAPER, settings.design().paper());
         properties.setProperty(
                 KEY_DESIGN_IMAGE_NOTICE, Boolean.toString(settings.design().imageNoticeShown()));
+        properties.setProperty(KEY_THEME, settings.appearance().theme());
+        properties.setProperty(KEY_SOUNDS, settings.appearance().sounds());
+        properties.setProperty(
+                KEY_ANIMATE_DISC, Boolean.toString(settings.appearance().animateDisc()));
         settings.workDirectory().ifPresent(folder -> properties.setProperty(KEY_WORK_DIRECTORY, folder.toString()));
         settings.toolPaths()
                 .forEach((tool, path) -> properties.setProperty(KEY_TOOL_PATH_PREFIX + toolKey(tool), path.toString()));

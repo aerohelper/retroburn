@@ -37,7 +37,8 @@ class SettingsStoreTest {
                 new Settings.Audio(false, true),
                 new Settings.Mp3("FLAT", false, false, "VBR_2", true),
                 new Settings.Video("NTSC", 10, "y2k", "NEXT"),
-                new Settings.Design("LETTER", true));
+                new Settings.Design("LETTER", true),
+                new Settings.Appearance("y2k", "OFF", false));
         SettingsStore store = new SettingsStore(folder);
 
         store.save(changed);
