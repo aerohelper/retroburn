@@ -47,7 +47,7 @@ Proposed: **option 1**, Apache PDFBox 3.0.8 (`pdfbox`, which brings
   every output; Java2D only draws the glyphs.
 - Bundled fonts: Lato (Regular and Bold) and VT323, both under the SIL
   Open Font License 1.1, taken unchanged from the Google Fonts repository
-  (`ofl/lato`, `ofl/vt323`), with their `OFL.txt`. VT323 is also the
+  (`ofl/lato`, `ofl/vt323`), with their `OFL.txt` shipped in the in-app credits. VT323 is also the
   display font of the `y2k` skin.
 
 ### Consequences

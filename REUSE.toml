@@ -63,3 +63,25 @@ SPDX-License-Identifier = "MIT"
 path = ".claude/skills/**/SKILL.md"
 SPDX-FileCopyrightText = "2026 Chetan and contributors"
 SPDX-License-Identifier = "GPL-3.0-or-later"
+
+[[annotations]]
+path = [
+    "src/main/resources/credits/licenses/pdfbox-LICENSE.txt",
+    "src/main/resources/credits/licenses/fontbox-LICENSE.txt",
+    "src/main/resources/credits/notices/pdfbox-*.txt",
+    "src/main/resources/credits/notices/fontbox-NOTICE.txt",
+    "src/main/resources/credits/notices/commons-logging-NOTICE.txt",
+]
+SPDX-FileCopyrightText = "The Apache Software Foundation"
+SPDX-License-Identifier = "Apache-2.0"
+
+# Bundled fonts and their licence texts, unchanged from the Google Fonts repository.
+[[annotations]]
+path = ["src/main/resources/fonts/lato/*.ttf", "src/main/resources/credits/licenses/lato-OFL.txt"]
+SPDX-FileCopyrightText = "2010-2014 tyPoland Lukasz Dziedzic"
+SPDX-License-Identifier = "OFL-1.1"
+
+[[annotations]]
+path = ["src/main/resources/fonts/vt323/*.ttf", "src/main/resources/credits/licenses/vt323-OFL.txt"]
+SPDX-FileCopyrightText = "2011 The VT323 Project Authors"
+SPDX-License-Identifier = "OFL-1.1"

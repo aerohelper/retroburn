@@ -57,6 +57,58 @@
       ],
       "noticeFiles": ["jackson-core-NOTICE.txt"],
       "mavenArtifacts": ["tools.jackson.core:jackson-core"]
+    },
+    {
+      "id": "pdfbox",
+      "name": "Apache PDFBox and FontBox",
+      "role": "Writes PDF files of covers and labels and reads fonts",
+      "authors": "The Apache Software Foundation; original PDFBox and FontBox projects; includes Adobe font metrics, CMaps and glyph lists, Unicode data, the Liberation Sans font, a CC0 ICC profile and parts of TwelveMonkeys ImageIO",
+      "license": "Apache-2.0 AND BSD-3-Clause AND APAFML AND Adobe-Glyph AND OFL-1.1 AND CC0-1.0 AND Unicode-TOU",
+      "homepage": "https://pdfbox.apache.org/",
+      "provision": "BUNDLED_LIBRARY",
+      "platforms": ["LINUX", "WINDOWS"],
+      "licenseFiles": ["pdfbox-LICENSE.txt", "fontbox-LICENSE.txt", "Apache-2.0.txt"],
+      "noticeFiles": ["pdfbox-NOTICE.txt", "pdfbox-io-NOTICE.txt", "fontbox-NOTICE.txt"],
+      "mavenArtifacts": ["org.apache.pdfbox:pdfbox", "org.apache.pdfbox:pdfbox-io", "org.apache.pdfbox:fontbox"]
+    },
+    {
+      "id": "commons-logging",
+      "name": "Apache Commons Logging",
+      "role": "Logging used by PDFBox",
+      "authors": "The Apache Software Foundation",
+      "license": "Apache-2.0",
+      "homepage": "https://commons.apache.org/proper/commons-logging/",
+      "provision": "BUNDLED_LIBRARY",
+      "platforms": ["LINUX", "WINDOWS"],
+      "licenseFiles": ["Apache-2.0.txt"],
+      "noticeFiles": ["commons-logging-NOTICE.txt"],
+      "mavenArtifacts": ["commons-logging:commons-logging"]
+    },
+    {
+      "id": "font-lato",
+      "name": "Lato font (Regular, Bold)",
+      "role": "Text on covers and labels",
+      "authors": "Łukasz Dziedzic",
+      "license": "OFL-1.1",
+      "homepage": "https://github.com/google/fonts/tree/main/ofl/lato",
+      "provision": "BUNDLED_ASSET",
+      "platforms": ["LINUX", "WINDOWS"],
+      "licenseFiles": ["lato-OFL.txt"],
+      "noticeFiles": [],
+      "mavenArtifacts": []
+    },
+    {
+      "id": "font-vt323",
+      "name": "VT323 font",
+      "role": "Text on covers and labels, and the y2k skin's display font",
+      "authors": "The VT323 Project Authors",
+      "license": "OFL-1.1",
+      "homepage": "https://github.com/google/fonts/tree/main/ofl/vt323",
+      "provision": "BUNDLED_ASSET",
+      "platforms": ["LINUX", "WINDOWS"],
+      "licenseFiles": ["vt323-OFL.txt"],
+      "noticeFiles": [],
+      "mavenArtifacts": []
     }
   ]
 }
