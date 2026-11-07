@@ -47,3 +47,11 @@ Sound; a missing audio device only turns sounds off.
   all.
 - Option 3 was not chosen because theme authors could not drop in their
   own files.
+
+## Findings so far (2026-11-07)
+
+- Running the generator twice gives byte-identical files (checked with
+  SHA-256).
+- Java Sound reads every file as 22 050 Hz mono 16-bit signed PCM
+  (`ThemeFilesTest`, Windows 11). Playing them on a real audio device on
+  each system is a manual check (`docs/MANUAL_TEST.md`, THEME-2).

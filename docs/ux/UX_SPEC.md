@@ -160,21 +160,24 @@ Themes are JavaFX CSS files that set these looked-up colours and sizes on
 | Token | Purpose | `classic` (proposed) | `y2k` (proposed) |
 |---|---|---|---|
 | `-rb-bg` | Window background | `#F4F5F7` | `#C9D6E8` |
-| `-rb-surface` | Panels, cards | `#FFFFFF` | `#E6EEF8` gradient |
+| `-rb-surface` | Panels, cards | `#FFFFFF` | `#E6EEF8` |
 | `-rb-text` | Body text | `#1B1F24` | `#0B1A33` |
 | `-rb-text-muted` | Secondary text | `#59636E` | `#33476B` |
-| `-rb-accent` | Primary action, progress | `#1F5FBF` | `#1E6FD9` |
+| `-rb-accent` | Primary action, progress | `#1F5FBF` | `#1E5FB8` |
 | `-rb-accent-text` | Text on accent | `#FFFFFF` | `#FFFFFF` |
-| `-rb-success` | Success state | `#1E7B34` | `#1F8F3A` |
-| `-rb-warning` | Warnings, near-full | `#8A5A00` | `#B36B00` |
-| `-rb-error` | Errors, over-capacity | `#B3261E` | `#C62828` |
+| `-rb-success` | Success state | `#1E7B34` | `#17652C` |
+| `-rb-warning` | Warnings, near-full | `#8A5A00` | `#7A4A00` |
+| `-rb-error` | Errors, over-capacity | `#B3261E` | `#A61F1F` |
 | `-rb-focus` | Focus ring | `#1F5FBF` | `#FF9F1C` |
 | `-rb-radius` | Corner radius | `6px` | `3px` (bevelled) |
 | `-rb-font-body` | Body font | System UI | System UI |
 | `-rb-font-display` | Headers, LED display | System UI | VT323 (OFL) |
 
-`classic` text/background pairs must meet WCAG AA (4.5:1 for body text, 3:1
-for large text and UI components); this is checked when the theme is built.
+Text/background pairs of every theme must meet WCAG AA (4.5:1 for body text,
+3:1 for large text and UI components); `ThemeContrastTest` checks them for
+both themes. `y2k` also defines `-rb-led` `#39FF14` on `-rb-led-bg`
+`#0B1A0B` for the LED read-out. The table shows the values as built
+(see [LLD-themes.md](../design/LLD-themes.md)).
 `y2k` adds bevelled buttons, a gradient header and a segmented LED-style
 progress bar.
 
@@ -196,7 +199,7 @@ progress bar.
 
 | Event | Sound | Default |
 |---|---|---|
-| Burn starts | spin-up | On in `y2k`, off in `classic` |
+| Burn starts | spin-up | On in `y2k`, off in `classic`; **View → Sounds** overrides |
 | Writing | burning loop (quiet) | same |
 | Success | success chime | same |
 | Error | error tone | same |

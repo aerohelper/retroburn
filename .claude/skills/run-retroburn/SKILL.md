@@ -55,6 +55,8 @@ timeout 120 java -cp "$SCRATCH/tour/classes;$CP" 'ScreenTour$Main' "$SCRATCH/tou
 ```
 
 Steps: `card:<title>` presses the home card whose title is `<title>`;
+`menu:<path>` chooses a menu item by its texts, such as `menu:View>Theme>Y2K`
+(it changes the saved theme; switch back with `menu:View>Theme>Classic`);
 `button:<text>` presses a button by its visible text; `wait:<ms>` sleeps;
 `snap:<name>` writes `<out>/<name>.png` and prints every visible label.
 Each press also prints whether the control was disabled.

@@ -55,3 +55,8 @@ All notable changes to RetroBurn are recorded here. The format follows
   minimal styles; text filled in from the last project; `.rbdesign` files;
   PDF export with embedded fonts (Apache PDFBox), 300 dpi PNG, printing at
   100 % and a test page. Lato and VT323 fonts are bundled.
+- Retro skins: a `y2k` theme beside `classic`, switched live from the View
+  menu, with bevelled buttons, a gradient header, an LED progress bar and
+  the VT323 display font; a spinning disc on the progress and result
+  screens; original sounds for spin-up, burning, success and error (on by
+  default in `y2k` only); options to turn sounds and the animation off.

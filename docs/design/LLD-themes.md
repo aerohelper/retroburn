@@ -7,7 +7,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 | | |
 |---|---|
-| Status | Designed for the retro skins milestone (M9) |
+| Status | Built in the retro skins milestone (M9). Sounds not yet heard on Linux; the disc not yet seen during a real burn. |
 | Packages | `io.aerohelper.retroburn.theme` (themes, sounds, disc animation; JavaFX), `.app` (View menu), `.ui` (progress and result screens) |
 | Related | [ADR-0017](../adr/0017-sounds-and-themes.md), [UX_SPEC §7–9](../ux/UX_SPEC.md), [EXTENSIBILITY §4](../EXTENSIBILITY.md) |
 
@@ -58,7 +58,7 @@ The `classic` values of UX_SPEC §7 are kept. `y2k`:
 | `-rb-text-muted` | `#33476B` |
 | `-rb-accent` | `#1E5FB8` |
 | `-rb-accent-text` | `#FFFFFF` |
-| `-rb-success` | `#1A6E30` |
+| `-rb-success` | `#17652C` |
 | `-rb-warning` | `#7A4A00` |
 | `-rb-error` | `#A61F1F` |
 | `-rb-focus` | `#FF9F1C` |
@@ -115,4 +115,14 @@ it is drawn still.
   `SettingsStore` round trip.
 - Manual: switch themes on each screen, including dialogs; burn and
   cancel with sounds on and off; check the disc stays still with
-  animation off or reduced motion on.
+  animation off or reduced motion on (`docs/MANUAL_TEST.md`, themes
+  section).
+
+Results so far (Windows 11): `ThemeContrastTest` passes for both themes
+after the `y2k` success colour was darkened from `#1A6E30` (4.3:1 on its
+background) to `#17652C` (4.86:1); `ThemeFilesTest` reads every sound
+with Java Sound as 22 050 Hz mono 16-bit PCM; switching to `y2k` from the
+View menu restyled the open home and video DVD screens at once; a
+progress header with the disc, the LED bar and the LED percentage was
+drawn in both themes. The `@import` of the classic stylesheet works from
+the classpath.
