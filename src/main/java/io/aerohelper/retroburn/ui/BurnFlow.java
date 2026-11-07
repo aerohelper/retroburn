@@ -18,6 +18,8 @@ import io.aerohelper.retroburn.project.BurnPlan;
 import io.aerohelper.retroburn.project.BurnPreCheck;
 import io.aerohelper.retroburn.project.JobKind;
 import io.aerohelper.retroburn.settings.Settings;
+import io.aerohelper.retroburn.theme.Appearance;
+import io.aerohelper.retroburn.theme.DiscMotion;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,6 +36,9 @@ import javafx.scene.control.Alert;
  * {@code docs/design/LLD-data-burning.md} sections 3 to 6.
  */
 final class BurnFlow {
+
+    /** Size of the spinning disc on the progress and result screens. */
+    private static final double DISC_RADIUS = 30;
 
     private static final Logger LOG = Logger.getLogger(BurnFlow.class.getName());
 
@@ -101,7 +106,13 @@ final class BurnFlow {
     /** Runs a job that needs no drive, such as creating an ISO file. Call on the FX thread. */
     void startWithoutDrive(Pipeline pipeline, String title, String successText) {
         CancelToken cancel = new CancelToken();
-        ProgressView progress = new ProgressView(messages, pipeline, cancel, navigation.window(), title);
+        ProgressView progress = new ProgressView(
+                messages,
+                pipeline,
+                cancel,
+                navigation.window(),
+                title,
+                services.appearance().newDisc(DISC_RADIUS));
         navigation.showOnTop(progress.node());
         Settings settings = services.settings().current();
         CompletableFuture.supplyAsync(
@@ -161,24 +172,52 @@ final class BurnFlow {
         BurnPlan plan = choice.plan();
         Pipeline pipeline = job.pipeline().build(plan, choice.blankMode());
         CancelToken cancel = new CancelToken();
-        ProgressView progress = new ProgressView(messages, pipeline, cancel, navigation.window(), job.title());
+        ProgressView progress = new ProgressView(
+                messages,
+                pipeline,
+                cancel,
+                navigation.window(),
+                job.title(),
+                services.appearance().newDisc(DISC_RADIUS));
         navigation.showOnTop(progress.node());
         BurnJob burnJob =
                 new BurnJob(services.pipelineRunner(), services.platform().burnEngine(), driveBar.watcher());
         Settings settings = services.settings().current();
+        services.appearance().burnStarted();
         CompletableFuture.supplyAsync(
                         () -> burnJob.run(plan, pipeline, options(settings), progress, cancel), services.jobs())
                 .whenComplete((result, error) -> Platform.runLater(() -> {
                     progress.close();
                     driveBar.readMedia();
-                    showResult(error == null ? result : unexpected(error), job.successText(), progress);
+                    BurnJob.Result finished = error == null ? result : unexpected(error);
+                    services.appearance().burnFinished(ending(finished.outcome()));
+                    showResult(finished, job.successText(), progress);
                 }));
     }
 
     private void showResult(BurnJob.Result result, String successText, ProgressView progress) {
+        progress.disc()
+                .setState(
+                        ending(result.outcome()) == Appearance.Ending.SUCCESS
+                                ? DiscMotion.State.DONE
+                                : DiscMotion.State.STOPPED);
         ResultView view = new ResultView(
-                messages, result, successText, progress.logTail(), navigation::backToProject, navigation::showHome);
+                messages,
+                result,
+                successText,
+                progress.logTail(),
+                progress.disc().node(),
+                navigation::backToProject,
+                navigation::showHome);
         navigation.showOnTop(view.node());
+    }
+
+    static Appearance.Ending ending(BurnJob.Outcome outcome) {
+        return switch (outcome) {
+            case SUCCEEDED, SUCCEEDED_WITHOUT_VERIFY -> Appearance.Ending.SUCCESS;
+            case CANCELLED -> Appearance.Ending.CANCELLED;
+            case VERIFY_FAILED, FAILED, DRIVE_LOST -> Appearance.Ending.ERROR;
+        };
     }
 
     private static PipelineRunner.Options options(Settings settings) {

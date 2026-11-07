@@ -17,7 +17,10 @@ import io.aerohelper.retroburn.platform.linux.LinuxPlatform;
 import io.aerohelper.retroburn.platform.simulated.SimulatedPlatform;
 import io.aerohelper.retroburn.platform.windows.WindowsAppPaths;
 import io.aerohelper.retroburn.platform.windows.WindowsPlatform;
+import io.aerohelper.retroburn.settings.Settings;
 import io.aerohelper.retroburn.settings.SettingsStore;
+import io.aerohelper.retroburn.theme.Appearance;
+import io.aerohelper.retroburn.theme.ThemeRegistry;
 import io.aerohelper.retroburn.tools.ExternalTool;
 import io.aerohelper.retroburn.tools.Feature;
 import io.aerohelper.retroburn.tools.FeatureAvailability;
@@ -50,6 +53,7 @@ public final class AppContext implements AutoCloseable {
     private final AtomicReference<CoverContent> coverContent = new AtomicReference<>(CoverContent.EMPTY);
     private final PlatformServices platform;
     private final SettingsStore settingsStore;
+    private final Appearance appearance;
     private final AppInfo appInfo;
     private final Messages messages;
     private final ComponentRegistry componentRegistry;
@@ -90,6 +94,8 @@ public final class AppContext implements AutoCloseable {
         this.workRoot = workRoot;
         this.workFolders = new WorkFolders(workRoot);
         this.pipelineRunner = new PipelineRunner(workFolders, platform.sleepInhibitor());
+        Settings.Appearance look = settingsStore.current().appearance();
+        this.appearance = new Appearance(ThemeRegistry.builtIn(), look.theme(), look.soundChoice(), look.animateDisc());
     }
 
     /**
@@ -204,12 +210,14 @@ public final class AppContext implements AutoCloseable {
                 () -> workRoot,
                 background,
                 jobs,
-                coverContent);
+                coverContent,
+                appearance);
     }
 
     /** Stops background threads; a running job's processes are stopped with the JVM. */
     @Override
     public void close() {
+        appearance.close();
         background.shutdownNow();
         jobs.shutdownNow();
     }

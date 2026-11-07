@@ -3,6 +3,9 @@
 package io.aerohelper.retroburn.app;
 
 import io.aerohelper.retroburn.common.Messages;
+import io.aerohelper.retroburn.settings.Settings;
+import io.aerohelper.retroburn.theme.Appearance;
+import io.aerohelper.retroburn.theme.Theme;
 import io.aerohelper.retroburn.ui.AboutDialog;
 import io.aerohelper.retroburn.ui.HomeView;
 import io.aerohelper.retroburn.ui.LicensesDialog;
@@ -11,9 +14,12 @@ import io.aerohelper.retroburn.ui.UiServices;
 import java.util.Objects;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.RadioMenuItem;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -24,7 +30,6 @@ import javafx.stage.Window;
  */
 public final class MainWindow implements Navigation {
 
-    private static final String THEME_STYLESHEET = "/themes/classic/theme.css";
     private static final double INITIAL_WIDTH = 960;
     private static final double INITIAL_HEIGHT = 640;
 
@@ -46,7 +51,7 @@ public final class MainWindow implements Navigation {
         showHome();
 
         Scene scene = new Scene(root, INITIAL_WIDTH, INITIAL_HEIGHT);
-        scene.getStylesheets().add(stylesheetUrl());
+        services.appearance().apply(scene);
 
         stage.setTitle(context.appInfo().name());
         stage.setScene(scene);
@@ -106,14 +111,53 @@ public final class MainWindow implements Navigation {
 
         Menu help = new Menu(messages.get("menu.help"));
         help.getItems().addAll(about, licenses);
-        return new MenuBar(help);
+        return new MenuBar(viewMenu(messages), help);
     }
 
-    private static String stylesheetUrl() {
-        var url = MainWindow.class.getResource(THEME_STYLESHEET);
-        if (url == null) {
-            throw new IllegalStateException("Missing bundled resource " + THEME_STYLESHEET);
+    /** View: theme (switched live), sounds and the disc animation, each saved at once. */
+    private Menu viewMenu(Messages messages) {
+        Appearance appearance = services.appearance();
+        Menu themes = new Menu(messages.get("menu.view.theme"));
+        ToggleGroup group = new ToggleGroup();
+        for (Theme theme : appearance.registry().all()) {
+            RadioMenuItem item = new RadioMenuItem(theme.name());
+            item.setToggleGroup(group);
+            item.setSelected(theme.id().equals(appearance.theme().id()));
+            themes.getItems().add(item);
         }
-        return url.toExternalForm();
+        CheckMenuItem sounds = new CheckMenuItem(messages.get("menu.view.sounds"));
+        sounds.setSelected(appearance.soundsOn());
+        CheckMenuItem animate = new CheckMenuItem(messages.get("menu.view.animateDisc"));
+        animate.setSelected(appearance.animateDiscSetting());
+        for (int index = 0; index < themes.getItems().size(); index++) {
+            Theme theme = appearance.registry().all().get(index);
+            themes.getItems().get(index).setOnAction(event -> {
+                appearance.setTheme(theme.id(), stage.getScene());
+                sounds.setSelected(appearance.soundsOn());
+                saveAppearance();
+            });
+        }
+        sounds.setOnAction(event -> {
+            appearance.setSounds(sounds.isSelected());
+            saveAppearance();
+        });
+        animate.setOnAction(event -> {
+            appearance.setAnimateDisc(animate.isSelected());
+            saveAppearance();
+        });
+        Menu view = new Menu(messages.get("menu.view"));
+        view.getItems().addAll(themes, sounds, animate);
+        return view;
+    }
+
+    private void saveAppearance() {
+        Appearance appearance = services.appearance();
+        Boolean choice = appearance.soundChoice();
+        Settings settings = services.settings().current();
+        services.settings()
+                .save(settings.withAppearance(new Settings.Appearance(
+                        appearance.theme().id(),
+                        choice == null ? "" : choice ? "ON" : "OFF",
+                        appearance.animateDiscSetting())));
     }
 }

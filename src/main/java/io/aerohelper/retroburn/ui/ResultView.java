@@ -33,6 +33,7 @@ final class ResultView {
             BurnJob.Result result,
             String successText,
             List<String> logTail,
+            Node disc,
             Runnable back,
             Runnable home) {
         String outcome = result.outcome().name().toLowerCase(Locale.ROOT).replace('_', '-');
@@ -43,7 +44,9 @@ final class ResultView {
         Label text = new Label(message(messages, result, successText));
         text.setWrapText(true);
 
-        VBox content = new VBox(title, text);
+        HBox top = new HBox(disc, title);
+        top.getStyleClass().add("progress-top");
+        VBox content = new VBox(top, text);
         Optional<RetroBurnException> error = result.error();
         if (error.isPresent() || !logTail.isEmpty()) {
             StringBuilder details = new StringBuilder();
