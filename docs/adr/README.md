@@ -28,6 +28,7 @@ record that supersedes the old one.
 | [0014](0014-cd-text-on-windows-through-cdrdao.md) | CD-Text on Windows through cdrdao | Proposed |
 | [0015](0015-video-dvd-structure.md) | Video DVD structure and images | Proposed |
 | [0016](0016-pdf-export-and-fonts.md) | PDF export with Apache PDFBox, and fonts for covers | Proposed |
+| [0017](0017-sounds-and-themes.md) | Theme sounds made by a generator and played with Java Sound | Proposed |
 
 Statuses: **Proposed** (awaiting owner review or a spike), **Accepted**,
 **Superseded by NNNN**, **Rejected**.
