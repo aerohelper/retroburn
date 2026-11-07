@@ -46,28 +46,35 @@ SHIM
 chmod +x "$work/bin/freetype-config"
 export PATH="$work/bin:$PATH"
 
-# MinGW gaps: no <netinet/in.h> (the byte-order functions are in winsock2) and a one-argument
-# mkdir. Without iconv (am_cv_func_iconv=no), nl_langinfo is not needed and text subtitles are
-# read as UTF-8; the app's menus use image buttons only.
+# MinGW gaps: no <netinet/in.h> (only its byte-order functions are used; x86 is little-endian, and
+# winsock2.h would clash with subfont.c's own Windows declarations), no <langinfo.h>, fsync or
+# bzero, and a one-argument mkdir. Without iconv (am_cv_func_iconv=no), nl_langinfo is not called
+# and text subtitles are read as UTF-8; the app's menus use image buttons only.
 mkdir -p "$work/compat/netinet"
 cat > "$work/compat/netinet/in.h" <<'SHIM'
-#include <winsock2.h>
+#include <stdint.h>
+static inline uint32_t htonl(uint32_t x) { return __builtin_bswap32(x); }
+static inline uint32_t ntohl(uint32_t x) { return __builtin_bswap32(x); }
+static inline uint16_t htons(uint16_t x) { return __builtin_bswap16(x); }
+static inline uint16_t ntohs(uint16_t x) { return __builtin_bswap16(x); }
 SHIM
+: > "$work/compat/langinfo.h"
 cat > "$work/compat/mingw-compat.h" <<'SHIM'
 #include <io.h>
 #include <direct.h>
+#include <string.h>
 #define mkdir(path, mode) _mkdir(path)
+#define fsync(fd) _commit(fd)
+#define bzero(p, n) memset((p), 0, (n))
 SHIM
 # Given to make only: a forced include confuses configure's own checks.
 compat_flags="-I$work/compat -include $work/compat/mingw-compat.h"
-export LIBS="-lws2_32"
 
 ./configure --prefix="$work/install" am_cv_func_iconv=no | tee "$out/configure.log"
-# Only the programs: the manual pages need docbook2man, and the app does not ship them.
-# -k lists every compile error in one run.
-make -C src -k -j"$(nproc)" CPPFLAGS="$compat_flags" | tail -n 20
-make -C src install CPPFLAGS="$compat_flags" | tail -n 5
-cp "$work/install/bin/dvdauthor.exe" "$work/install/bin/spumux.exe" "$out/"
+# Only the two programs the app runs: the manual pages need docbook2man, and mpeg2desc needs
+# select() on pipes. -k lists every compile error in one run.
+make -C src -k -j"$(nproc)" CPPFLAGS="$compat_flags" dvdauthor.exe spumux.exe | tail -n 20
+cp src/dvdauthor.exe src/spumux.exe "$out/"
 cp ../source.tar.gz "$out/dvdauthor-${VERSION}.tar.gz"
 cp COPYING "$out/COPYING.dvdauthor"
 
