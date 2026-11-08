@@ -19,3 +19,6 @@ target/
 # OS clutter
 .DS_Store
 Thumbs.db
+
+# Packages built by packaging/package.sh.
+/dist/
