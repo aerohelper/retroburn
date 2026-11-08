@@ -7,7 +7,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 | | |
 |---|---|
-| Status | Draft — contracts firm up as each module is built; final review before v0.1.0 |
+| Status | Reviewed for v0.1.0 against the code as built (M11) |
 | Background | [HLD §4 and §14](architecture/HLD.md) |
 
 RetroBurn has a small number of deliberate extension points. Each one has a
@@ -28,8 +28,9 @@ line in `AppContext` that selects it.
 
 | You provide | Notes |
 |---|---|
-| `AppPaths` | The OS's conventional folders for settings, data, logs, cache, videos. |
-| `ToolLocator` | Where FFmpeg, ffprobe, dvdauthor, spumux live (bundled or system). |
+| `AppPaths` | The OS's conventional folders for settings, data, logs, work folders and reels (videos). |
+| `ToolLocator` | Where FFmpeg, ffprobe, dvdauthor, spumux live (bundled or system); user settings override it. |
+| `fontFolders()` | Folders of the computer's fonts, for the cover designer. |
 | `BurnEngine` | Drive listing, media info, burn image, blank, verify, eject. (Data discs are burned from an image, ADR-0013.) |
 | `DiscImageBuilder` | Data ISO and DVD-Video image (ISO 9660 + UDF 1.02). |
 | `AudioCdEngine` (optional) | Return empty if unsupported; Audio CD is then disabled with an explanation. |
@@ -59,21 +60,30 @@ gets its own fixtures.
 
 ---
 
-## 3. A new disc / project type — `ProjectType` + `PipelineStep`s
+## 3. A new disc / project type — model, job factory, `PipelineStep`s, screen
 
-**Contract:**
+**Contract** (as the four project types are built, see the audio CD, MP3
+and video DVD LLDs):
 
-1. A record implementing `Project` (add it to the sealed `permits` list).
-2. A `ProjectType` declaring id, supported media, required tools, and how to
-   build its `Pipeline`.
-3. Its `PipelineStep`s, reusing existing ones where possible.
-4. One compilation view in `ui`.
-5. One registration line in `AppContext` (`ProjectTypeRegistry`).
-6. A `.rbproj` schema entry and migration if it changes the file format.
+1. A model in `project` (like `AudioCompilation`, `DvdProject`): immutable,
+   no JavaFX.
+2. A `JobKind` value and a job factory (like `DvdJobFactory`) that builds a
+   `Pipeline` of `PipelineStep`s, reusing `BurnJobFactory`'s image, burn and
+   verify steps, plus a pre-check (`BurnPreCheck`) for what blocks a burn.
+3. The `Feature` it needs, with each platform's `featureRequirements()`, so
+   the screen is gated with a reason when tools are missing.
+4. One screen in `ui` that runs the job through `BurnFlow` and publishes its
+   cover text (`CoverContents`), and one card in `HomeView`.
+5. Its user-visible text in `messages.properties` and a section in
+   `MANUAL_TEST.md`.
 
-**Worked example (photo slideshow DVD):** `SlideshowProject` holds images and
-durations; `SlideshowProjectType` builds: render slides to video (FFmpeg) →
-then reuses the Video DVD steps (menu, spumux, dvdauthor, image, burn, verify).
+Projects are not saved to files in v0.1; a project file format would come
+with its own ADR and `schemaVersion`.
+
+**Worked example (photo slideshow DVD):** a `SlideshowProject` holds images
+and durations; its job factory renders the slides to video with FFmpeg,
+then reuses `DvdJobFactory`'s menu, spumux, dvdauthor, image, burn and
+verify steps.
 
 ---
 
@@ -99,22 +109,28 @@ them.
 
 ## 5. A DVD menu template — `MenuTemplate`
 
-**Contract:** a folder under `menu-templates/<name>/` with a data file
-describing background, title position, button grid (≤ 6 per page), thumbnail
-frame, fonts, and the ≤ 4-colour highlight/select palette for subtitle
-overlays. `MenuRenderer` draws any template that follows the schema.
+**Contract:** a `MenuTemplate` constant (id, background top and bottom
+colours, text colour, highlight and select colours, font family, framed
+thumbnails) added to `MenuTemplate.named` and the template choice of the
+video DVD screen. Fonts are the bundled ones (`MenuFonts`) or a Java logical
+font. The layout (six buttons a page, page buttons) is shared by all
+templates in `MenuLayout`; highlight and select overlays use one colour
+each, as spumux needs. `VideoRulesTest` checks a new template renders.
 
-**Worked example:** a seasonal template with a different background image and
-a 2×2 button grid.
+**Worked example:** a seasonal template with warm colours and Lato,
+selectable as "Holiday".
 
 ---
 
 ## 6. A print template — `PrintTemplate`
 
-**Contract:** a data file under `print-templates/` giving the item's trim size
-in millimetres, bleed, safe zone, fold/spine lines, hole diameters for disc
-labels, and how many fit per A4/Letter sheet. Dimensions are verified by test
-print and recorded in `docs/PRINT_TEMPLATES.md`.
+**Contract:** a data file `src/main/resources/print-templates/<id>.json`
+(see `DATA_MODEL.md`) giving the trim size in millimetres, bleed, safe zone,
+fold lines or an adjustable spine, and hole diameters for disc labels; its id
+added to `PrintTemplates.IDS` and its name to `messages.properties`
+(`design.template.<id>`). `SheetLayout` works out how many fit on A4 and
+Letter; `PrintTemplatesTest` and `SheetLayoutTest` then cover it. Dimensions
+are verified by test print and recorded in `docs/PRINT_TEMPLATES.md`.
 
 **Worked example:** a label template for a specific brand of A4 label stock
 with two discs per sheet at different offsets.
