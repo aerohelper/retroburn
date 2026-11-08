@@ -6,8 +6,8 @@ import java.awt.Color;
 import java.util.Locale;
 
 /**
- * The look of a DVD menu: colours and fonts, as data. Fonts are the JDK's logical fonts until bundled
- * fonts arrive with the skins. See {@code docs/design/LLD-video-dvd.md} section 4.
+ * The look of a DVD menu: colours and fonts, as data. Fonts are the bundled Lato and VT323
+ * ({@link MenuFonts}). See {@code docs/design/LLD-video-dvd.md} section 4.
  *
  * @param id the template's name in settings
  * @param top background colour at the top
@@ -15,7 +15,7 @@ import java.util.Locale;
  * @param text text colour
  * @param highlight outline colour of the button the remote is on
  * @param select outline colour of a pressed button
- * @param font logical font family
+ * @param font font family: a bundled one (Lato, VT323) or a Java logical font
  * @param framedThumbnails draw a frame around each thumbnail
  */
 public record MenuTemplate(
@@ -35,7 +35,7 @@ public record MenuTemplate(
             new Color(0xF2F2F2),
             new Color(0xFFD23F),
             new Color(0xFF6B35),
-            "Serif",
+            "Lato",
             true);
     public static final MenuTemplate Y2K = new MenuTemplate(
             "y2k",
@@ -44,7 +44,7 @@ public record MenuTemplate(
             new Color(0xE6F7FF),
             new Color(0x5CFFE1),
             new Color(0xFF4FD8),
-            "Monospaced",
+            "VT323",
             true);
     public static final MenuTemplate MINIMAL = new MenuTemplate(
             "minimal",
@@ -53,7 +53,7 @@ public record MenuTemplate(
             new Color(0xFFFFFF),
             new Color(0xFFFFFF),
             new Color(0xAAAAAA),
-            "SansSerif",
+            "Lato",
             false);
 
     /** The template named {@code id}, or {@link #CLASSIC}. */
