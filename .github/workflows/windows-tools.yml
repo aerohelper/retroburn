@@ -137,7 +137,7 @@ jobs:
             mingw-w64-ucrt-x86_64-gcc
             mingw-w64-ucrt-x86_64-pkgconf
             mingw-w64-ucrt-x86_64-nasm
-            mingw-w64-ucrt-x86_64-x264
+            mingw-w64-ucrt-x86_64-libx264
             mingw-w64-ucrt-x86_64-lame
             mingw-w64-ucrt-x86_64-zlib
 
@@ -150,7 +150,9 @@ jobs:
           ./ffmpeg.exe -nostdin -hide_banner -loglevel error -y -f lavfi -i testsrc=size=1080x1920:rate=30:duration=2             -f lavfi -i sine=duration=2 -c:v libx264 -preset medium -crf 20 -pix_fmt yuv420p -c:a aac reel.mp4
           ./ffmpeg.exe -nostdin -hide_banner -loglevel error -y -f lavfi -i sine=duration=2 -c:a libmp3lame -q:a 2             -id3v2_version 3 -write_id3v1 1 tone.mp3
           ./ffmpeg.exe -nostdin -hide_banner -loglevel error -y -f lavfi -i testsrc=size=720x576:rate=25:duration=2             -f lavfi -i sine=duration=2 -target pal-dvd -c:a ac3 -b:a 192k -shortest title.mpg
-          ./ffprobe.exe -v error -show_entries stream=codec_name,width,height -of csv=p=0 reel.mp4 tone.mp3 title.mpg
+          for file in reel.mp4 tone.mp3 title.mpg; do
+            ./ffprobe.exe -v error -show_entries stream=codec_name,width,height -of csv=p=0 "$file"
+          done
           rm -f reel.mp4 tone.mp3 title.mpg
 
       - uses: actions/upload-artifact@v6
@@ -181,7 +183,7 @@ jobs:
             mingw-w64-ucrt-x86_64-libdvdread
             mingw-w64-ucrt-x86_64-fribidi
             mingw-w64-ucrt-x86_64-fontconfig
-            mingw-w64-ucrt-x86_64-x264
+            mingw-w64-ucrt-x86_64-libx264
             mingw-w64-ucrt-x86_64-lame
             mingw-w64-ucrt-x86_64-zlib
 

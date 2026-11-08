@@ -66,7 +66,7 @@ JavaFX jars' licence files (inside the jars), `LICENSE`,
 
 | Tool | How | Licence |
 |---|---|---|
-| FFmpeg, ffprobe | `build-ffmpeg.sh`: pinned FFmpeg release tarball (SHA-256 checked), MSYS2 UCRT64, `--disable-autodetect --enable-gpl --enable-libx264 --enable-libmp3lame --enable-zlib --disable-ffplay --disable-doc`; libx264, LAME and zlib from MSYS2 packages | GPL-2.0-or-later (because of `--enable-gpl` and libx264); configure line recorded |
+| FFmpeg, ffprobe | `build-ffmpeg.sh`: pinned FFmpeg release tarball (SHA-256 checked), MSYS2 UCRT64, `--disable-autodetect --enable-gpl --enable-libx264 --enable-libmp3lame --enable-zlib --disable-ffplay --disable-doc`; libx264, LAME and zlib from MSYS2 packages (the libx264 library package, not the x264 program) | GPL-2.0-or-later (because of `--enable-gpl` and libx264); configure line recorded |
 | dvdauthor, spumux | `build-dvdauthor.sh` (M7) | GPL-2.0-or-later |
 
 `bundle.sh` collects the executables and the DLLs `ldd` reports outside
