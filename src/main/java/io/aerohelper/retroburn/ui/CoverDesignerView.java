@@ -147,7 +147,15 @@ public final class CoverDesignerView implements Navigation.Screen {
         this.navigation = navigation;
         this.messages = services.messages();
         this.paper = Paper.fromSetting(services.settings().current().design().paper(), Locale.getDefault());
-        CoverContent content = services.coverContent().get();
+        CoverContent published = services.coverContent().get();
+        // Before any project has been opened, give the title something to show.
+        CoverContent content = published.title().isBlank()
+                ? new CoverContent(
+                        published.kind(),
+                        messages.get("design.placeholderTitle"),
+                        published.subtitle(),
+                        published.lines())
+                : published;
         this.history = new CommandHistory(Presets.create("classic", templates.get("cd-front"), content));
 
         Label heading = new Label(messages.get("home.card.coverAndLabel"));
@@ -288,6 +296,7 @@ public final class CoverDesignerView implements Navigation.Screen {
         Button png = button("design.exportPng", this::exportPng);
         Button print = button("design.print", this::print);
         Button testPage = button("design.testPage", this::testPage);
+        Button home = button("result.home", navigation::showHome);
         FlowPane bar = new FlowPane(
                 undo,
                 redo,
@@ -304,7 +313,9 @@ public final class CoverDesignerView implements Navigation.Screen {
                 pdf,
                 png,
                 print,
-                testPage);
+                testPage,
+                new Separator(Orientation.VERTICAL),
+                home);
         bar.getStyleClass().add("form-row");
         bar.setHgap(6);
         bar.setVgap(6);
