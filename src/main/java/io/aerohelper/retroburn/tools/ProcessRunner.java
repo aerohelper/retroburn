@@ -7,10 +7,12 @@ import io.aerohelper.retroburn.common.OperationCancelledException;
 import io.aerohelper.retroburn.common.ToolFailedException;
 import io.aerohelper.retroburn.common.UserMessage;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 
 /**
@@ -41,7 +43,13 @@ public final class ProcessRunner {
         OutputPump pump = new OutputPump(OUTPUT_TAIL_LINES);
         Thread stdout = drainStdout(process, request, pump);
         Thread stderr = pump.drain(process.getErrorStream(), request.charset(), request.stderrLines(), "stderr");
-        closeQuietly(process);
+        AtomicReference<RuntimeException> writerFailure = new AtomicReference<>();
+        Thread stdin = request.stdinWriter()
+                .map(writer -> feed(process, writer, writerFailure))
+                .orElse(null);
+        if (stdin == null) {
+            closeQuietly(process);
+        }
 
         boolean timedOut;
         try {
@@ -49,12 +57,18 @@ public final class ProcessRunner {
         } finally {
             joinQuietly(stdout);
             joinQuietly(stderr);
+            if (stdin != null) {
+                joinQuietly(stdin);
+            }
         }
         if (cancel.isCancelled()) {
             throw new OperationCancelledException();
         }
         if (pump.consumerFailure() != null) {
             throw pump.consumerFailure();
+        }
+        if (writerFailure.get() != null) {
+            throw writerFailure.get();
         }
         int exitCode = timedOut ? -1 : process.exitValue();
         LOG.info(() -> "Finished (" + (timedOut ? "timed out" : "exit " + exitCode) + "): " + request.commandLine());
@@ -73,6 +87,25 @@ public final class ProcessRunner {
         Thread stdout = drainStdout(process, request, pump);
         Thread stderr = pump.drain(process.getErrorStream(), request.charset(), request.stderrLines(), "stderr");
         return new RunningProcess(process, pump, List.of(stdout, stderr), request.commandLine());
+    }
+
+    /**
+     * Writes standard input on a virtual thread, then closes it. An {@link IOException} means the
+     * program stopped reading (it failed or was stopped); its exit code tells the caller why. Other
+     * failures of the writer are rethrown by {@link #run} after the program ended.
+     */
+    private static Thread feed(
+            Process process, ProcessRequest.StdinWriter writer, AtomicReference<RuntimeException> failure) {
+        return Thread.ofVirtual().name("stdin").start(() -> {
+            try (OutputStream input = process.getOutputStream()) {
+                writer.write(input);
+            } catch (IOException e) {
+                LOG.fine(() -> "Standard input closed early: " + e.getMessage());
+            } catch (RuntimeException e) {
+                failure.set(e);
+                destroyTree(process);
+            }
+        });
     }
 
     private static Thread drainStdout(Process process, ProcessRequest request, OutputPump pump) {
