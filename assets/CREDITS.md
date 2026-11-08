@@ -20,3 +20,4 @@ images — including in tests and screenshots.
 | `src/main/resources/themes/classic/sounds/*.wav`, `src/main/resources/themes/y2k/sounds/*.wav` | Chetan and contributors | Original, made by `tools/sounds/GenerateSounds.java` (ADR-0017) | GPL-3.0-or-later |
 | Theme stylesheets and the spinning disc drawing (`themes/*/theme.css`, `theme.DiscAnimation`) | Chetan and contributors | Original | GPL-3.0-or-later |
 | `packaging/icons/retroburn.png`, `retroburn.ico` (app icon) | Chetan and contributors | Original, drawn by `tools/icon/GenerateIcon.java` | GPL-3.0-or-later |
+| `docs/images/*.png`, `docs/images/demo-reel.gif` (README) | Chetan and contributors | Screenshots of RetroBurn and a reel of an invented burn (`tools/readme/DemoReelGif.java`) | GPL-3.0-or-later |

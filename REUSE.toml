@@ -103,3 +103,10 @@ SPDX-License-Identifier = "GPL-3.0-or-later"
 path = ["packaging/icons/retroburn.png", "packaging/icons/retroburn.ico"]
 SPDX-FileCopyrightText = "2026 Chetan and contributors"
 SPDX-License-Identifier = "GPL-3.0-or-later"
+
+# Screenshots of RetroBurn's own interface and the demo reel (invented content), made with the
+# run-retroburn skill's screen tour and tools/readme/DemoReelGif.java.
+[[annotations]]
+path = "docs/images/*"
+SPDX-FileCopyrightText = "2026 Chetan and contributors"
+SPDX-License-Identifier = "GPL-3.0-or-later"
