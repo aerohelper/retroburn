@@ -97,3 +97,9 @@ SPDX-License-Identifier = "GPL-3.0-or-later"
 path = "src/main/resources/themes/*/sounds/*.wav"
 SPDX-FileCopyrightText = "2026 Chetan and contributors"
 SPDX-License-Identifier = "GPL-3.0-or-later"
+
+# The app icon: original, drawn by tools/icon/GenerateIcon.java.
+[[annotations]]
+path = ["packaging/icons/retroburn.png", "packaging/icons/retroburn.ico"]
+SPDX-FileCopyrightText = "2026 Chetan and contributors"
+SPDX-License-Identifier = "GPL-3.0-or-later"
