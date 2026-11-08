@@ -2,9 +2,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 /**
- * Burn sessions and the burn reel: recording what happened during a burn and rendering it as a
- * short vertical MP4.
+ * Burn sessions and the burn reel: {@link io.aerohelper.retroburn.reel.SessionRecorder} records a
+ * burn, {@link io.aerohelper.retroburn.reel.SessionStore} keeps it as JSON, and {@link
+ * io.aerohelper.retroburn.reel.ReelMaker} draws the scenes of a {@link
+ * io.aerohelper.retroburn.reel.ReelTimeline} with Java2D and streams them into FFmpeg. No JavaFX.
  *
- * <p>Empty until the burn reel milestone. See {@code docs/EXTENSIBILITY.md} section 7.
+ * <p>See {@code docs/design/LLD-burn-reel.md}, ADR-0018 and {@code docs/EXTENSIBILITY.md} section 7.
  */
 package io.aerohelper.retroburn.reel;

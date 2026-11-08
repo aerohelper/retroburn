@@ -60,3 +60,8 @@ All notable changes to RetroBurn are recorded here. The format follows
   the VT323 display font; a spinning disc on the progress and result
   screens; original sounds for spin-up, burning, success and error (on by
   default in `y2k` only); options to turn sounds and the animation off.
+- Burn reels: every burn is recorded locally; after a success, "Make my
+  burn reel" renders a 15-second vertical video (1080 × 1920, H.264 and
+  AAC, with the theme's sounds) of the burn as a timelapse, with item
+  names hidden by default, saved to the Videos folder. Help → Make a demo
+  burn reel shows one without a drive.

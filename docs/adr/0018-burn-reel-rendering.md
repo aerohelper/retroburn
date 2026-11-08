@@ -46,3 +46,12 @@ encoder.
 - Bad: drawing 450 large frames takes several seconds of CPU.
 - Option 3 was not chosen: JavaFX snapshots need the UI thread and a
   toolkit, which tests and the encoding thread do not have.
+
+## Findings so far (2026-11-08)
+
+- The FFmpeg command in LLD-burn-reel section 5 works as written with the
+  FFmpeg of Ubuntu's packages and of Chocolatey on Windows: `ffprobe`
+  reports `h264`, 1080 × 1920, `yuv420p`, `aac`, 15.000 s
+  (`ReelAcceptanceTest`, CI).
+- Streaming 450 raw frames through `ProcessRequest.stdinWriter` took 14 s
+  (Linux) and 24 s (Windows) on the CI runners, drawing included.

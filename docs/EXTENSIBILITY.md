@@ -128,12 +128,13 @@ with two discs per sheet at different offsets.
 ```java
 public interface ReelScene {
     String id();
-    Duration preferredDuration(BurnSession session);
-    void render(Graphics2D graphics, ReelFrame frame, BurnSession session, Theme theme);
+    void render(Graphics2D graphics, ReelFrame frame, BurnSession session, ReelStyle style);
 }
 ```
 
 `render` must be pure (same inputs → same pixels) so snapshot tests work.
-Register it with one line in the reel timeline factory.
+`ReelStyle` carries the theme's colours and fonts, the user-visible text
+and the item names (hidden or not). Register the scene with one line in
+`ReelTimeline.of`. See [LLD-burn-reel.md](design/LLD-burn-reel.md).
 
 **Worked example:** a "cassette rewind" scene used as an alternative intro.

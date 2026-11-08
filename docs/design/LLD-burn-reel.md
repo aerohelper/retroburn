@@ -7,7 +7,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 | | |
 |---|---|
-| Status | Designed for the burn reel milestone (M10) |
+| Status | Built in the burn reel milestone (M10). Not yet made after a real burn or played on a phone. |
 | Packages | `io.aerohelper.retroburn.reel` (sessions, timeline, scenes, soundtrack, encoding; Java2D, no JavaFX), `.tools` (streamed standard input), `.ui` (result screen, demo) |
 | Related | [ADR-0018](../adr/0018-burn-reel-rendering.md), [EXTENSIBILITY §7](../EXTENSIBILITY.md), [LLD-themes.md](LLD-themes.md) |
 
@@ -140,3 +140,12 @@ File name: `RetroBurn-<yyyyMMdd-HHmmss>.mp4` from the session's start.
   reports 1080 × 1920, 14.5–15.5 s, `h264` (or the documented fallback),
   `yuv420p` and an AAC audio stream.
 - Manual: make a reel after a real burn; play it on a phone.
+
+Results so far: `ReelAcceptanceTest` passed in CI on Ubuntu (FFmpeg from
+apt) and on Windows (FFmpeg from Chocolatey): both chose `libx264`;
+`ffprobe` reported `h264` (High profile), 1080 × 1920, `yuv420p`, an `aac`
+mono stream and a duration of exactly 15.000 s; the files were about
+890 KB. Drawing a frame takes 13–22 ms on the development PC. The demo
+screen was opened in the real app (without FFmpeg it explains that reels
+need FFmpeg). With FFmpeg installed on the Windows runner, the other
+FFmpeg integration tests (audio conversion) now run there too, and pass.
