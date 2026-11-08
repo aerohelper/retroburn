@@ -47,7 +47,10 @@ while read -r package; do
     version="$(pacman -Q "$package" | awk '{print $2}')"
     licence="$(pacman -Qi "$package" | sed -n 's/^Licenses *: //p')"
     name="${package#mingw-w64-ucrt-x86_64-}"
-    base="mingw-w64-${name}"
+    # Split packages (gettext-runtime, libx264, ...) come from a differently named source package;
+    # pacman's local database records it as %BASE%.
+    base="$(awk '/^%BASE%$/ {getline; print; exit}' /var/lib/pacman/local/"$package-$version"/desc)"
+    base="${base:-mingw-w64-${name}}"
     if [ -d "/ucrt64/share/licenses/$name" ]; then
         mkdir -p "$tools/licenses/$name"
         cp -r "/ucrt64/share/licenses/$name/." "$tools/licenses/$name/"
