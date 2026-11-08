@@ -19,6 +19,16 @@ class WindowsFontFoldersTest {
     }
 
     @Test
+    void bundledToolsSitNextToTheLauncher() {
+        assertEquals(
+                java.util.Optional.of(
+                        Path.of("C:/Program Files/RetroBurn/tools").toAbsolutePath()),
+                WindowsPlatform.bundledToolsFolder("C:/Program Files/RetroBurn/RetroBurn.exe"));
+        assertEquals(java.util.Optional.empty(), WindowsPlatform.bundledToolsFolder(null));
+        assertEquals(java.util.Optional.empty(), WindowsPlatform.bundledToolsFolder(""));
+    }
+
+    @Test
     void missingVariablesAreLeftOut() {
         assertEquals(List.of(), WindowsPlatform.fontFolders(Map.of()));
     }

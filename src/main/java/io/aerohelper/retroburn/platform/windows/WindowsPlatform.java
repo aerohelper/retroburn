@@ -59,10 +59,11 @@ public final class WindowsPlatform implements PlatformServices {
             Map<String, String> environment,
             Supplier<Map<ExternalTool, Path>> toolOverrides) {
         this.appPaths = appPaths;
-        PathSearchToolLocator pathSearch = new PathSearchToolLocator(
-                PathSearchToolLocator.foldersFromPathVariable(
-                        WindowsEnvironment.get(environment, "PATH").orElse(""), File.pathSeparator),
-                List.of(".exe"));
+        List<Path> searchFolders = new ArrayList<>();
+        bundledToolsFolder(System.getProperty("jpackage.app-path")).ifPresent(searchFolders::add);
+        searchFolders.addAll(PathSearchToolLocator.foldersFromPathVariable(
+                WindowsEnvironment.get(environment, "PATH").orElse(""), File.pathSeparator));
+        PathSearchToolLocator pathSearch = new PathSearchToolLocator(searchFolders, List.of(".exe"));
         this.toolLocator = new OverridingToolLocator(toolOverrides, pathSearch);
         HelperFiles helperFiles = new HelperFiles(appPaths.data().resolve("helper"));
         this.helper = new HelperClient(runner, HelperClient.powerShell(powerShell(environment), helperFiles::script));
@@ -72,6 +73,22 @@ public final class WindowsPlatform implements PlatformServices {
         this.sleepInhibitor = new ExecutionStateSleepInhibitor(helper);
         this.powerStatus = new HelperPowerStatus(helper);
         this.fontFolders = fontFolders(environment);
+    }
+
+    /**
+     * The tools shipped with the installed app (ADR-0019): {@code tools\} next to the launcher, whose
+     * path jpackage's launcher puts in {@code jpackage.app-path}. Empty when running from source.
+     */
+    static Optional<Path> bundledToolsFolder(String launcherPath) {
+        if (launcherPath == null || launcherPath.isBlank()) {
+            return Optional.empty();
+        }
+        try {
+            Path parent = Path.of(launcherPath).toAbsolutePath().getParent();
+            return parent == null ? Optional.empty() : Optional.of(parent.resolve("tools"));
+        } catch (InvalidPathException e) {
+            return Optional.empty();
+        }
     }
 
     /** The Windows fonts folder and the per-user one where fonts installed without admin rights go. */
