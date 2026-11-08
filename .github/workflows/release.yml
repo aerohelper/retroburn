@@ -20,6 +20,11 @@ on:
 permissions:
   contents: read
 
+# A newer push to the same pull request replaces a dry run still in progress; tag builds always finish.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   windows-tools:
     uses: ./.github/workflows/windows-tools.yml
