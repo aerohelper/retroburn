@@ -109,6 +109,84 @@
       "licenseFiles": ["vt323-OFL.txt"],
       "noticeFiles": [],
       "mavenArtifacts": []
+    },
+    {
+      "id": "xorriso",
+      "name": "GNU xorriso",
+      "role": "Burns data discs and images, erases and reads discs on Linux",
+      "authors": "Thomas Schmitt and the libburnia project",
+      "license": "GPL-3.0-or-later",
+      "homepage": "https://www.gnu.org/software/xorriso/",
+      "provision": "OS_PACKAGE",
+      "platforms": ["LINUX"],
+      "licenseFiles": ["GPL-3.0.txt"],
+      "noticeFiles": [],
+      "mavenArtifacts": []
+    },
+    {
+      "id": "cdrskin",
+      "name": "cdrskin",
+      "role": "Burns audio CDs with CD-Text on Linux",
+      "authors": "Thomas Schmitt and the libburnia project",
+      "license": "GPL-2.0-or-later",
+      "homepage": "https://dev.lovelyhq.com/libburnia/web/wiki/Cdrskin",
+      "provision": "OS_PACKAGE",
+      "platforms": ["LINUX"],
+      "licenseFiles": ["GPL-2.0.txt"],
+      "noticeFiles": [],
+      "mavenArtifacts": []
+    },
+    {
+      "id": "genisoimage",
+      "name": "genisoimage (cdrkit)",
+      "role": "Builds DVD-Video disc images on Linux",
+      "authors": "The cdrkit project, based on mkisofs by Jörg Schilling",
+      "license": "GPL-2.0-only",
+      "homepage": "https://salsa.debian.org/debian/cdrkit",
+      "provision": "OS_PACKAGE",
+      "platforms": ["LINUX"],
+      "licenseFiles": ["GPL-2.0.txt"],
+      "noticeFiles": [],
+      "mavenArtifacts": []
+    },
+    {
+      "id": "ffmpeg-linux",
+      "name": "FFmpeg",
+      "role": "Converts audio and video, draws thumbnails and encodes burn reels",
+      "authors": "The FFmpeg developers",
+      "license": "GPL-2.0-or-later (as built by your Linux distribution)",
+      "homepage": "https://ffmpeg.org/",
+      "provision": "OS_PACKAGE",
+      "platforms": ["LINUX"],
+      "licenseFiles": ["GPL-2.0.txt"],
+      "noticeFiles": [],
+      "mavenArtifacts": []
+    },
+    {
+      "id": "dvdauthor-linux",
+      "name": "dvdauthor and spumux",
+      "role": "Author video DVDs and their menu buttons",
+      "authors": "Scott Smith, Lawrence D'Oliveiro and contributors",
+      "license": "GPL-2.0-or-later",
+      "homepage": "https://github.com/ldo/dvdauthor",
+      "provision": "OS_PACKAGE",
+      "platforms": ["LINUX"],
+      "licenseFiles": ["GPL-2.0.txt"],
+      "noticeFiles": [],
+      "mavenArtifacts": []
+    },
+    {
+      "id": "imapi2",
+      "name": "Windows Image Mastering API (IMAPI2)",
+      "role": "Finds drives, burns, erases and builds disc images on Windows",
+      "authors": "Microsoft Corporation",
+      "license": "Part of Windows (not redistributed)",
+      "homepage": "https://learn.microsoft.com/windows/win32/imapi/disc-mastering-api",
+      "provision": "PART_OF_OS",
+      "platforms": ["WINDOWS"],
+      "licenseFiles": ["imapi2-NOTE.txt"],
+      "noticeFiles": [],
+      "mavenArtifacts": []
     }
   ]
 }

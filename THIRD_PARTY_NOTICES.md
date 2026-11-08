@@ -100,6 +100,20 @@ The verbatim NOTICE files are in `src/main/resources/credits/notices/`. The
 full PDFBox and FontBox licence files, which list the terms of every
 external component they contain, are in `src/main/resources/credits/licenses/`.
 
+## Used from the operating system (not distributed)
+
+| Component | Used for | Authors | Licence (SPDX) | Homepage | Platforms |
+|---|---|---|---|---|---|
+| GNU xorriso | Burns data discs and images, erases and reads discs | Thomas Schmitt and the libburnia project | GPL-3.0-or-later | https://www.gnu.org/software/xorriso/ | Linux |
+| cdrskin | Burns audio CDs with CD-Text | Thomas Schmitt and the libburnia project | GPL-2.0-or-later | https://dev.lovelyhq.com/libburnia/web/wiki/Cdrskin | Linux |
+| genisoimage (cdrkit) | Builds DVD-Video disc images | The cdrkit project, based on mkisofs by Jörg Schilling | GPL-2.0-only | https://salsa.debian.org/debian/cdrkit | Linux |
+| FFmpeg | Converts audio and video, thumbnails, burn reels | The FFmpeg developers | GPL-2.0-or-later (as built by the distribution) | https://ffmpeg.org/ | Linux |
+| dvdauthor and spumux | Video DVD authoring and menu buttons | Scott Smith, Lawrence D'Oliveiro and contributors | GPL-2.0-or-later | https://github.com/ldo/dvdauthor | Linux |
+| Windows Image Mastering API (IMAPI2) | Drives, burning, erasing, disc images | Microsoft Corporation | Part of Windows | https://learn.microsoft.com/windows/win32/imapi/disc-mastering-api | Windows |
+
+The Linux package declares these as dependencies; they come from your
+distribution with their own licences and sources.
+
 ## Build and test tools (not distributed)
 
 | Component | Used for | Licence (SPDX) | Homepage |

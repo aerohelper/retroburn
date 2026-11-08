@@ -1,0 +1,4 @@
+The Windows Image Mastering API (IMAPI2) is part of Microsoft Windows.
+RetroBurn uses it through its public COM interfaces to find drives and to burn,
+erase and build disc images. RetroBurn does not include or redistribute any part
+of it; it is covered by the licence terms of your copy of Windows.

@@ -110,3 +110,19 @@ SPDX-License-Identifier = "GPL-3.0-or-later"
 path = "docs/images/*"
 SPDX-FileCopyrightText = "2026 Chetan and contributors"
 SPDX-License-Identifier = "GPL-3.0-or-later"
+
+# GNU licence texts shown in the in-app credits for the external tools.
+[[annotations]]
+path = "src/main/resources/credits/licenses/GPL-2.0.txt"
+SPDX-FileCopyrightText = "1989, 1991 Free Software Foundation, Inc."
+SPDX-License-Identifier = "GPL-2.0-only"
+
+[[annotations]]
+path = "src/main/resources/credits/licenses/GPL-3.0.txt"
+SPDX-FileCopyrightText = "2007 Free Software Foundation, Inc."
+SPDX-License-Identifier = "GPL-3.0-or-later"
+
+[[annotations]]
+path = "src/main/resources/credits/licenses/imapi2-NOTE.txt"
+SPDX-FileCopyrightText = "2026 Chetan and contributors"
+SPDX-License-Identifier = "GPL-3.0-or-later"
