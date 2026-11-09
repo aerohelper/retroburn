@@ -65,3 +65,9 @@ All notable changes to RetroBurn are recorded here. The format follows
   AAC, with the theme's sounds) of the burn as a timelapse, with item
   names hidden by default, saved to the Videos folder. Help → Make a demo
   burn reel shows one without a drive.
+- Packages: a Debian package that depends on the distribution's burning
+  tools, and a Windows installer and portable zip that include FFmpeg and
+  dvdauthor built from pinned source, with every licence text and the
+  corresponding source published with each release; a CycloneDX SBOM and
+  checksums; an original app icon. DVD menus now use the bundled fonts, and
+  the cover designer has a Home button.

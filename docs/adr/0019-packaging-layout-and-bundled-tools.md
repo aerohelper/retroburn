@@ -54,3 +54,15 @@ Proposed:
   `tools/manifest.json`.
 - The Windows package grows by the size of FFmpeg and its DLLs (expected
   tens of MB).
+
+## Findings so far (2026-11-08)
+
+- JavaFX from `--app-content` lands beside the `app` folder on Windows
+  (`RetroBurn\javafx`) and on Linux (`/opt/retroburn/lib/javafx`), so
+  `--module-path=$APPDIR/../javafx` works on both; the Windows app image
+  started without warnings.
+- The release dry run built the `.deb`, `.msi`, portable `.zip` and SBOM;
+  the bundled tools need 23 DLLs from 21 MSYS2 packages, whose licence
+  fields and source packages are recorded (LLD-packaging section 6).
+- Installing the `x264` package pulls in MSYS2's own FFmpeg and some 140
+  packages; the build uses the `libx264` library package instead.

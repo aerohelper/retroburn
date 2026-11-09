@@ -7,7 +7,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 | | |
 |---|---|
-| Status | Designed for the release milestone (M11) |
+| Status | Built in the release milestone (M11). Packages built in CI; not yet installed on a clean machine; no release tagged. |
 | Files | `packaging/package.sh`, `packaging/sbom-tools.py`, `windows-tools/build-ffmpeg.sh`, `windows-tools/bundle.sh`, `.github/workflows/windows-tools.yml`, `.github/workflows/release.yml`, `tools/icon/GenerateIcon.java` |
 | Related | [ADR-0006](../adr/0006-external-tool-provisioning-per-os.md), [ADR-0010](../adr/0010-classpath-application-on-jlinked-javafx-runtime.md), [ADR-0019](../adr/0019-packaging-layout-and-bundled-tools.md), [RELEASE.md](../RELEASE.md) |
 
@@ -106,3 +106,23 @@ An original drawing (a disc with an orange arc), generated as
 - Manual: install the `.deb` on Ubuntu and the `.msi` on Windows 11 on a
   clean machine; start; check Help → Open-source licenses lists the
   bundled tools; burn the DVD+RW once (RELEASE.md step 5).
+
+Results of the dry run on the pull request (CI, 2026-11-08):
+
+| Asset | Size | Checked |
+|---|---|---|
+| `retroburn_0.1.0_amd64.deb` | 44 MB | `dpkg-deb`: depends on xorriso, cdrskin, genisoimage, ffmpeg, dvdauthor (plus the X11 and ALSA libraries jpackage adds); app under `/opt/retroburn`, JavaFX in `lib/javafx` beside `lib/app`, `legal/` present |
+| `RetroBurn-0.1.0.msi` | 75 MB | built with WiX 5 |
+| `RetroBurn-0.1.0-windows-portable.zip` | 87 MB | app image 197 MB with `tools\` |
+| `retroburn-0.1.0.cdx.json` | 36 components | Maven libraries plus FFmpeg, dvdauthor and 21 MSYS2 library packages |
+
+FFmpeg 9.0.2 built with `--disable-autodetect --enable-w32threads
+--enable-gpl --enable-libx264 --enable-libmp3lame --enable-zlib` in about
+25 minutes and encoded H.264/AAC, MP3 (LAME) and PAL DVD MPEG-2/AC-3
+test files. The bundle job found 23 DLLs from 21 packages (Brotli, bzip2,
+Expat, Fontconfig, FreeType, FriBidi, gettext runtime, GLib, Graphite2,
+HarfBuzz, LAME, libgcc, libiconv, libpng, libstdc++, winpthreads, libx264,
+libxml2, mpg123, PCRE2, zlib); every source package was found on
+repo.msys2.org once split packages were looked up by their `%BASE%`.
+Locally (Windows 11) the app image built by `package.sh image` started
+from its own runtime without warnings.
