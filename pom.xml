@@ -10,7 +10,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
     <groupId>io.aerohelper</groupId>
     <artifactId>retroburn</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.1.0</version>
     <name>RetroBurn</name>
     <description>Burn CDs, DVDs and Blu-ray discs, design their covers and share a burn reel.</description>
     <url>https://github.com/aerohelper/retroburn</url>
