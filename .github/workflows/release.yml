@@ -156,7 +156,7 @@ jobs:
           cp artefacts/package-deb/* artefacts/package-windows/* artefacts/sbom/* release/
           (cd artefacts/windows-tools-sources && zip -qr "../../release/windows-tools-sources-${version}.zip" .)
           (cd release && sha256sum * > SHA256SUMS)
-          awk -v v="$version" '$0 ~ "^## \[" v "\]" {on=1; next} on && /^## \[/ {exit} on' CHANGELOG.md > notes.md
+          awk -v v="$version" 'index($0, "## [" v "]") == 1 {on=1; next} on && index($0, "## [") == 1 {exit} on' CHANGELOG.md > notes.md
           test -s notes.md || echo "See CHANGELOG.md." > notes.md
           ls -l release
       - name: Create the release
