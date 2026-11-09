@@ -22,3 +22,4 @@ Thumbs.db
 
 # Packages built by packaging/package.sh.
 /dist/
+__pycache__/
