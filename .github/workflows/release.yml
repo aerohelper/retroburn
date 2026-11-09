@@ -37,13 +37,19 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - id: version
-        name: From the tag, or the pom without -SNAPSHOT for a dry run
+        name: From the tag (which must match the pom), or the pom without -SNAPSHOT for a dry run
         run: |
+          pom="$(sed -n 's:^    <version>\(.*\)</version>$:\1:p' pom.xml | head -n 1)"
           if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
             version="${GITHUB_REF#refs/tags/v}"
+            if [ "$pom" != "$version" ]; then
+              echo "::error::The tag says $version but pom.xml says $pom"
+              exit 1
+            fi
           else
-            version="$(sed -n 's:.*<version>\(.*\)-SNAPSHOT</version>.*:\1:p' pom.xml | head -n 1)"
+            version="${pom%-SNAPSHOT}"
           fi
+          test -n "$version"
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "Version $version"
 
