@@ -1,0 +1,40 @@
+Libraries used by the programs bundled with RetroBurn on Windows
+================================================================
+
+The Windows packages of RetroBurn include FFmpeg, ffprobe, dvdauthor and spumux,
+built by RetroBurn's continuous integration from pinned source (see the GitHub
+release assets and windows-tools/ in the source repository). These programs load
+the following libraries, which are the MSYS2 project's UCRT64 builds:
+
+  Library            Licence (as recorded by the MSYS2 package)
+  -----------------  ---------------------------------------------------------
+  Brotli             MIT
+  bzip2              bzip2 licence ("custom" in MSYS2)
+  Expat              MIT
+  Fontconfig         Fontconfig licence ("custom" in MSYS2)
+  FreeType           GPL-2.0-or-later OR FTL
+  FriBidi            LGPL-2.1-or-later
+  gettext runtime    LGPL-2.1-or-later (libintl)
+  GLib               LGPL-2.1-or-later
+  Graphite2          LGPL-2.1-or-later
+  HarfBuzz           MIT
+  LAME               LGPL
+  GCC runtime        GPL-3.0-or-later WITH GCC-exception-3.1 (libgcc, libstdc++)
+  libiconv           LGPL-2.1-or-later
+  libpng             libpng licence ("custom" in MSYS2)
+  winpthreads        MIT AND BSD-3-Clause
+  x264               GPL-2.0-or-later ("custom" in MSYS2)
+  libxml2            MIT
+  mpg123             LGPL-2.1-or-later
+  PCRE2              BSD-3-Clause
+  zlib               Zlib
+
+The full licence texts of every library are installed with RetroBurn in the
+folder tools\licenses\ of the installation directory. The exact versions are
+listed in tools\manifest.tsv, and the corresponding source of each library (the
+MSYS2 source package) is published with every RetroBurn release as
+windows-tools-sources-<version>.zip. FFmpeg's configure options are in
+tools\licenses\ffmpeg-configure-line.txt.
+
+Because FFmpeg is built with --enable-gpl and libx264, the bundled FFmpeg is
+distributed under the GNU General Public License, version 2 or later.

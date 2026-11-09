@@ -187,6 +187,45 @@
       "licenseFiles": ["imapi2-NOTE.txt"],
       "noticeFiles": [],
       "mavenArtifacts": []
+    },
+    {
+      "id": "ffmpeg-windows",
+      "name": "FFmpeg 9.0.2 (with x264 and LAME)",
+      "role": "Converts audio and video, draws thumbnails and encodes burn reels",
+      "authors": "The FFmpeg developers; x264 by VideoLAN; the LAME project",
+      "license": "GPL-2.0-or-later",
+      "homepage": "https://ffmpeg.org/",
+      "provision": "BUNDLED_TOOL",
+      "platforms": ["WINDOWS"],
+      "licenseFiles": ["GPL-2.0.txt",  "windows-tools-libraries.txt"],
+      "noticeFiles": [],
+      "mavenArtifacts": []
+    },
+    {
+      "id": "dvdauthor-windows",
+      "name": "dvdauthor and spumux 0.7.2",
+      "role": "Author video DVDs and their menu buttons",
+      "authors": "Scott Smith, Lawrence D'Oliveiro and contributors",
+      "license": "GPL-2.0-or-later",
+      "homepage": "https://github.com/ldo/dvdauthor",
+      "provision": "BUNDLED_TOOL",
+      "platforms": ["WINDOWS"],
+      "licenseFiles": ["GPL-2.0.txt",  "windows-tools-libraries.txt"],
+      "noticeFiles": [],
+      "mavenArtifacts": []
+    },
+    {
+      "id": "windows-tool-libraries",
+      "name": "Libraries of the bundled tools (MSYS2 builds)",
+      "role": "Used by the bundled FFmpeg and dvdauthor",
+      "authors": "The Brotli, bzip2, Expat, Fontconfig, FreeType, FriBidi, gettext, GLib, Graphite2, HarfBuzz, LAME, GCC, libiconv, libpng, mingw-w64, x264, libxml2, mpg123, PCRE2 and zlib projects; built by MSYS2",
+      "license": "Various: see the list (MIT, BSD-3-Clause, LGPL-2.1-or-later, GPL-2.0-or-later, GPL-3.0-or-later WITH GCC-exception-3.1, FTL, Zlib, libpng, bzip2)",
+      "homepage": "https://www.msys2.org/",
+      "provision": "BUNDLED_TOOL",
+      "platforms": ["WINDOWS"],
+      "licenseFiles": ["windows-tools-libraries.txt",  "GPL-2.0.txt",  "GPL-3.0.txt"],
+      "noticeFiles": [],
+      "mavenArtifacts": []
     }
   ]
 }

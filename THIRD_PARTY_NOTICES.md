@@ -24,6 +24,15 @@ sync; a build test fails if a runtime dependency is missing from the register.
 | Lato font (Regular, Bold) | Cover designer text | Łukasz Dziedzic | OFL-1.1 | https://github.com/google/fonts/tree/main/ofl/lato | Linux, Windows |
 | VT323 font | Cover designer and the y2k skin | The VT323 Project Authors | OFL-1.1 | https://github.com/google/fonts/tree/main/ofl/vt323 | Linux, Windows |
 
+| FFmpeg 9.0.2 with x264 and LAME | Audio and video conversion, thumbnails, burn reels | The FFmpeg developers; x264 by VideoLAN; the LAME project | GPL-2.0-or-later | https://ffmpeg.org/ | Windows (bundled) |
+| dvdauthor and spumux 0.7.2 | Video DVD authoring and menu buttons | Scott Smith, Lawrence D'Oliveiro and contributors | GPL-2.0-or-later | https://github.com/ldo/dvdauthor | Windows (bundled) |
+| Libraries of the bundled tools (MSYS2 builds) | Used by the bundled FFmpeg and dvdauthor | See `credits/licenses/windows-tools-libraries.txt` | MIT, BSD-3-Clause, LGPL-2.1-or-later, GPL-2.0-or-later, GPL-3.0-or-later WITH GCC-exception-3.1, FTL, Zlib, libpng, bzip2 | https://www.msys2.org/ | Windows (bundled) |
+
+The bundled Windows tools are built from pinned source by `windows-tools/`; their
+corresponding source, the MSYS2 source package of every library, and the build
+scripts are published with every release as `windows-tools-sources-<version>.zip`,
+and the installed `tools\licenses\` folder holds every licence text.
+
 The OpenJDK runtime image also carries the third-party notices of the JDK
 modules it contains, in its `legal/` folder.
 
@@ -130,8 +139,5 @@ distribution with their own licences and sources.
 
 ## Planned components
 
-These will be registered here, in the in-app credits and with their licence
-texts when the features using them are built: GNU xorriso, cdrskin,
-genisoimage (Linux); the Windows Image Mastering API (Windows, part of the OS);
-FFmpeg, dvdauthor and spumux (both; bundled on Windows with their
-corresponding source published); cdrdao (Windows, if adopted).
+cdrdao (Windows) will be registered here, in the in-app credits and with its
+licence texts if the Windows CD-Text work (ADR-0014) adopts it.

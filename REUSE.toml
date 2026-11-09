@@ -126,3 +126,8 @@ SPDX-License-Identifier = "GPL-3.0-or-later"
 path = "src/main/resources/credits/licenses/imapi2-NOTE.txt"
 SPDX-FileCopyrightText = "2026 Chetan and contributors"
 SPDX-License-Identifier = "GPL-3.0-or-later"
+
+[[annotations]]
+path = "src/main/resources/credits/licenses/windows-tools-libraries.txt"
+SPDX-FileCopyrightText = "2026 Chetan and contributors"
+SPDX-License-Identifier = "GPL-3.0-or-later"
