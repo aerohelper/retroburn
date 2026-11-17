@@ -70,7 +70,8 @@ written down as "not tested — no drive", not skipped silently.
 
 Needs a blank CD-R (or a CD-RW) and a few music files in different formats
 (MP3, FLAC, M4A), one with a non-Latin title and one shorter than
-4 seconds. **Not run yet: a CD-RW is on order.** Steps that say CD-R can
+4 seconds. **Engine checks done on a CD-RW (Windows, see Results); the screens
+and CD players not yet.** Steps that say CD-R can
 be run on the CD-RW; many older CD players and some car stereos cannot
 read CD-RW, so a playback failure there points at the disc type first.
 
@@ -185,6 +186,7 @@ Copy this table into the pull request or release checklist.
 
 | OS and version | Drive | Media | Steps run | Failures (step, what happened) | Date |
 |---|---|---|---|---|---|
+| Windows 11 Pro 10.0.26200 | Slimtype eBAU108 (USB) | CD-RW 80 min | Through the engines (`WindowsRealCdRwTest`): data burn and verify of 49 MB (116 s, DATA-6 on CD-RW), quick erase (26 s), cancelling an audio CD (stopped in 3.2 s, AUDIO-8), full erase (507 s, ERASE-2), 3-track audio CD (52 s) with the track list read back and matching (AUDIO-7's check) | Erasing a CD-RW with data was refused ("The disc in the drive cannot be written"): fixed, see LLD-windows-platform 5.5. Not yet: playback in a CD player, the screens | 2026-11-17 |
 | | | | | | |
 
 ## 14. Automated real-disc test
