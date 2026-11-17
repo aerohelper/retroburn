@@ -799,9 +799,11 @@ namespace RetroBurn.Helper
         public void Blank(string drive, bool full)
         {
             dynamic recorder = Imapi.FindRecorder(drive);
-            RequireMedia(Imapi.DataWriter(recorder), recorder);
             dynamic erase = Com.Create("IMAPI2.MsftDiscFormat2Erase");
             erase.Recorder = recorder;
+            // Ask the erase format, not the data format: a CD-RW with a closed session cannot take
+            // more data (the data format says no) but can be erased (checked on a real CD-RW).
+            RequireMedia(erase, recorder);
             erase.ClientName = "RetroBurn";
             erase.FullErase = full;
             EraseSink sink = new EraseSink((elapsed, estimated) => output.Emit("progress", "stage", "erasing",
