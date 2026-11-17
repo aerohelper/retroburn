@@ -69,6 +69,7 @@ jobs:
         with:
           name: cdrdao-windows
           path: out/
+          retention-days: 3
 
   dvdauthor:
     name: Build dvdauthor and spumux (MSYS2 UCRT64)
@@ -123,6 +124,7 @@ jobs:
         with:
           name: dvdauthor-windows
           path: out/
+          retention-days: 3
 
   ffmpeg:
     name: Build FFmpeg (MSYS2 UCRT64)
@@ -167,6 +169,7 @@ jobs:
         with:
           name: ffmpeg-windows
           path: out/
+          retention-days: 3
 
   bundle:
     name: Collect the bundled tools with licences and source
@@ -218,8 +221,10 @@ jobs:
         with:
           name: windows-tools-bundle
           path: bundle/tools/
+          retention-days: 3
 
       - uses: actions/upload-artifact@v6
         with:
           name: windows-tools-sources
           path: bundle/sources/
+          retention-days: 3
