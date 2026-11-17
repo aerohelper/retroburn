@@ -266,12 +266,18 @@ written DVD+RW and can be burned again.
 ### 5.5 Blank
 
 `MsftDiscFormat2Erase` with `Recorder`, `ClientName`, `FullErase` = `full`;
-`EraseMedia()`. Progress from `DDiscFormat2EraseEvents.Update` (DISPID 0x200,
+`EraseMedia()`. Whether the disc can be erased is asked of the erase format
+(`IsCurrentMediaSupported` and `CurrentPhysicalMediaType` exist on
+`MsftDiscFormat2Erase`, checked with `Get-Member`), not of the data format:
+on a CD-RW holding a closed data session the data format answers false and
+the erase format true (owner's CD-RW, 2026-11-17). Progress from `DDiscFormat2EraseEvents.Update` (DISPID 0x200,
 elapsed and estimated total seconds) as stage `erasing`, `done`/`total` in
 seconds. The estimate is useless: in the capture the estimated total always
 equalled the time elapsed, so Java shows no percentage (section 5.7).
 
 Measured: quick erase of a blank DVD+RW 0.15 s; of a written one 24 to 28 s.
+CD-RW (80 min, USB writer): quick erase 26 s, full erase 507 s with a single
+progress event.
 Afterwards a DVD+RW still reports media state 0x1 (overwrite-only), not
 blank, so it maps to `APPENDABLE`, like a written one.
 IMAPI2 has no way to cancel an erase, so the UI offers no cancel button while
