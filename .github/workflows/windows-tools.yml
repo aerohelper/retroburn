@@ -57,6 +57,14 @@ jobs:
           ./cdrdao.exe show-toc disc.toc
           ./cdrdao.exe toc-size disc.toc
 
+      # Only now: inside the MSYS2 shell a second copy of msys-2.0.dll next to the program clashes with
+      # the shell's own. Outside MSYS2 the copies let the build run on its own, for the CD-Text tests
+      # on a real writer (ADR-0014).
+      - name: Add the MSYS runtime DLLs next to the program
+        run: |
+          ldd out/cdrdao.exe | awk '$3 ~ /^\/usr\/bin\// {print $3}' | xargs -r -I{} cp {} out/
+          ls out
+
       - uses: actions/upload-artifact@v6
         with:
           name: cdrdao-windows
