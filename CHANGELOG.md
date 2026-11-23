@@ -22,3 +22,9 @@ All notable changes to RetroBurn are recorded here. The format follows
   that every runtime dependency is credited.
 - Build checks for formatting, licence headers, architecture rules and test
   coverage; CI on Linux and Windows; REUSE compliance.
+- Core services: safe external-process runner with timeouts and cancellation,
+  tool detection and feature gating, job pipeline with weighted progress and
+  work folders, settings file, rotating log files.
+- Linux: drive and media detection and ISO image creation with GNU xorriso,
+  drive hot-plug and USB detection, battery detection, and keeping the
+  computer awake during burns with systemd-inhibit.

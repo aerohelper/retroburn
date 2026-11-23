@@ -3,14 +3,19 @@
 package io.aerohelper.retroburn.platform;
 
 import io.aerohelper.retroburn.common.OperatingSystem;
+import io.aerohelper.retroburn.engine.BurnEngine;
+import io.aerohelper.retroburn.engine.DiscImageBuilder;
+import io.aerohelper.retroburn.tools.Feature;
+import io.aerohelper.retroburn.tools.Requirement;
+import io.aerohelper.retroburn.tools.ToolLocator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Everything RetroBurn needs from the operating system, bundled behind one interface.
  *
  * <p>Each supported OS provides one implementation in its own {@code platform.<os>} package, and
- * only those packages contain OS-specific code. Drive access, burning engines, standard folders,
- * hot-plug detection, sleep inhibition and power status are added to this interface as those
- * features are built; see {@code docs/architecture/HLD.md} section 4.1.
+ * only those packages contain OS-specific code. See {@code docs/design/LLD-engine-and-platform.md}.
  */
 public interface PlatformServices {
 
@@ -19,4 +24,24 @@ public interface PlatformServices {
 
     /** A short name for logs and the About screen, for example "Linux". */
     String displayName();
+
+    /** Where RetroBurn keeps its files. */
+    AppPaths appPaths();
+
+    /** Where external tools are found (before user overrides from the settings). */
+    ToolLocator toolLocator();
+
+    /** What each feature needs on this OS; features missing from the map are not supported here. */
+    Map<Feature, List<Requirement>> featureRequirements();
+
+    BurnEngine burnEngine();
+
+    DiscImageBuilder discImageBuilder();
+
+    /** Creates a new hot-plug watcher; the caller starts and closes it. */
+    DriveWatcher createDriveWatcher();
+
+    SleepInhibitor sleepInhibitor();
+
+    PowerStatus powerStatus();
 }

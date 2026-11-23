@@ -1,0 +1,23 @@
+$ xorriso -abort_on FAILURE -return_with SORRY 32 -report_about UPDATE -outdev stdio:/tmp/out.iso -volid RETROBURN_TEST -joliet on -pathspecs on -path_list /tmp/pathlist.txt -commit -end
+xorriso 1.5.6 : RockRidge filesystem manipulator, libburnia project.
+
+Drive current: -outdev 'stdio:/tmp/out.iso'
+Media current: stdio file, overwriteable
+Media status : is blank
+Media summary: 0 sessions, 0 data blocks, 0 data,  954g free
+xorriso : UPDATE :       6 files added in 1 seconds
+Added 4 items from file '/tmp/pathlist.txt'
+xorriso : UPDATE : Writing:       7024s   47.3%   fifo  94%  buf  50%
+ISO image produced: 14686 sectors
+Written to medium : 14848 sectors at LBA 32
+Writing to 'stdio:/tmp/out.iso' completed successfully.
+
+xorriso : NOTE : Re-assessing -outdev 'stdio:/tmp/out.iso'
+xorriso : NOTE : Loading ISO image tree from LBA 0
+xorriso : UPDATE :       8 nodes read in 1 seconds
+Drive current: -dev 'stdio:/tmp/out.iso'
+Media current: stdio file, overwriteable
+Media status : is written , is appendable
+Media summary: 1 session, 14686 data blocks, 28.7m data,  954g free
+Volume id    : 'RETROBURN_TEST'
+[exit 0]

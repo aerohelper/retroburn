@@ -28,8 +28,15 @@ jobs:
           java-version: "25"
           cache: maven
 
-      # Compiles, runs unit and architecture tests, and checks formatting, licence headers,
-      # credits completeness and coverage.
+      # The Linux integration tests build real ISO images and probe the real tools.
+      - name: Install external tools (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xorriso cdrskin genisoimage ffmpeg dvdauthor
+
+      # Compiles, runs unit, integration and architecture tests, and checks formatting, licence
+      # headers, credits completeness and coverage.
       - name: Verify (Linux)
         if: runner.os == 'Linux'
         run: ./mvnw -B verify

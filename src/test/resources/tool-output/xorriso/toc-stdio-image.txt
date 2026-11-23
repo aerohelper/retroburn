@@ -1,0 +1,23 @@
+$ xorriso -indev stdio:/tmp/out.iso -toc
+xorriso 1.5.6 : RockRidge filesystem manipulator, libburnia project.
+
+xorriso : NOTE : Loading ISO image tree from LBA 0
+xorriso : UPDATE :       8 nodes read in 1 seconds
+Drive current: -indev 'stdio:/tmp/out.iso'
+Media current: stdio file, overwriteable
+Media status : is written , is appendable
+Media summary: 1 session, 14686 data blocks, 28.7m data,  954g free
+Volume id    : 'RETROBURN_TEST'
+Drive current: -indev 'stdio:/tmp/out.iso'
+Drive access : exclusive:unrestricted
+Drive type   : vendor 'YOYODYNE' product 'WARP DRIVE' revision 'FX01'
+Media current: stdio file, overwriteable
+Media status : is written , is appendable
+Media blocks : 14720 readable , 500024182 writable , 500038902 overall
+ISO offers   : Rock_Ridge Joliet
+ISO loaded   : Rock_Ridge
+TOC layout   : Idx ,  sbsector ,       Size , Volume Id
+ISO session  :   1 ,        32 ,     14686s , RETROBURN_TEST
+Media summary: 1 session, 14686 data blocks, 28.7m data,  954g free
+Media nwa    : 14720s
+[exit 0]

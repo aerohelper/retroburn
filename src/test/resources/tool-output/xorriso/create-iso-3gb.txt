@@ -1,0 +1,71 @@
+$ xorriso -abort_on FAILURE -return_with SORRY 32 -report_about UPDATE -outdev stdio:/tmp/big.iso -volid BIG -joliet on -pathspecs on -map /tmp/big /big -commit -end
+xorriso 1.5.6 : RockRidge filesystem manipulator, libburnia project.
+
+Drive current: -outdev 'stdio:/tmp/big.iso'
+Media current: stdio file, overwriteable
+Media status : is blank
+Media summary: 0 sessions, 0 data blocks, 0 data,  952g free
+xorriso : UPDATE :       1 files added in 1 seconds
+Added to ISO image: directory '/big'='/tmp/big'
+xorriso : UPDATE : Writing:       4560s    0.3%   fifo  23%  buf  50%
+xorriso : UPDATE : Writing:      17888s    1.2%   fifo  93%  buf  50%   65.5xD 
+xorriso : UPDATE : Writing:      70640s    4.8%   fifo  99%  buf  50%   77.9xD 
+xorriso : UPDATE : Writing:     129312s    8.8%   fifo  95%  buf  50%   86.6xD 
+xorriso : UPDATE : Writing:     181728s   12.4%   fifo  99%  buf  50%   77.4xD 
+xorriso : UPDATE : Writing:     229456s   15.7%   fifo 100%  buf  50%   70.4xD 
+xorriso : UPDATE : Writing:     250432s   17.1%   fifo  94%  buf  50%   30.9xD 
+xorriso : UPDATE : Writing:     285472s   19.5%   fifo  82%  buf  50%   51.7xD 
+xorriso : UPDATE : Writing:     336592s   23.0%   fifo  98%  buf  50%   75.4xD 
+xorriso : UPDATE : Writing:     369664s   25.2%   fifo  92%  buf  50%   49.1xD 
+xorriso : UPDATE : Writing:     398880s   27.2%   fifo  97%  buf  50%   42.9xD 
+xorriso : UPDATE : Writing:     430896s   29.4%   fifo  68%  buf  50%   47.1xD 
+xorriso : UPDATE : Writing:     451776s   30.8%   fifo  89%  buf  50%   30.7xD 
+xorriso : UPDATE : Writing:     479616s   32.7%   fifo   0%  buf  50%   40.9xD 
+xorriso : UPDATE : Writing:     490816s   33.5%   fifo  20%  buf  50%   17.3xD 
+xorriso : UPDATE : Writing:     513904s   35.1%   fifo  65%  buf  50%   34.1xD 
+xorriso : UPDATE : Writing:     542144s   37.0%   fifo  96%  buf  50%   41.5xD 
+xorriso : UPDATE : Writing:     567248s   38.7%   fifo  99%  buf  50%   37.0xD 
+xorriso : UPDATE : Writing:     593744s   40.5%   fifo 100%  buf  50%   39.1xD 
+xorriso : UPDATE : Writing:     627680s   42.8%   fifo  99%  buf  50%   50.1xD 
+xorriso : UPDATE : Writing:     661168s   45.1%   fifo  92%  buf  50%   49.4xD 
+xorriso : UPDATE : Writing:     672208s   45.9%   fifo  86%  buf  50%   16.1xD 
+xorriso : UPDATE : Writing:     693664s   47.3%   fifo  51%  buf  50%   31.2xD 
+xorriso : UPDATE : Writing:     730304s   49.8%   fifo  99%  buf  50%   53.9xD 
+xorriso : UPDATE : Writing:     765008s   52.2%   fifo  93%  buf  50%   51.1xD 
+xorriso : UPDATE : Writing:     792800s   54.1%   fifo  99%  buf  50%   45.6xD 
+xorriso : UPDATE : Writing:     822864s   56.2%   fifo  80%  buf  50%   44.3xD 
+xorriso : UPDATE : Writing:     833456s   56.9%   fifo  81%  buf  50%   15.6xD 
+xorriso : UPDATE : Writing:     843168s   57.6%   fifo 100%  buf  50%   13.9xD 
+xorriso : UPDATE : Writing:     854688s   58.3%   fifo  95%  buf  50%   17.0xD 
+xorriso : UPDATE : Writing:     870240s   59.4%   fifo  76%  buf  50%   22.9xD 
+xorriso : UPDATE : Writing:     874096s   59.7%   fifo  82%  buf  50%    5.8xD 
+xorriso : UPDATE : Writing:     885569s   60.4%   fifo  96%  buf  50%   16.1xD 
+xorriso : UPDATE : Writing:     914352s   62.4%   fifo 100%  buf  50%   42.5xD 
+xorriso : UPDATE : Writing:     948608s   64.8%   fifo  99%  buf  50%   50.5xD 
+xorriso : UPDATE : Writing:     976464s   66.7%   fifo  99%  buf  50%   41.0xD 
+xorriso : UPDATE : Writing:     999632s   68.2%   fifo 100%  buf  50%   34.2xD 
+xorriso : UPDATE : Writing:    1022640s   69.8%   fifo 100%  buf  50%   33.9xD 
+xorriso : UPDATE : Writing:    1047184s   71.5%   fifo  99%  buf  50%   40.2xD 
+xorriso : UPDATE : Writing:    1071760s   73.2%   fifo  83%  buf  50%   36.2xD 
+xorriso : UPDATE : Writing:    1115520s   76.1%   fifo  99%  buf  50%   64.6xD 
+xorriso : UPDATE : Writing:    1163264s   79.4%   fifo 100%  buf  50%   70.4xD 
+xorriso : UPDATE : Writing:    1243888s   84.9%   fifo  99%  buf  50%  119.0xD 
+xorriso : UPDATE : Writing:    1280368s   87.4%   fifo  96%  buf  50%   53.8xD 
+xorriso : UPDATE : Writing:    1312464s   89.6%   fifo  97%  buf  50%   47.3xD 
+xorriso : UPDATE : Writing:    1347872s   92.0%   fifo  99%  buf  50%   52.2xD 
+xorriso : UPDATE : Writing:    1387472s   94.7%   fifo  99%  buf  50%   58.4xD 
+xorriso : UPDATE : Writing:    1433664s   97.9%   fifo  98%  buf  50%   68.1xD 
+xorriso : UPDATE : Thank you for being patient. Working since 47 seconds.
+ISO image produced: 1464873 sectors
+Written to medium : 1465024 sectors at LBA 32
+Writing to 'stdio:/tmp/big.iso' completed successfully.
+
+xorriso : NOTE : Re-assessing -outdev 'stdio:/tmp/big.iso'
+xorriso : NOTE : Loading ISO image tree from LBA 0
+xorriso : UPDATE :       2 nodes read in 1 seconds
+Drive current: -dev 'stdio:/tmp/big.iso'
+Media current: stdio file, overwriteable
+Media status : is written , is appendable
+Media summary: 1 session, 1464873 data blocks, 2861m data,  949g free
+Volume id    : 'BIG'
+[exit 0]

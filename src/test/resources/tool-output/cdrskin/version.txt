@@ -1,0 +1,10 @@
+$ cdrskin --version
+cdrskin 1.5.6 : limited cdrecord compatibility wrapper for libburn
+Cdrecord 2.01a27 Emulation. Copyright (C) 2006-2023, see libburnia-project.org
+System adapter    :  internal GNU/Linux SG_IO adapter sg-linux
+libburn interface :  1.5.6
+libburn in use    :  1.5.6
+cdrskin version   :  1.5.6
+Version timestamp :  2023.06.07.143001
+Build timestamp   :  -none-given-
+[exit 0]

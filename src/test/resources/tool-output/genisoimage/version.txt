@@ -1,0 +1,3 @@
+$ genisoimage --version
+genisoimage 1.1.11 (Linux)
+[exit 0]

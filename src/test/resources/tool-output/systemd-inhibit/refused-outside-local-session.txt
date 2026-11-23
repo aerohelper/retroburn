@@ -1,0 +1,2 @@
+$ systemd-inhibit --what=sleep:idle --who=RetroBurn --why=Burning a disc --mode=block cat
+Failed to inhibit: Access denied
