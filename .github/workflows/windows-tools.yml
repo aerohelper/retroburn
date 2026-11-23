@@ -57,10 +57,19 @@ jobs:
           ./cdrdao.exe show-toc disc.toc
           ./cdrdao.exe toc-size disc.toc
 
+      # Only now: inside the MSYS2 shell a second copy of msys-2.0.dll next to the program clashes with
+      # the shell's own. Outside MSYS2 the copies let the build run on its own, for the CD-Text tests
+      # on a real writer (ADR-0014).
+      - name: Add the MSYS runtime DLLs next to the program
+        run: |
+          ldd out/cdrdao.exe | awk '$3 ~ /^\/usr\/bin\// {print $3}' | xargs -r -I{} cp {} out/
+          ls out
+
       - uses: actions/upload-artifact@v6
         with:
           name: cdrdao-windows
           path: out/
+          retention-days: 3
 
   dvdauthor:
     name: Build dvdauthor and spumux (MSYS2 UCRT64)
@@ -115,6 +124,7 @@ jobs:
         with:
           name: dvdauthor-windows
           path: out/
+          retention-days: 3
 
   ffmpeg:
     name: Build FFmpeg (MSYS2 UCRT64)
@@ -159,6 +169,7 @@ jobs:
         with:
           name: ffmpeg-windows
           path: out/
+          retention-days: 3
 
   bundle:
     name: Collect the bundled tools with licences and source
@@ -210,8 +221,10 @@ jobs:
         with:
           name: windows-tools-bundle
           path: bundle/tools/
+          retention-days: 3
 
       - uses: actions/upload-artifact@v6
         with:
           name: windows-tools-sources
           path: bundle/sources/
+          retention-days: 3

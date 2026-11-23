@@ -38,7 +38,3 @@ cp COPYING "$out/COPYING.cdrdao"
 
 # The DLLs the program needs from MSYS2 (each must be shipped with its licence).
 ldd "$out/cdrdao.exe" | tee "$out/dlls.txt"
-# Copy them next to the program so the build can run on its own (for the CD-Text tests on a real
-# writer, ADR-0014).
-ldd "$out/cdrdao.exe" | awk '$3 ~ /^\/usr\/bin\// {print $3}' | xargs -r -I{} cp {} "$out/"
-ls "$out"
