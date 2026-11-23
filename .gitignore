@@ -5,6 +5,14 @@
 .private/
 REQUIREMENTS.md
 
+# Books and e-books are published separately, never from this repository
+*.pdf
+*.epub
+*.mobi
+*.azw
+*.azw3
+*.kpf
+
 # Build output
 target/
 
