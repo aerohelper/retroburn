@@ -9,11 +9,28 @@ package io.aerohelper.retroburn.common;
  */
 public final class CancelToken {
 
+    private final CancelToken parent;
     private volatile boolean cancelled;
+
+    public CancelToken() {
+        this(null);
+    }
+
+    private CancelToken(CancelToken parent) {
+        this.parent = parent;
+    }
 
     /** A token that is never cancelled, for work the user cannot stop. */
     public static CancelToken none() {
         return new CancelToken();
+    }
+
+    /**
+     * A token that is cancelled when this one is, and can also be cancelled on its own without
+     * affecting this one: for stopping a step early for a reason of the code's own.
+     */
+    public CancelToken child() {
+        return new CancelToken(this);
     }
 
     public void cancel() {
@@ -21,12 +38,12 @@ public final class CancelToken {
     }
 
     public boolean isCancelled() {
-        return cancelled;
+        return cancelled || (parent != null && parent.isCancelled());
     }
 
     /** @throws OperationCancelledException if the user has cancelled */
     public void throwIfCancelled() {
-        if (cancelled) {
+        if (isCancelled()) {
             throw new OperationCancelledException();
         }
     }

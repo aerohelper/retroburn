@@ -16,7 +16,7 @@ record that supersedes the old one.
 | [0002](0002-project-license-gpl-3-0-or-later.md) | License RetroBurn under GPL-3.0-or-later | Accepted |
 | [0003](0003-java-lts-and-javafx.md) | Java 25 LTS, OpenJFX and Maven | Accepted |
 | [0004](0004-external-tools-as-separate-processes.md) | Use external tools as separate processes | Accepted |
-| [0005](0005-windows-imapi2-bridge.md) | Reach IMAPI2 through a PowerShell helper | Proposed (spike pending) |
+| [0005](0005-windows-imapi2-bridge.md) | Reach IMAPI2 through a PowerShell helper | Accepted |
 | [0006](0006-external-tool-provisioning-per-os.md) | Provide external tools per OS | Proposed |
 | [0007](0007-package-root.md) | Java package root `io.aerohelper.retroburn` | Accepted |
 | [0008](0008-hand-wired-composition-root.md) | Hand-wired composition root, no DI framework | Accepted |

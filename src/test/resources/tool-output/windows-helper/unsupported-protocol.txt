@@ -1,0 +1,1 @@
+{"event":"error","code":"BAD_REQUEST","message":"Unsupported protocol version 2"}

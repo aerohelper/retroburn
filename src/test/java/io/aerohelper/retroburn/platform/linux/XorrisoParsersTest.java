@@ -133,6 +133,49 @@ class XorrisoParsersTest {
     }
 
     @Test
+    void readsTheCdrecordStyleProgressOfARealBurn() {
+        List<BurnEvent.Progress> progress = ToolOutput.lines("xorriso/burn-image-stdio.txt").stream()
+                .map(XorrisoProgressParser::parse)
+                .flatMap(Optional::stream)
+                .toList();
+
+        assertEquals(List.of(new BurnEvent.Progress(0.0, Optional.empty(), OptionalInt.of(50))), progress);
+        // The fifo part is documented in the manual's -pacifier entry but absent with a stdio: drive.
+        assertEquals(
+                Optional.of(new BurnEvent.Progress(0.5, Optional.empty(), OptionalInt.of(97))),
+                XorrisoProgressParser.parse("xorriso : UPDATE :   10 of   20 MB written (fifo 100%) [buf  97%]"));
+        assertTrue(XorrisoProgressParser.parse("Writing to 'stdio:/tmp/drive.bin' completed successfully.")
+                .isEmpty());
+    }
+
+    @Test
+    void readsTheMediaStateAfterBurningAndBlankingAPseudoDrive() {
+        List<String> afterBurn = ToolOutput.lines("xorriso/burn-image-stdio.txt");
+        List<String> afterBlank = ToolOutput.lines("xorriso/blank-as-needed-stdio.txt");
+
+        // Each run prints the state before and, after re-assessing, after the operation.
+        assertEquals(
+                MediaState.APPENDABLE,
+                XorrisoMediaInfoParser.parse(tailFrom(afterBurn, "Re-assessing"))
+                        .state());
+        assertEquals(
+                MediaState.BLANK,
+                XorrisoMediaInfoParser.parse(tailFrom(afterBlank, "Re-assessing"))
+                        .state());
+        assertTrue(XorrisoErrorParser.mainProblem(ToolOutput.lines("xorriso/check-media-read-back-stdio.txt"))
+                .isEmpty());
+    }
+
+    private static List<String> tailFrom(List<String> lines, String marker) {
+        for (int i = 0; i < lines.size(); i++) {
+            if (lines.get(i).contains(marker)) {
+                return lines.subList(i, lines.size());
+            }
+        }
+        throw new AssertionError("No '" + marker + "' in " + lines);
+    }
+
+    @Test
     void explainsFailuresWithTheMostSevereMessage() {
         assertEquals(
                 Optional.of("Cannot determine attributes of source file '/does/not/exist' : No such file or directory"),

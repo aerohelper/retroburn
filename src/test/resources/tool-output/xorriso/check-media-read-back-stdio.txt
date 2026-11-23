@@ -1,0 +1,12 @@
+$ xorriso -abort_on FAILURE -return_with SORRY 32 -report_about UPDATE -outdev stdio:/tmp/drive.bin -check_media use=outdev what=disc min_lba=0 max_lba=10463 event=FAILURE data_to=- --
+xorriso 1.5.6 : RockRidge filesystem manipulator, libburnia project.
+
+Drive current: -outdev 'stdio:/tmp/drive.bin'
+Media current: stdio file, overwriteable
+Media status : is written , is appendable
+Media summary: 1 session, 10267 data blocks, 20.1m data, 12.3g free
+xorriso : UPDATE : 10464 of 10464 blocks read in 1 s = 15.5xD
+Media checks :        lba ,       size , quality
+Media region :          0 ,      10464 , + good
+Media region :      10464 ,        150 , 0 untested
+[exit 0]

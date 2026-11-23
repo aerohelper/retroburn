@@ -1,0 +1,3 @@
+{"event":"progress","stage":"image","done":0,"total":9568256}
+{"event":"progress","stage":"image","done":9568256,"total":9568256}
+{"event":"result"}

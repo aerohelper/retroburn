@@ -18,6 +18,7 @@ interleaved as they arrived.
 | `xorriso/` | Ubuntu 24.04.5 (Docker `ubuntu:24.04`), 2026-10-31 | xorriso 1.5.6 |
 | `cdrskin/`, `genisoimage/`, `ffmpeg/`, `dvdauthor/` | same | cdrskin 1.5.6, genisoimage 1.1.11, FFmpeg 6.1.1-3ubuntu5, dvdauthor/spumux 0.7.2 |
 | `systemd-inhibit/` | Ubuntu 22.04.3 under WSL 2, normal user (not a local desktop session), 2026-10-31 | systemd 249 |
+| `windows-helper/` | Windows 11 Pro 10.0.26200, standard user, USB drive "Slimtype eBAU108", 2026-11-01 | Windows PowerShell 5.1.26100, .NET Framework 4.8 (CLR 4.0.30319) |
 
 Notes:
 
@@ -26,6 +27,23 @@ Notes:
   byte.
 - `xorriso/create-iso-3gb.txt` wrote a 3 GB file of zeros to get many progress
   lines, including speed figures.
+- `xorriso/burn-image-stdio.txt`, `check-media-read-back-stdio.txt` and
+  `blank-as-needed-stdio.txt` come from the GitHub Actions Ubuntu runner
+  (xorriso 1.5.6), 2026-11-01: `XorrisoIntegrationTest` printed each line
+  xorriso reported on stdout and stderr. The command line was rebuilt from
+  `XorrisoCommandBuilder`, temporary folders are shortened to `/tmp/`, and the
+  read-back's stdout (the disc's data) is left out.
 - `xorriso/devices-none-found.txt` and the image captures ran without any
   optical drive. Output with real drives will be added from the owner's
   hardware.
+- `windows-helper/` files hold the helper's stdout only (JSON Lines), without
+  a command line: the request is named by the file name and the operation
+  tables in `docs/design/LLD-windows-platform.md`. The drive's serial number
+  inside its id is replaced with zeros and the Windows user name in paths with
+  `user`. `read-media-no-media.txt` was captured with the tray open.
+- The `burn-image-*`, `verify-image-*`, `blank-*` and `read-media-dvdplusrw`
+  captures used a DVD+RW and a 68 MB image (one random 64 MiB file).
+  `burn-image-without-force-overwrite.txt` is the helper before it set
+  `ForceOverwrite`, on a written disc; `verify-image-mismatch.txt` compared
+  that image with the disc's older content. `burn-image-cancelled.txt` closed
+  the helper's input after a few writing updates.

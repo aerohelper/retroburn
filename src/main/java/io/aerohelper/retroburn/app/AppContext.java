@@ -14,6 +14,8 @@ import io.aerohelper.retroburn.platform.PlatformServices;
 import io.aerohelper.retroburn.platform.linux.LinuxAppPaths;
 import io.aerohelper.retroburn.platform.linux.LinuxPlatform;
 import io.aerohelper.retroburn.platform.simulated.SimulatedPlatform;
+import io.aerohelper.retroburn.platform.windows.WindowsAppPaths;
+import io.aerohelper.retroburn.platform.windows.WindowsPlatform;
 import io.aerohelper.retroburn.settings.SettingsStore;
 import io.aerohelper.retroburn.tools.ProcessRunner;
 import io.aerohelper.retroburn.tools.ToolProbe;
@@ -61,28 +63,38 @@ public final class AppContext {
     }
 
     /**
-     * Builds the context for the machine the app is running on: the Linux platform on Linux, the
-     * simulated platform elsewhere until the Windows platform exists.
+     * Builds the context for the machine the app is running on: the Linux or Windows platform, or the
+     * simulated platform on any other OS.
      */
     public static AppContext createDefault() {
         OperatingSystem operatingSystem = PlatformDetector.currentOperatingSystem();
         Path home = Path.of(System.getProperty("user.home"));
         ProcessRunner processRunner = new ProcessRunner();
 
-        AppPaths paths = operatingSystem == OperatingSystem.LINUX
-                ? LinuxAppPaths.fromEnvironment(System.getenv(), home)
-                : simulatedPaths(home);
+        AppPaths paths = switch (operatingSystem) {
+            case LINUX -> LinuxAppPaths.fromEnvironment(System.getenv(), home);
+            case WINDOWS -> WindowsAppPaths.fromEnvironment(System.getenv(), home);
+            default -> simulatedPaths(home);
+        };
         paths.ensureExists();
         LoggingSetup.writeLogsTo(paths.logs());
         SettingsStore settingsStore = new SettingsStore(paths.settings());
 
-        PlatformServices platform = operatingSystem == OperatingSystem.LINUX
-                ? new LinuxPlatform(
+        PlatformServices platform = switch (operatingSystem) {
+            case LINUX ->
+                new LinuxPlatform(
                         paths,
                         processRunner,
                         System.getenv("PATH"),
-                        () -> settingsStore.current().toolPaths())
-                : new SimulatedPlatform(operatingSystem, paths);
+                        () -> settingsStore.current().toolPaths());
+            case WINDOWS ->
+                new WindowsPlatform(
+                        paths,
+                        processRunner,
+                        System.getenv(),
+                        () -> settingsStore.current().toolPaths());
+            default -> new SimulatedPlatform(operatingSystem, paths);
+        };
 
         AppContext context = new AppContext(
                 platform,

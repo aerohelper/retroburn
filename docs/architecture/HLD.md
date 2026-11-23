@@ -206,7 +206,7 @@ public interface PlatformServices {
 | Verify | xorriso MD5 checking | Read back via the drive letter; SHA-256 compared in Java |
 | Audio CD | cdrskin, SAO, CD-Text from a v07t sheet | IMAPI2 audio; CD-Text via cdrdao only if the spike succeeds |
 | DVD-Video image | genisoimage in DVD-Video mode | IMAPI2FS with ISO 9660 + UDF 1.02 (validated on hardware players) |
-| Hot-plug | Polling while idle (cheap device listing; xorriso only when the set changes) — final choice in LLD | IMAPI2 device add/remove notifications, polling as fallback |
+| Hot-plug | Polling while idle (cheap device listing; xorriso only when the set changes) — final choice in LLD | Polling in a long-running helper (IMAPI2 notifications did not arrive in the spike) |
 | USB detection | Device's sysfs path | Device's Plug and Play ID |
 | Sleep inhibition | `systemd-inhibit` child process (sleep + idle) | `SetThreadExecutionState` held by the burning process |
 | Battery | sysfs power-supply info | System power status |
@@ -481,7 +481,7 @@ go in `docs/DATA_MODEL.md` (M2).
 
 ## 11. Windows IMAPI2 bridge (overview)
 
-Proposed in [ADR-0005](../adr/0005-windows-imapi2-bridge.md): a bundled,
+Decided in [ADR-0005](../adr/0005-windows-imapi2-bridge.md): a bundled,
 readable PowerShell 5.1 script that uses the IMAPI2 COM objects.
 
 - Java starts the script with an argument list (no shell string), passes a
@@ -495,7 +495,7 @@ readable PowerShell 5.1 script that uses the IMAPI2 COM objects.
   detection, and holds the execution-state request for sleep inhibition while
   it burns.
 
-The M3 spike confirms or replaces this choice with JNA in-process COM.
+The M3 spike confirmed this choice. IMAPI2 calls event sinks on its own thread, where PowerShell cannot run, so the helper's work is done by C# source compiled at start by `Add-Type`. Details: [LLD-windows-platform.md](../design/LLD-windows-platform.md).
 
 ---
 

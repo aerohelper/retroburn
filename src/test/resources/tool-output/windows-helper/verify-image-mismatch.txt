@@ -1,0 +1,2 @@
+{"event":"progress","stage":"verifying","done":0,"total":68288512}
+{"event":"error","code":"VERIFY_MISMATCH","message":"First difference at byte 32808"}

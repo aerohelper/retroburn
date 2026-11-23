@@ -15,6 +15,7 @@ module) are added before each module is built.
 | [architecture/HLD.md](architecture/HLD.md) | Layers, modules, data flow per project type, platform abstraction, pipeline, threading and error handling. |
 | [adr/](adr/) | Architecture Decision Records — why things are the way they are. |
 | [EXTENSIBILITY.md](EXTENSIBILITY.md) | How to add a platform, project type, theme, template or reel scene. |
+| [PORTING.md](PORTING.md) | How to port RetroBurn to another operating system, step by step (draft). |
 | [SECURITY_THREAT_MODEL.md](SECURITY_THREAT_MODEL.md) | What can go wrong security-wise and how the design prevents it. |
 | [RISKS.md](RISKS.md) | Project risk register. |
 | [GLOSSARY.md](GLOSSARY.md) | Optical-disc and project terms (SAO, CD-Text, UDF, IFO, …). |

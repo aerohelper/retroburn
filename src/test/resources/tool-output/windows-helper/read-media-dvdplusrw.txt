@@ -1,0 +1,2 @@
+{"event":"media","present":true,"physicalType":7,"status":1,"freeSectors":2295104,"totalSectors":2295104}
+{"event":"result"}

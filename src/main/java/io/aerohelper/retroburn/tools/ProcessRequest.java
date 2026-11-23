@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 package io.aerohelper.retroburn.tools;
 
+import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -26,8 +27,9 @@ import java.util.stream.Collectors;
  * @param totalTimeout maximum run time
  * @param idleTimeout maximum time without any output, which catches hung devices
  * @param charset encoding of the program's output
- * @param stdoutLines receives each stdout line
+ * @param stdoutLines receives each stdout line, unless {@code stdoutSink} is set
  * @param stderrLines receives each stderr line
+ * @param stdoutSink receives stdout unchanged, as bytes, instead of {@code stdoutLines}
  */
 public record ProcessRequest(
         Path executable,
@@ -37,7 +39,8 @@ public record ProcessRequest(
         Optional<Duration> idleTimeout,
         Charset charset,
         Consumer<String> stdoutLines,
-        Consumer<String> stderrLines) {
+        Consumer<String> stderrLines,
+        Optional<OutputStream> stdoutSink) {
 
     public ProcessRequest {
         Objects.requireNonNull(executable, "executable");
@@ -48,6 +51,7 @@ public record ProcessRequest(
         Objects.requireNonNull(charset, "charset");
         Objects.requireNonNull(stdoutLines, "stdoutLines");
         Objects.requireNonNull(stderrLines, "stderrLines");
+        Objects.requireNonNull(stdoutSink, "stdoutSink");
     }
 
     public static Builder builder(Path executable, List<String> arguments) {
@@ -83,6 +87,7 @@ public record ProcessRequest(
         private Charset charset = StandardCharsets.UTF_8;
         private Consumer<String> stdoutLines = line -> {};
         private Consumer<String> stderrLines = line -> {};
+        private OutputStream stdoutSink;
 
         private Builder(Path executable, List<String> arguments) {
             this.executable = executable;
@@ -119,6 +124,15 @@ public record ProcessRequest(
             return this;
         }
 
+        /**
+         * Copies stdout unchanged into {@code sink}, for programs that write data rather than text.
+         * The sink is called from a background thread and is not closed.
+         */
+        public Builder stdoutTo(OutputStream sink) {
+            this.stdoutSink = sink;
+            return this;
+        }
+
         public ProcessRequest build() {
             return new ProcessRequest(
                     executable,
@@ -128,7 +142,8 @@ public record ProcessRequest(
                     Optional.ofNullable(idleTimeout),
                     charset,
                     stdoutLines,
-                    stderrLines);
+                    stderrLines,
+                    Optional.ofNullable(stdoutSink));
         }
     }
 }
