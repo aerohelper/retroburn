@@ -205,6 +205,52 @@ class ProcessRunnerTest {
     }
 
     @Test
+    void streamsStandardInputFromAWriter() {
+        byte[] chunk = new byte[64 * 1024];
+        new Random(5).nextBytes(chunk);
+        ByteArrayOutputStream sink = new ByteArrayOutputStream();
+
+        ProcessResult result = runner.run(
+                request("copy-stdin")
+                        .stdinWriter(input -> {
+                            for (int count = 0; count < 40; count++) {
+                                input.write(chunk);
+                            }
+                        })
+                        .stdoutTo(sink)
+                        .build(),
+                CancelToken.none());
+
+        assertTrue(result.succeeded(), result.technicalDetail());
+        assertEquals(40 * chunk.length, sink.size());
+    }
+
+    @Test
+    void rethrowsAFailingStdinWriterAndStopsTheProgram() {
+        IllegalStateException error = assertThrows(
+                IllegalStateException.class,
+                () -> runner.run(
+                        request("copy-stdin")
+                                .stdinWriter(input -> {
+                                    throw new IllegalStateException("frame failed");
+                                })
+                                .stdoutTo(new ByteArrayOutputStream())
+                                .build(),
+                        CancelToken.none()));
+        assertEquals("frame failed", error.getMessage());
+    }
+
+    @Test
+    void stdinFileAndWriterCannotBeCombined() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> request("copy-stdin")
+                        .stdinFrom(Path.of("in.bin"))
+                        .stdinWriter(input -> {})
+                        .build());
+    }
+
+    @Test
     void rethrowsAFailingSinkAfterTheProgramHasFinished() {
         OutputStream failing = new OutputStream() {
             @Override

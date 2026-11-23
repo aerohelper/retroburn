@@ -25,6 +25,7 @@ import java.util.Optional;
  * @param video settings for video DVDs
  * @param design settings for the cover and label designer
  * @param appearance theme, sounds and the disc animation
+ * @param reel burn reel options
  */
 public record Settings(
         boolean preventSleepWhileBurning,
@@ -37,7 +38,8 @@ public record Settings(
         Mp3 mp3,
         Video video,
         Design design,
-        Appearance appearance) {
+        Appearance appearance,
+        Reel reel) {
 
     public Settings {
         Objects.requireNonNull(workDirectory, "workDirectory");
@@ -47,6 +49,7 @@ public record Settings(
         Objects.requireNonNull(video, "video");
         Objects.requireNonNull(design, "design");
         Objects.requireNonNull(appearance, "appearance");
+        Objects.requireNonNull(reel, "reel");
     }
 
     /**
@@ -150,6 +153,19 @@ public record Settings(
         }
     }
 
+    /**
+     * Burn reel options.
+     *
+     * @param hideNames show "Item 1", "Item 2" … instead of file, track and title names
+     * @param seconds reel length, 12 to 18
+     */
+    public record Reel(boolean hideNames, int seconds) {
+
+        public static Reel defaults() {
+            return new Reel(true, 15);
+        }
+    }
+
     /** Settings for a first start. */
     public static Settings defaults() {
         return new Settings(
@@ -163,7 +179,8 @@ public record Settings(
                 Mp3.defaults(),
                 Video.defaults(),
                 Design.defaults(),
-                Appearance.defaults());
+                Appearance.defaults(),
+                Reel.defaults());
     }
 
     public Settings withVerifyAfterBurn(boolean verify) {
@@ -178,7 +195,8 @@ public record Settings(
                 mp3,
                 video,
                 design,
-                appearance);
+                appearance,
+                reel);
     }
 
     public Settings withShowUsbTip(boolean show) {
@@ -193,7 +211,8 @@ public record Settings(
                 mp3,
                 video,
                 design,
-                appearance);
+                appearance,
+                reel);
     }
 
     public Settings withAudio(Audio changed) {
@@ -208,7 +227,8 @@ public record Settings(
                 mp3,
                 video,
                 design,
-                appearance);
+                appearance,
+                reel);
     }
 
     public Settings withMp3(Mp3 changed) {
@@ -223,7 +243,8 @@ public record Settings(
                 changed,
                 video,
                 design,
-                appearance);
+                appearance,
+                reel);
     }
 
     public Settings withVideo(Video changed) {
@@ -238,7 +259,8 @@ public record Settings(
                 mp3,
                 changed,
                 design,
-                appearance);
+                appearance,
+                reel);
     }
 
     public Settings withDesign(Design changed) {
@@ -253,7 +275,8 @@ public record Settings(
                 mp3,
                 video,
                 changed,
-                appearance);
+                appearance,
+                reel);
     }
 
     public Settings withAppearance(Appearance changed) {
@@ -268,6 +291,23 @@ public record Settings(
                 mp3,
                 video,
                 design,
+                changed,
+                reel);
+    }
+
+    public Settings withReel(Reel changed) {
+        return new Settings(
+                preventSleepWhileBurning,
+                keepTemporaryFiles,
+                workDirectory,
+                toolPaths,
+                verifyAfterBurn,
+                showUsbTip,
+                audio,
+                mp3,
+                video,
+                design,
+                appearance,
                 changed);
     }
 }

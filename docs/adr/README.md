@@ -29,6 +29,7 @@ record that supersedes the old one.
 | [0015](0015-video-dvd-structure.md) | Video DVD structure and images | Proposed |
 | [0016](0016-pdf-export-and-fonts.md) | PDF export with Apache PDFBox, and fonts for covers | Proposed |
 | [0017](0017-sounds-and-themes.md) | Theme sounds made by a generator and played with Java Sound | Proposed |
+| [0018](0018-burn-reel-rendering.md) | Burn reels drawn with Java2D and encoded by FFmpeg from a pipe | Proposed |
 
 Statuses: **Proposed** (awaiting owner review or a spike), **Accepted**,
 **Superseded by NNNN**, **Rejected**.

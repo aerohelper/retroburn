@@ -7,6 +7,7 @@ import io.aerohelper.retroburn.settings.Settings;
 import io.aerohelper.retroburn.theme.Appearance;
 import io.aerohelper.retroburn.theme.Theme;
 import io.aerohelper.retroburn.ui.AboutDialog;
+import io.aerohelper.retroburn.ui.DemoReelView;
 import io.aerohelper.retroburn.ui.HomeView;
 import io.aerohelper.retroburn.ui.LicensesDialog;
 import io.aerohelper.retroburn.ui.Navigation;
@@ -109,8 +110,14 @@ public final class MainWindow implements Navigation {
                         context.componentRegistry(), context.platform().operatingSystem(), messages)
                 .showAndWait(owner));
 
+        MenuItem demoReel = new MenuItem(messages.get("menu.help.demoReel"));
+        demoReel.setOnAction(event -> {
+            closeProject();
+            root.setCenter(new DemoReelView(services, this).node());
+        });
+
         Menu help = new Menu(messages.get("menu.help"));
-        help.getItems().addAll(about, licenses);
+        help.getItems().addAll(demoReel, about, licenses);
         return new MenuBar(viewMenu(messages), help);
     }
 

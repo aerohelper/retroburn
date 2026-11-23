@@ -7,7 +7,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 | | |
 |---|---|
-| Status | Draft: data disc, Burn ISO, Create ISO, erase, audio CD, MP3 disc, video DVD, covers and themes. Extended as each project type is built. |
+| Status | Draft: data disc, Burn ISO, Create ISO, erase, audio CD, MP3 disc, video DVD, covers, themes and burn reels. Extended as each project type is built. |
 
 Automated tests cover the models, parsers, pipelines and engines (see
 [TEST_STRATEGY.md](TEST_STRATEGY.md)). This checklist covers what needs a
@@ -25,7 +25,7 @@ change to the screens or an engine.
   name (for example `Grüße.txt`), and one empty folder.
 - Start the app with `./mvnw javafx:run`, or from an installed build.
 - Write down the OS version, drive model and media brand in the results
-  table (section 11).
+  table (section 12).
 
 Features the drive cannot test (for example Blu-ray on a DVD writer) are
 written down as "not tested — no drive", not skipped silently.
@@ -140,7 +140,20 @@ a disc to try the cut-outs against. Record measurements in
 | THEME-4 | View → Sounds off, then burn. | Silent. Classic with Sounds untouched is silent too. |
 | THEME-5 | View → Animate the disc off (and, separately, the system's reduce-motion setting on). | The disc stays still. |
 
-## 10. USB and power
+## 10. Burn reels
+
+Needs FFmpeg (Linux: from the distribution; Windows: on `PATH` or set in
+the tool settings) and a phone to play the result.
+
+| # | Steps | Expected |
+|---|---|---|
+| REEL-1 | Help → Make a demo burn reel → Make my burn reel. | "frame N of 450" counts up; "Saved RetroBurn-….mp4 in your Videos folder"; Open folder shows it. |
+| REEL-2 | Play the demo reel on a phone. | Vertical, about 15 s, with sound: intro, spinning disc, percentage and names, "Burn complete" with figures, end card. |
+| REEL-3 | After a successful burn (DVD+RW), make a reel with Hide item names on, then off. | The names show as "Item 1"… or the real names; the disc name and figures match the burn. |
+| REEL-4 | Start a reel and press Cancel. | "Stopped. No reel was saved."; no partial file in the Videos folder. |
+| REEL-5 | Check the data folder after a few burns. | `sessions/` holds one JSON file per burn; nothing is sent anywhere. |
+
+## 11. USB and power
 
 Run these on the DVD+RW only.
 
@@ -151,7 +164,7 @@ Run these on the DVD+RW only.
 | USB-3 | During a burn, leave the laptop idle past its sleep timeout. | The computer stays awake; the progress view shows the sleep note (Linux: a warning if sleep could not be blocked). |
 | USB-4 | Unplug the drive during a burn. | Result "The drive was disconnected or lost power…" with details; the app stays usable; replugging shows the drive again. |
 
-## 11. Results
+## 12. Results
 
 Copy this table into the pull request or release checklist.
 
@@ -159,7 +172,7 @@ Copy this table into the pull request or release checklist.
 |---|---|---|---|---|---|
 | | | | | | |
 
-## 12. Automated real-disc test
+## 13. Automated real-disc test
 
 Separate from this checklist, `WindowsRealDiscTest` burns, verifies and
 erases the inserted rewritable disc through the engine, without the screens.

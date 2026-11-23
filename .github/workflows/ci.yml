@@ -36,6 +36,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y xorriso cdrskin genisoimage ffmpeg dvdauthor cdrdao
 
+      # FFmpeg on Windows runs the FFmpeg integration tests there too, including the burn reel's
+      # acceptance test (ffprobe checks size, length, codecs).
+      - name: Install FFmpeg (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          choco install ffmpeg -y --no-progress
+          ffmpeg -hide_banner -version
+
       # Compiles, runs unit, integration and architecture tests, and checks formatting, licence
       # headers, credits completeness and coverage.
       - name: Verify (Linux)

@@ -56,6 +56,8 @@ public final class SettingsStore {
     static final String KEY_THEME = "appearance.theme";
     static final String KEY_SOUNDS = "appearance.sounds";
     static final String KEY_ANIMATE_DISC = "appearance.animateDisc";
+    static final String KEY_REEL_HIDE_NAMES = "reel.hideNames";
+    static final String KEY_REEL_SECONDS = "reel.seconds";
 
     private static final Logger LOG = Logger.getLogger(SettingsStore.class.getName());
 
@@ -158,7 +160,14 @@ public final class SettingsStore {
                         properties.getProperty(KEY_SOUNDS, defaults.appearance().sounds()),
                         bool(
                                 properties.getProperty(KEY_ANIMATE_DISC),
-                                defaults.appearance().animateDisc())));
+                                defaults.appearance().animateDisc())),
+                new Settings.Reel(
+                        bool(
+                                properties.getProperty(KEY_REEL_HIDE_NAMES),
+                                defaults.reel().hideNames()),
+                        integer(
+                                properties.getProperty(KEY_REEL_SECONDS),
+                                defaults.reel().seconds())));
     }
 
     private static int integer(String value, int fallback) {
@@ -198,6 +207,10 @@ public final class SettingsStore {
         properties.setProperty(KEY_SOUNDS, settings.appearance().sounds());
         properties.setProperty(
                 KEY_ANIMATE_DISC, Boolean.toString(settings.appearance().animateDisc()));
+        properties.setProperty(
+                KEY_REEL_HIDE_NAMES, Boolean.toString(settings.reel().hideNames()));
+        properties.setProperty(
+                KEY_REEL_SECONDS, Integer.toString(settings.reel().seconds()));
         settings.workDirectory().ifPresent(folder -> properties.setProperty(KEY_WORK_DIRECTORY, folder.toString()));
         settings.toolPaths()
                 .forEach((tool, path) -> properties.setProperty(KEY_TOOL_PATH_PREFIX + toolKey(tool), path.toString()));

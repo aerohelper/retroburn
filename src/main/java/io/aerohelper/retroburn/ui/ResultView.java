@@ -34,6 +34,7 @@ final class ResultView {
             String successText,
             List<String> logTail,
             Node disc,
+            Node reel,
             Runnable back,
             Runnable home) {
         String outcome = result.outcome().name().toLowerCase(Locale.ROOT).replace('_', '-');
@@ -72,6 +73,9 @@ final class ResultView {
         Button homeButton = new Button(messages.get("result.home"));
         homeButton.setOnAction(event -> home.run());
         homeButton.setDefaultButton(true);
+        if (reel != null) {
+            content.getChildren().add(reel);
+        }
         HBox buttons = new HBox(backButton, homeButton);
         buttons.getStyleClass().add("result-buttons");
         content.getChildren().add(buttons);

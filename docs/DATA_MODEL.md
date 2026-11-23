@@ -15,7 +15,7 @@ loading after an upgrade and newer files are refused clearly.
 | `.rbproj` project | JSON | where the user saves it | planned |
 | `.rbdesign` cover design | ZIP: JSON + images | where the user saves it | M8 |
 | Print templates | JSON | bundled resources (`print-templates/`) | M8 |
-| Burn session | JSON | data folder | planned |
+| Burn session | JSON | `<data>/sessions/` (newest 50) | M10 |
 
 Folders are resolved per OS by `AppPaths` (see
 [LLD-engine-and-platform.md](design/LLD-engine-and-platform.md)).
@@ -55,6 +55,8 @@ Folders are resolved per OS by `AppPaths` (see
 | `appearance.theme` | `classic`/`y2k` | `classic` | Theme; an unknown id falls back to `classic`. |
 | `appearance.sounds` | `ON`/`OFF`/empty | empty | Sounds; empty follows the theme (on in `y2k`). |
 | `appearance.animateDisc` | `true`/`false` | `true` | Whether the disc on the progress screen moves (it also stays still when the system asks for reduced motion). |
+| `reel.hideNames` | `true`/`false` | `true` | Burn reels show "Item 1", "Item 2" … instead of file, track and title names. |
+| `reel.seconds` | whole number, 12–18 | `15` | Burn reel length. |
 | `audio.normalizeLoudness` | `true`/`false` | `false` | Even out loudness (FFmpeg `loudnorm`, −16 LUFS) while converting audio CD tracks. |
 | `jobs.keepTemporaryFiles` | `true`/`false` | `false` | Keep job work folders after success or cancel. |
 | `jobs.workDirectory` | path | (platform work folder) | Where job work folders are created. |
@@ -89,6 +91,16 @@ section 9.
 `heightMm`, `bleedMm`, `safeMm`, `foldsMm`, `adjustableSpine`,
 `defaultSpineMm`, `minSpineMm`, `maxSpineMm`, `holeDiametersMm`. Unknown
 fields are rejected. Sizes are listed in [PRINT_TEMPLATES.md](PRINT_TEMPLATES.md).
+
+## Burn session (schema version 1)
+
+`<data>/sessions/<yyyyMMdd-HHmmss>-<id>.json`, written by `SessionStore`
+after every burn, only on this computer: `schemaVersion`, `id`, `started`
+and `ended` (ISO-8601 instants), `kind` (job kind), `label`, `theme`,
+`items` (names), `bytes`, `outcome`, `samples` (`atMillis`, `fraction`,
+`speed`; at most one a second) and `markers` (`atMillis`, `step` message
+key). Unknown fields are ignored. See
+[LLD-burn-reel.md](design/LLD-burn-reel.md).
 
 ## `credits/components.json` (schema version 1)
 

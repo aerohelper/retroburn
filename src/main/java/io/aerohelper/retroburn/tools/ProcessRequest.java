@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 package io.aerohelper.retroburn.tools;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -31,6 +32,8 @@ import java.util.stream.Collectors;
  * @param stderrLines receives each stderr line
  * @param stdoutSink receives stdout unchanged, as bytes, instead of {@code stdoutLines}
  * @param stdinFile a file the program reads as its standard input; otherwise it gets none
+ * @param stdinWriter writes the program's standard input from a background thread; the stream is
+ *     closed afterwards. Not combined with {@code stdinFile}.
  */
 public record ProcessRequest(
         Path executable,
@@ -42,7 +45,8 @@ public record ProcessRequest(
         Consumer<String> stdoutLines,
         Consumer<String> stderrLines,
         Optional<OutputStream> stdoutSink,
-        Optional<Path> stdinFile) {
+        Optional<Path> stdinFile,
+        Optional<StdinWriter> stdinWriter) {
 
     public ProcessRequest {
         Objects.requireNonNull(executable, "executable");
@@ -55,6 +59,18 @@ public record ProcessRequest(
         Objects.requireNonNull(stderrLines, "stderrLines");
         Objects.requireNonNull(stdoutSink, "stdoutSink");
         Objects.requireNonNull(stdinFile, "stdinFile");
+        Objects.requireNonNull(stdinWriter, "stdinWriter");
+        if (stdinFile.isPresent() && stdinWriter.isPresent()) {
+            throw new IllegalArgumentException("Standard input comes from a file or a writer, not both");
+        }
+    }
+
+    /** Produces a program's standard input, for example raw video frames. */
+    @FunctionalInterface
+    public interface StdinWriter {
+
+        /** Writes everything; an {@link IOException} usually means the program stopped reading. */
+        void write(OutputStream input) throws IOException;
     }
 
     public static Builder builder(Path executable, List<String> arguments) {
@@ -92,6 +108,7 @@ public record ProcessRequest(
         private Consumer<String> stderrLines = line -> {};
         private OutputStream stdoutSink;
         private Path stdinFile;
+        private StdinWriter stdinWriter;
 
         private Builder(Path executable, List<String> arguments) {
             this.executable = executable;
@@ -143,6 +160,15 @@ public record ProcessRequest(
             return this;
         }
 
+        /**
+         * Streams the program's standard input from {@code writer}, called on a background thread
+         * while the program runs, for data too large for a file.
+         */
+        public Builder stdinWriter(StdinWriter writer) {
+            this.stdinWriter = writer;
+            return this;
+        }
+
         public ProcessRequest build() {
             return new ProcessRequest(
                     executable,
@@ -154,7 +180,8 @@ public record ProcessRequest(
                     stdoutLines,
                     stderrLines,
                     Optional.ofNullable(stdoutSink),
-                    Optional.ofNullable(stdinFile));
+                    Optional.ofNullable(stdinFile),
+                    Optional.ofNullable(stdinWriter));
         }
     }
 }

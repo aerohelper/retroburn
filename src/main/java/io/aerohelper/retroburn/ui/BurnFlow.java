@@ -6,10 +6,12 @@ import io.aerohelper.retroburn.common.CancelToken;
 import io.aerohelper.retroburn.common.Messages;
 import io.aerohelper.retroburn.common.RetroBurnException;
 import io.aerohelper.retroburn.common.UserMessage;
+import io.aerohelper.retroburn.design.CoverContent;
 import io.aerohelper.retroburn.engine.BlankMode;
 import io.aerohelper.retroburn.engine.DriveInfo;
 import io.aerohelper.retroburn.engine.MediaInfo;
 import io.aerohelper.retroburn.pipeline.Pipeline;
+import io.aerohelper.retroburn.pipeline.PipelineListener;
 import io.aerohelper.retroburn.pipeline.PipelineResult;
 import io.aerohelper.retroburn.pipeline.PipelineRunner;
 import io.aerohelper.retroburn.platform.PowerStatus.PowerSource;
@@ -17,12 +19,17 @@ import io.aerohelper.retroburn.project.BurnJob;
 import io.aerohelper.retroburn.project.BurnPlan;
 import io.aerohelper.retroburn.project.BurnPreCheck;
 import io.aerohelper.retroburn.project.JobKind;
+import io.aerohelper.retroburn.reel.BurnSession;
+import io.aerohelper.retroburn.reel.SessionRecorder;
+import io.aerohelper.retroburn.reel.SessionStore;
 import io.aerohelper.retroburn.settings.Settings;
 import io.aerohelper.retroburn.theme.Appearance;
 import io.aerohelper.retroburn.theme.DiscMotion;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Clock;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
@@ -183,19 +190,68 @@ final class BurnFlow {
         BurnJob burnJob =
                 new BurnJob(services.pipelineRunner(), services.platform().burnEngine(), driveBar.watcher());
         Settings settings = services.settings().current();
+        SessionRecorder recorder = recorder(job);
+        PipelineListener listener = event -> {
+            progress.onEvent(event);
+            recorder.onEvent(event);
+        };
         services.appearance().burnStarted();
         CompletableFuture.supplyAsync(
-                        () -> burnJob.run(plan, pipeline, options(settings), progress, cancel), services.jobs())
+                        () -> burnJob.run(plan, pipeline, options(settings), listener, cancel), services.jobs())
                 .whenComplete((result, error) -> Platform.runLater(() -> {
                     progress.close();
                     driveBar.readMedia();
                     BurnJob.Result finished = error == null ? result : unexpected(error);
                     services.appearance().burnFinished(ending(finished.outcome()));
-                    showResult(finished, job.successText(), progress);
+                    BurnSession session = recorder.finish(finished.outcome().name());
+                    saveSession(session);
+                    boolean reel = finished.outcome() != BurnJob.Outcome.CANCELLED
+                            && session.succeeded()
+                            && job.kind() != JobKind.ERASE;
+                    showResult(finished, job.successText(), progress, reel ? Optional.of(session) : Optional.empty());
                 }));
     }
 
+    /**
+     * Records the burn for the reel. The disc name and item names come from the project screen that
+     * started it, which publishes them as cover text; Burn ISO and Erase have none.
+     */
+    private SessionRecorder recorder(Job job) {
+        CoverContent content = services.coverContent().get();
+        String projectKind = switch (job.kind()) {
+            case DATA_DISC -> messages.get("home.card.dataDisc");
+            case AUDIO_CD -> messages.get("home.card.audioCd");
+            case MP3_DISC -> messages.get("home.card.mp3Disc");
+            case VIDEO_DVD -> messages.get("home.card.videoDvd");
+            case BURN_ISO, ERASE -> "";
+        };
+        boolean fromProject = !projectKind.isEmpty() && projectKind.equals(content.kind());
+        return new SessionRecorder(
+                Clock.systemUTC(),
+                job.kind().name(),
+                fromProject ? content.title() : job.title(),
+                services.appearance().theme().id(),
+                fromProject ? content.lines() : List.of(),
+                job.bytesToWrite());
+    }
+
+    private void saveSession(BurnSession session) {
+        SessionStore store = new SessionStore(services.platform().appPaths().data());
+        services.background().execute(() -> {
+            try {
+                store.save(session);
+            } catch (IOException | RuntimeException e) {
+                LOG.log(Level.WARNING, "Could not save the burn session", e);
+            }
+        });
+    }
+
     private void showResult(BurnJob.Result result, String successText, ProgressView progress) {
+        showResult(result, successText, progress, Optional.empty());
+    }
+
+    private void showResult(
+            BurnJob.Result result, String successText, ProgressView progress, Optional<BurnSession> session) {
         progress.disc()
                 .setState(
                         ending(result.outcome()) == Appearance.Ending.SUCCESS
@@ -207,6 +263,7 @@ final class BurnFlow {
                 successText,
                 progress.logTail(),
                 progress.disc().node(),
+                session.map(found -> new ReelPanel(services, found).node()).orElse(null),
                 navigation::backToProject,
                 navigation::showHome);
         navigation.showOnTop(view.node());
