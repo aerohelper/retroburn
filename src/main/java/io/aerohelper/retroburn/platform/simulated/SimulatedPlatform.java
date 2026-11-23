@@ -15,6 +15,7 @@ import io.aerohelper.retroburn.platform.SleepInhibitor;
 import io.aerohelper.retroburn.tools.Feature;
 import io.aerohelper.retroburn.tools.Requirement;
 import io.aerohelper.retroburn.tools.ToolLocator;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.EnumMap;
 import java.util.List;
@@ -99,6 +100,11 @@ public final class SimulatedPlatform implements PlatformServices {
     @Override
     public SleepInhibitor sleepInhibitor() {
         return SleepInhibitor.none();
+    }
+
+    @Override
+    public List<Path> fontFolders() {
+        return List.of();
     }
 
     @Override

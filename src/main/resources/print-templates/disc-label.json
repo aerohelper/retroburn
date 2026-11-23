@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "id": "disc-label",
+  "shape": "DISC",
+  "widthMm": 118,
+  "heightMm": 118,
+  "bleedMm": 3,
+  "safeMm": 3,
+  "holeDiametersMm": [41, 17]
+}

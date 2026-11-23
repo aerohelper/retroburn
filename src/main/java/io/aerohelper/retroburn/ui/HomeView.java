@@ -66,6 +66,7 @@ public final class HomeView {
             case "home.card.videoDvd" -> () -> navigation.openProject(new VideoDvdView(services, navigation));
             case "home.card.createIso" ->
                 () -> navigation.openProject(new DataDiscView(services, navigation, DataDiscView.Mode.CREATE_ISO));
+            case "home.card.coverAndLabel" -> () -> navigation.openProject(new CoverDesignerView(services, navigation));
             default -> null;
         };
         String title = messages.get(key);

@@ -24,6 +24,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -44,6 +45,7 @@ public final class WindowsPlatform implements PlatformServices {
     private final Imapi2ImageBuilder imageBuilder;
     private final SleepInhibitor sleepInhibitor;
     private final PowerStatus powerStatus;
+    private final List<Path> fontFolders;
 
     /**
      * @param appPaths folders from {@link WindowsAppPaths#fromEnvironment}
@@ -69,6 +71,23 @@ public final class WindowsPlatform implements PlatformServices {
         this.imageBuilder = new Imapi2ImageBuilder(helper);
         this.sleepInhibitor = new ExecutionStateSleepInhibitor(helper);
         this.powerStatus = new HelperPowerStatus(helper);
+        this.fontFolders = fontFolders(environment);
+    }
+
+    /** The Windows fonts folder and the per-user one where fonts installed without admin rights go. */
+    static List<Path> fontFolders(Map<String, String> environment) {
+        List<Path> folders = new ArrayList<>();
+        for (List<String> place :
+                List.of(List.of("SystemRoot", "Fonts"), List.of("LOCALAPPDATA", "Microsoft", "Windows", "Fonts"))) {
+            WindowsEnvironment.get(environment, place.getFirst()).ifPresent(base -> {
+                try {
+                    folders.add(Path.of(base, place.subList(1, place.size()).toArray(String[]::new)));
+                } catch (InvalidPathException e) {
+                    // Leave out a folder whose variable is not a usable path.
+                }
+            });
+        }
+        return List.copyOf(folders);
     }
 
     /**
@@ -155,6 +174,11 @@ public final class WindowsPlatform implements PlatformServices {
     @Override
     public SleepInhibitor sleepInhibitor() {
         return sleepInhibitor;
+    }
+
+    @Override
+    public List<Path> fontFolders() {
+        return fontFolders;
     }
 
     @Override

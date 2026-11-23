@@ -2,9 +2,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 /**
- * The cover and label designer: design documents, print templates, editor commands with undo and
- * redo, PDF and PNG export, printing, and {@code .rbdesign} files.
+ * The cover and label designer's model and output: print templates, design documents, editor
+ * commands with undo and redo, snapping, fonts and text layout, one renderer for Java2D and PDF,
+ * sheet layout, PDF and PNG export, and {@code .rbdesign} files. No JavaFX: the screen is {@code
+ * ui.CoverDesignerView}.
  *
- * <p>Empty until the designer milestone. See {@code docs/EXTENSIBILITY.md} section 6.
+ * <p>See {@code docs/design/LLD-cover-designer.md} and {@code docs/EXTENSIBILITY.md} section 6.
  */
 package io.aerohelper.retroburn.design;

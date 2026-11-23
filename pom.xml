@@ -36,6 +36,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
         <!-- Runtime libraries. Each one is registered in THIRD_PARTY_NOTICES.md and credits/components.json. -->
         <javafx.version>25.0.5</javafx.version>
         <jackson.version>3.2.4</jackson.version>
+        <pdfbox.version>3.0.8</pdfbox.version>
 
         <!-- Test-only libraries -->
         <junit.version>6.1.3</junit.version>
@@ -82,6 +83,11 @@ SPDX-License-Identifier: GPL-3.0-or-later
             <groupId>tools.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>${pdfbox.version}</version>
         </dependency>
 
         <dependency>

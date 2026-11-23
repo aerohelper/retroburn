@@ -51,6 +51,8 @@ public final class SettingsStore {
     static final String KEY_VIDEO_CHAPTERS = "video.chapterMinutes";
     static final String KEY_VIDEO_TEMPLATE = "video.template";
     static final String KEY_VIDEO_AFTER = "video.afterTitle";
+    static final String KEY_DESIGN_PAPER = "design.paper";
+    static final String KEY_DESIGN_IMAGE_NOTICE = "design.imageNoticeShown";
 
     private static final Logger LOG = Logger.getLogger(SettingsStore.class.getName());
 
@@ -141,7 +143,13 @@ public final class SettingsStore {
                                 defaults.video().chapterMinutes()),
                         properties.getProperty(
                                 KEY_VIDEO_TEMPLATE, defaults.video().template()),
-                        properties.getProperty(KEY_VIDEO_AFTER, defaults.video().afterTitle())));
+                        properties.getProperty(KEY_VIDEO_AFTER, defaults.video().afterTitle())),
+                new Settings.Design(
+                        properties.getProperty(
+                                KEY_DESIGN_PAPER, defaults.design().paper()),
+                        bool(
+                                properties.getProperty(KEY_DESIGN_IMAGE_NOTICE),
+                                defaults.design().imageNoticeShown())));
     }
 
     private static int integer(String value, int fallback) {
@@ -174,6 +182,9 @@ public final class SettingsStore {
                 KEY_VIDEO_CHAPTERS, Integer.toString(settings.video().chapterMinutes()));
         properties.setProperty(KEY_VIDEO_TEMPLATE, settings.video().template());
         properties.setProperty(KEY_VIDEO_AFTER, settings.video().afterTitle());
+        properties.setProperty(KEY_DESIGN_PAPER, settings.design().paper());
+        properties.setProperty(
+                KEY_DESIGN_IMAGE_NOTICE, Boolean.toString(settings.design().imageNoticeShown()));
         settings.workDirectory().ifPresent(folder -> properties.setProperty(KEY_WORK_DIRECTORY, folder.toString()));
         settings.toolPaths()
                 .forEach((tool, path) -> properties.setProperty(KEY_TOOL_PATH_PREFIX + toolKey(tool), path.toString()));

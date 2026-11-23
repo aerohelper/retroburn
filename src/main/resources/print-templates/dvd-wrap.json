@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "dvd-wrap",
+  "shape": "RECTANGLE",
+  "widthMm": 259,
+  "heightMm": 183,
+  "bleedMm": 3,
+  "safeMm": 3,
+  "adjustableSpine": true,
+  "defaultSpineMm": 14,
+  "minSpineMm": 5,
+  "maxSpineMm": 30
+}

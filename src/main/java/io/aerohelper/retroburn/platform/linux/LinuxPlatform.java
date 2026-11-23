@@ -134,6 +134,16 @@ public final class LinuxPlatform implements PlatformServices {
     }
 
     @Override
+    public List<Path> fontFolders() {
+        Path home = Path.of(System.getProperty("user.home"));
+        return List.of(
+                Path.of("/usr/share/fonts"),
+                Path.of("/usr/local/share/fonts"),
+                home.resolve(".local/share/fonts"),
+                home.resolve(".fonts"));
+    }
+
+    @Override
     public PowerStatus powerStatus() {
         return powerStatus;
     }

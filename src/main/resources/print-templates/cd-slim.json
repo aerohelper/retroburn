@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "id": "cd-slim",
+  "shape": "RECTANGLE",
+  "widthMm": 120,
+  "heightMm": 120,
+  "bleedMm": 3,
+  "safeMm": 3
+}

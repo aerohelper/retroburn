@@ -6,6 +6,7 @@ import io.aerohelper.retroburn.common.AppInfo;
 import io.aerohelper.retroburn.common.Messages;
 import io.aerohelper.retroburn.common.OperatingSystem;
 import io.aerohelper.retroburn.credits.ComponentRegistry;
+import io.aerohelper.retroburn.design.CoverContent;
 import io.aerohelper.retroburn.pipeline.PipelineRunner;
 import io.aerohelper.retroburn.pipeline.WorkFolders;
 import io.aerohelper.retroburn.platform.AppPaths;
@@ -46,6 +47,7 @@ public final class AppContext implements AutoCloseable {
 
     private static final Logger LOG = Logger.getLogger(AppContext.class.getName());
 
+    private final AtomicReference<CoverContent> coverContent = new AtomicReference<>(CoverContent.EMPTY);
     private final PlatformServices platform;
     private final SettingsStore settingsStore;
     private final AppInfo appInfo;
@@ -201,7 +203,8 @@ public final class AppContext implements AutoCloseable {
                 features::get,
                 () -> workRoot,
                 background,
-                jobs);
+                jobs,
+                coverContent);
     }
 
     /** Stops background threads; a running job's processes are stopped with the JVM. */

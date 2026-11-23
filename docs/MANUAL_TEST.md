@@ -7,7 +7,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 | | |
 |---|---|
-| Status | Draft: data disc, Burn ISO, Create ISO, erase, audio CD, MP3 disc and video DVD. Extended as each project type is built. |
+| Status | Draft: data disc, Burn ISO, Create ISO, erase, audio CD, MP3 disc, video DVD and covers. Extended as each project type is built. |
 
 Automated tests cover the models, parsers, pipelines and engines (see
 [TEST_STRATEGY.md](TEST_STRATEGY.md)). This checklist covers what needs a
@@ -25,7 +25,7 @@ change to the screens or an engine.
   name (for example `Grüße.txt`), and one empty folder.
 - Start the app with `./mvnw javafx:run`, or from an installed build.
 - Write down the OS version, drive model and media brand in the results
-  table (section 9).
+  table (section 10).
 
 Features the drive cannot test (for example Blu-ray on a DVD writer) are
 written down as "not tested — no drive", not skipped silently.
@@ -113,7 +113,24 @@ such as MKV or MOV) and, for one step, enough files for two menu pages
 | VIDEO-8 | Play the disc from VIDEO-7 in a hardware DVD player, once for a disc made on Linux and once for one made on Windows. | Same as VIDEO-3 on a TV. A Windows disc that plays in VLC but not in the player points at the IMAPI2FS image layout (ADR-0015). |
 | VIDEO-9 | Cancel during converting. | "Stopped" quickly; no files left in the work folder unless "keep temporary files" is on. |
 
-## 8. USB and power
+## 8. Covers and labels
+
+Needs a printer, plain paper, a ruler, and a CD jewel case, a DVD case and
+a disc to try the cut-outs against. Record measurements in
+[PRINT_TEMPLATES.md](PRINT_TEMPLATES.md).
+
+| # | Steps | Expected |
+|---|---|---|
+| COVER-1 | Print test page… with "Actual size" in the print dialog. | The rulers measure 100 mm and the square 100 × 100 mm (±0.5 mm); the circle is 118 mm across. |
+| COVER-2 | Open an audio CD project with tracks, then Cover & label → CD case back with spines → Re-sync. | The track list and spine titles show the project's tracks and title. |
+| COVER-3 | Add a picture. | The image-rights note appears the first time only; a low-resolution picture shows the "may look soft" note. |
+| COVER-4 | Drag, resize and nudge elements; undo and redo several steps. | Elements snap to the edges, centre and safe zone (not while Alt is held); undo and redo walk back and forth; one drag is one undo step. |
+| COVER-5 | Save, close, open the design again. | It looks the same, pictures included. |
+| COVER-6 | Export PDF for each item on A4 (and Letter if available); open it in a PDF viewer. | Page size matches the paper; text is selectable; crop marks or cut circles are there. |
+| COVER-7 | Print the CD front, the back inlay, the DVD wrap and two disc labels at 100 %; cut them out. | Each fits its case; spines fold on the fold marks; the label fits the disc with the 41 mm hole. |
+| COVER-8 | Choose a font marked as not allowing PDF embedding (if the computer has one) and export PDF. | The export stops and names the font; printing still works. |
+
+## 9. USB and power
 
 Run these on the DVD+RW only.
 
@@ -124,7 +141,7 @@ Run these on the DVD+RW only.
 | USB-3 | During a burn, leave the laptop idle past its sleep timeout. | The computer stays awake; the progress view shows the sleep note (Linux: a warning if sleep could not be blocked). |
 | USB-4 | Unplug the drive during a burn. | Result "The drive was disconnected or lost power…" with details; the app stays usable; replugging shows the drive again. |
 
-## 9. Results
+## 10. Results
 
 Copy this table into the pull request or release checklist.
 
@@ -132,7 +149,7 @@ Copy this table into the pull request or release checklist.
 |---|---|---|---|---|---|
 | | | | | | |
 
-## 10. Automated real-disc test
+## 11. Automated real-disc test
 
 Separate from this checklist, `WindowsRealDiscTest` burns, verifies and
 erases the inserted rewritable disc through the engine, without the screens.

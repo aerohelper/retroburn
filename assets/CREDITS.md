@@ -15,4 +15,5 @@ images — including in tests and screenshots.
 
 | File | Author | Source | Licence |
 |---|---|---|---|
-| *(none yet)* | | | |
+| `src/main/resources/fonts/lato/Lato-Regular.ttf`, `Lato-Bold.ttf` | Łukasz Dziedzic | Google Fonts repository, `ofl/lato` (unchanged) | OFL-1.1 (`credits/licenses/lato-OFL.txt`) |
+| `src/main/resources/fonts/vt323/VT323-Regular.ttf` | The VT323 Project Authors | Google Fonts repository, `ofl/vt323` (unchanged) | OFL-1.1 (`credits/licenses/vt323-OFL.txt`) |

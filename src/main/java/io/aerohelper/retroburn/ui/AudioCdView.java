@@ -344,6 +344,7 @@ final class AudioCdView implements Navigation.Screen {
         }
         showProblems();
         burn.setDisable(compilation.tracks().isEmpty() || pendingProbes > 0);
+        CoverContents.publish(services, CoverContents.audio(messages.get("home.card.audioCd"), compilation));
     }
 
     /** Files that could not be added, then CD-Text fields that cannot be written. */

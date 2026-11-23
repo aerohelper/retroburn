@@ -27,6 +27,7 @@ record that supersedes the old one.
 | [0013](0013-data-discs-burned-from-an-image.md) | Data discs are burned from an image and verified against it | Proposed |
 | [0014](0014-cd-text-on-windows-through-cdrdao.md) | CD-Text on Windows through cdrdao | Proposed |
 | [0015](0015-video-dvd-structure.md) | Video DVD structure and images | Proposed |
+| [0016](0016-pdf-export-and-fonts.md) | PDF export with Apache PDFBox, and fonts for covers | Proposed |
 
 Statuses: **Proposed** (awaiting owner review or a spike), **Accepted**,
 **Superseded by NNNN**, **Rejected**.

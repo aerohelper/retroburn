@@ -399,6 +399,7 @@ final class VideoDvdView implements Navigation.Screen {
 
     private void refresh() {
         table.setItems(FXCollections.observableArrayList(project.titles()));
+        CoverContents.publish(services, CoverContents.video(messages.get("home.card.videoDvd"), project));
         DvdBitrate bitrate = project.bitrate(capacityBytes());
         long estimate = project.titles().isEmpty() ? 0 : project.estimatedBytes(bitrate);
         if (pendingProbes > 0) {
