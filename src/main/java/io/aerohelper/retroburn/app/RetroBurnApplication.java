@@ -5,12 +5,22 @@ package io.aerohelper.retroburn.app;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
-/** JavaFX lifecycle: builds the application context and shows the main window. */
+/** JavaFX lifecycle: builds the application context, shows the main window, closes the context. */
 public final class RetroBurnApplication extends Application {
+
+    private AppContext context;
 
     @Override
     public void start(Stage stage) {
-        AppContext context = AppContext.createDefault();
+        context = AppContext.createDefault();
         new MainWindow(context).show(stage);
+        context.checkToolsInBackground();
+    }
+
+    @Override
+    public void stop() {
+        if (context != null) {
+            context.close();
+        }
     }
 }

@@ -13,10 +13,8 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 
 /**
- * The home screen: "What do you want to make?" with one card per kind of project.
- *
- * <p>No project type can be opened yet, so every card is disabled and says why. When project types
- * are added, the cards come from the project type registry instead of the fixed list below.
+ * The home screen: "What do you want to make?" with one card per kind of project. Cards for project
+ * types that are not built yet are disabled and say so.
  */
 public final class HomeView {
 
@@ -30,10 +28,14 @@ public final class HomeView {
             "home.card.createIso",
             "home.card.coverAndLabel");
 
+    private final UiServices services;
+    private final Navigation navigation;
     private final Messages messages;
 
-    public HomeView(Messages messages) {
-        this.messages = Objects.requireNonNull(messages, "messages");
+    public HomeView(UiServices services, Navigation navigation) {
+        this.services = Objects.requireNonNull(services, "services");
+        this.navigation = Objects.requireNonNull(navigation, "navigation");
+        this.messages = services.messages();
     }
 
     /** Builds the screen's node tree. Call on the JavaFX Application Thread. */
@@ -45,7 +47,7 @@ public final class HomeView {
         cards.getStyleClass().add("home-cards");
         cards.setAlignment(Pos.CENTER);
         for (String key : CARD_KEYS) {
-            cards.getChildren().add(createCard(messages.get(key), messages.get("home.card.notAvailableYet")));
+            cards.getChildren().add(createCard(key));
         }
 
         VBox root = new VBox(heading, cards);
@@ -54,18 +56,34 @@ public final class HomeView {
         return root;
     }
 
-    private static Button createCard(String title, String unavailableReason) {
+    private Button createCard(String key) {
+        Runnable open = switch (key) {
+            case "home.card.dataDisc" ->
+                () -> navigation.openProject(new DataDiscView(services, navigation, DataDiscView.Mode.BURN));
+            case "home.card.burnIso" -> () -> navigation.openProject(new BurnIsoView(services, navigation));
+            case "home.card.createIso" ->
+                () -> navigation.openProject(new DataDiscView(services, navigation, DataDiscView.Mode.CREATE_ISO));
+            default -> null;
+        };
+        String title = messages.get(key);
+        String description = messages.get(open == null ? "home.card.notAvailableYet" : key + ".description");
+
         Label titleLabel = new Label(title);
         titleLabel.getStyleClass().add("project-card-title");
-        Label reasonLabel = new Label(unavailableReason);
-        reasonLabel.getStyleClass().add("project-card-reason");
+        Label descriptionLabel = new Label(description);
+        descriptionLabel.getStyleClass().add("project-card-reason");
+        descriptionLabel.setWrapText(true);
 
         Button card = new Button();
-        card.setGraphic(new VBox(titleLabel, reasonLabel));
+        card.setGraphic(new VBox(titleLabel, descriptionLabel));
         card.getStyleClass().add("project-card");
-        // Screen readers announce the reason together with the title.
-        card.setAccessibleText(title + ". " + unavailableReason);
-        card.setDisable(true);
+        // Screen readers announce the description or the reason together with the title.
+        card.setAccessibleText(title + ". " + description);
+        if (open == null) {
+            card.setDisable(true);
+        } else {
+            card.setOnAction(event -> open.run());
+        }
         return card;
     }
 }

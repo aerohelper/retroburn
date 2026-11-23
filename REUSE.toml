@@ -57,3 +57,9 @@ SPDX-License-Identifier = "MIT AND BSL-1.0 AND BSD-2-Clause"
 path = "src/main/resources/credits/licenses/jackson-core-Schubfach-LICENSE.txt"
 SPDX-FileCopyrightText = "2018-2020 Raffaello Giulietti"
 SPDX-License-Identifier = "MIT"
+
+# Agent skill files must start with their front matter, so they cannot carry a comment header.
+[[annotations]]
+path = ".claude/skills/**/SKILL.md"
+SPDX-FileCopyrightText = "2026 Chetan and contributors"
+SPDX-License-Identifier = "GPL-3.0-or-later"

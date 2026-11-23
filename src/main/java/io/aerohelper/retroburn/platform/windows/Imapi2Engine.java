@@ -57,7 +57,8 @@ final class Imapi2Engine implements BurnEngine {
                 drive.vendor(),
                 drive.product(),
                 Imapi2Mapping.connection(drive.bus()),
-                drive.accessible());
+                drive.accessible(),
+                drive.volume());
     }
 
     @Override

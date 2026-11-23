@@ -16,6 +16,9 @@ import io.aerohelper.retroburn.engine.DiscEntry;
 import io.aerohelper.retroburn.engine.DiscTree;
 import io.aerohelper.retroburn.engine.ImageOptions;
 import io.aerohelper.retroburn.platform.PowerStatus.PowerSource;
+import io.aerohelper.retroburn.project.DataCompilation;
+import io.aerohelper.retroburn.project.ImageSizeEstimate;
+import io.aerohelper.retroburn.project.TreeSizeScanner;
 import io.aerohelper.retroburn.tools.ProcessRequest;
 import io.aerohelper.retroburn.tools.ProcessResult;
 import io.aerohelper.retroburn.tools.ProcessRunner;
@@ -185,6 +188,39 @@ class WindowsHelperIntegrationTest {
                                 cancel));
 
         assertFalse(Files.exists(image));
+    }
+
+    @Test
+    void theSizeEstimateCoversARealImageOfManySmallFilesAndKeepsTheLabel() throws IOException {
+        Path source = Files.createDirectories(folder.resolve("small"));
+        for (int i = 0; i < 2000; i++) {
+            Files.writeString(source.resolve("note " + i + ".txt"), "note " + i);
+        }
+        writeRandom(source.resolve("one-megabyte.bin"), 1024 * 1024);
+        DataCompilation compilation = DataCompilation.empty().add(List.of(source));
+        Path image = folder.resolve("small.iso");
+
+        new Imapi2ImageBuilder(helper)
+                .buildDataImage(compilation, new ImageOptions("Holiday 2026"), image, event -> {}, new CancelToken());
+
+        long estimate = ImageSizeEstimate.bytes(new TreeSizeScanner().scan(compilation, new CancelToken()));
+        long actual = Files.size(image);
+        System.out.println("[estimate] IMAPI2FS image " + actual + " bytes, estimate " + estimate);
+        assertTrue(estimate >= actual, "estimate " + estimate + " < image " + actual);
+        assertTrue(estimate < actual * 2, "estimate " + estimate + " far above image " + actual);
+        assertEquals("Holiday 2026", volumeLabel(image));
+    }
+
+    private String volumeLabel(Path image) {
+        String quoted = "'" + image.toAbsolutePath().toString().replace("'", "''") + "'";
+        try {
+            return powerShell("Mount-DiskImage -ImagePath " + quoted + " | Out-Null; "
+                    + "for ($i = 0; $i -lt 60; $i++) { "
+                    + "$volume = Get-DiskImage -ImagePath " + quoted + " | Get-Volume; "
+                    + "if ($volume.DriveLetter) { $volume.FileSystemLabel; break }; Start-Sleep -Milliseconds 500 }");
+        } finally {
+            powerShell("Dismount-DiskImage -ImagePath " + quoted + " | Out-Null");
+        }
     }
 
     /** About 100 MB with awkward names: spaces, '=', accents and Devanagari. */

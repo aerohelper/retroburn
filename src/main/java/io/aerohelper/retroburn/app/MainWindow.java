@@ -6,39 +6,91 @@ import io.aerohelper.retroburn.common.Messages;
 import io.aerohelper.retroburn.ui.AboutDialog;
 import io.aerohelper.retroburn.ui.HomeView;
 import io.aerohelper.retroburn.ui.LicensesDialog;
+import io.aerohelper.retroburn.ui.Navigation;
+import io.aerohelper.retroburn.ui.UiServices;
 import java.util.Objects;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 
-/** The main window: menu bar on top, the current screen in the centre. */
-public final class MainWindow {
+/**
+ * The main window: menu bar on top, the current screen in the centre. It is also the {@link
+ * Navigation} between screens.
+ */
+public final class MainWindow implements Navigation {
 
     private static final String THEME_STYLESHEET = "/themes/classic/theme.css";
     private static final double INITIAL_WIDTH = 960;
     private static final double INITIAL_HEIGHT = 640;
 
     private final AppContext context;
+    private final UiServices services;
+    private final BorderPane root = new BorderPane();
+    private Stage stage;
+    private Screen project;
 
     public MainWindow(AppContext context) {
         this.context = Objects.requireNonNull(context, "context");
+        this.services = context.uiServices();
     }
 
     /** Fills the stage with the main window content and shows it. */
     public void show(Stage stage) {
-        BorderPane root = new BorderPane();
+        this.stage = stage;
         root.setTop(createMenuBar(stage));
-        root.setCenter(new HomeView(context.messages()).root());
+        showHome();
 
         Scene scene = new Scene(root, INITIAL_WIDTH, INITIAL_HEIGHT);
         scene.getStylesheets().add(stylesheetUrl());
 
         stage.setTitle(context.appInfo().name());
         stage.setScene(scene);
+        stage.setOnHidden(event -> closeProject());
         stage.show();
+    }
+
+    @Override
+    public void showHome() {
+        closeProject();
+        root.setCenter(new HomeView(services, this).root());
+    }
+
+    @Override
+    public void openProject(Screen screen) {
+        closeProject();
+        project = screen;
+        root.setCenter(screen.node());
+    }
+
+    @Override
+    public void showOnTop(Node node) {
+        root.setCenter(node);
+    }
+
+    @Override
+    public void backToProject() {
+        if (project == null) {
+            showHome();
+        } else {
+            root.setCenter(project.node());
+        }
+    }
+
+    @Override
+    public Window window() {
+        return stage;
+    }
+
+    private void closeProject() {
+        if (project != null) {
+            project.close();
+            project = null;
+        }
     }
 
     private MenuBar createMenuBar(Stage owner) {

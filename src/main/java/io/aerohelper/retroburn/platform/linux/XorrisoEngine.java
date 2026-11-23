@@ -90,18 +90,24 @@ final class XorrisoEngine implements BurnEngine {
             ListedDrive listed = byAddress.remove(address);
             drives.add(
                     listed == null
-                            ? new DriveInfo(new DriveId(address), "", "", sysfs.connectionOf(name), false)
+                            ? new DriveInfo(new DriveId(address), "", "", sysfs.connectionOf(name), false, address)
                             : new DriveInfo(
                                     new DriveId(address),
                                     listed.vendor(),
                                     listed.product(),
                                     sysfs.connectionOf(name),
-                                    true));
+                                    true,
+                                    address));
         }
         // Drives xorriso found under another name (unusual setups) are still offered.
         for (ListedDrive listed : byAddress.values()) {
             drives.add(new DriveInfo(
-                    new DriveId(listed.address()), listed.vendor(), listed.product(), ConnectionType.UNKNOWN, true));
+                    new DriveId(listed.address()),
+                    listed.vendor(),
+                    listed.product(),
+                    ConnectionType.UNKNOWN,
+                    true,
+                    listed.address()));
         }
         return List.copyOf(drives);
     }

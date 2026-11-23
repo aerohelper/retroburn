@@ -87,10 +87,10 @@ classDiagram
 |---|---|
 | `Main` | Plain `main` method that calls `Application.launch(RetroBurnApplication.class)`. Keeping it separate from the `Application` subclass lets the app start whether JavaFX is on the module path (runtime image, `javafx:run`) or not. |
 | `RetroBurnApplication` | JavaFX lifecycle only: builds `AppContext`, creates `MainWindow`. |
-| `AppContext` | Composition root. Constructs every long-lived object by hand and is the only place that chooses a `PlatformServices` implementation. |
+| `AppContext` | Composition root. Constructs every long-lived object by hand and is the only place that chooses a `PlatformServices` implementation. Owns two executors: virtual threads for background reads (drives, media, sizes) and one daemon thread, `pipeline-runner`, so only one job writes at a time. `checkToolsInBackground()` probes the external tools after the window is shown and publishes the feature set; `uiServices()` hands the views what they need; `close()` stops both executors when the app stops. |
 | `AppInfo` (`common`) | Name, version, copyright line and source URL, read from the filtered `app.properties` resource (the version comes from the Maven build). Lives in `common` because the About dialog in `ui` needs it and nothing may depend on `app`. |
-| `MainWindow` | Window title, menu bar (Help → About, Help → Open-source licenses), stylesheet, home screen in the centre. |
-| `HomeView` (`ui`) | "What do you want to make?" with one card per project type. In M1 every card is disabled with the reason "Not available yet". |
+| `MainWindow` | Window title, menu bar (Help → About, Help → Open-source licenses), stylesheet, home screen in the centre. Implements `ui.Navigation` (see [LLD-data-burning.md](LLD-data-burning.md) section 6). |
+| `HomeView` (`ui`) | "What do you want to make?" with one card per project type and a one-line description. Data disc, Burn ISO and Create ISO open their screens; the others are disabled with the reason "Not available yet". |
 | `AboutDialog`, `LicensesDialog` (`ui`) | See [LLD-credits.md](LLD-credits.md). Both apply the main window's stylesheets through the package-private `Dialogs` helper, because dialogs get their own scene. |
 | `Messages` (`common`) | Thin wrapper around the `i18n.messages` `ResourceBundle` with `MessageFormat` formatting. |
 | `OperatingSystem` (`common`) | OS families RetroBurn knows about; plain data used by credits filtering. |

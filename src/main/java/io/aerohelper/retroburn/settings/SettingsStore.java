@@ -38,6 +38,8 @@ public final class SettingsStore {
     static final String KEY_KEEP_TEMPORARY_FILES = "jobs.keepTemporaryFiles";
     static final String KEY_WORK_DIRECTORY = "jobs.workDirectory";
     static final String KEY_TOOL_PATH_PREFIX = "tools.path.";
+    static final String KEY_VERIFY_AFTER_BURN = "burn.verify";
+    static final String KEY_SHOW_USB_TIP = "burn.showUsbTip";
 
     private static final Logger LOG = Logger.getLogger(SettingsStore.class.getName());
 
@@ -100,7 +102,9 @@ public final class SettingsStore {
                 bool(properties.getProperty(KEY_PREVENT_SLEEP), defaults.preventSleepWhileBurning()),
                 bool(properties.getProperty(KEY_KEEP_TEMPORARY_FILES), defaults.keepTemporaryFiles()),
                 path(properties.getProperty(KEY_WORK_DIRECTORY)),
-                toolPaths);
+                toolPaths,
+                bool(properties.getProperty(KEY_VERIFY_AFTER_BURN), defaults.verifyAfterBurn()),
+                bool(properties.getProperty(KEY_SHOW_USB_TIP), defaults.showUsbTip()));
     }
 
     static Properties toProperties(Settings settings) {
@@ -108,6 +112,8 @@ public final class SettingsStore {
         properties.setProperty(KEY_SCHEMA_VERSION, Integer.toString(SCHEMA_VERSION));
         properties.setProperty(KEY_PREVENT_SLEEP, Boolean.toString(settings.preventSleepWhileBurning()));
         properties.setProperty(KEY_KEEP_TEMPORARY_FILES, Boolean.toString(settings.keepTemporaryFiles()));
+        properties.setProperty(KEY_VERIFY_AFTER_BURN, Boolean.toString(settings.verifyAfterBurn()));
+        properties.setProperty(KEY_SHOW_USB_TIP, Boolean.toString(settings.showUsbTip()));
         settings.workDirectory().ifPresent(folder -> properties.setProperty(KEY_WORK_DIRECTORY, folder.toString()));
         settings.toolPaths()
                 .forEach((tool, path) -> properties.setProperty(KEY_TOOL_PATH_PREFIX + toolKey(tool), path.toString()));

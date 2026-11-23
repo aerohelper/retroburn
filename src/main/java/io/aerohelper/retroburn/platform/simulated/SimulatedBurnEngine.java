@@ -40,7 +40,7 @@ final class SimulatedBurnEngine implements BurnEngine {
 
     @Override
     public List<DriveInfo> listDrives() {
-        return List.of(new DriveInfo(DRIVE, "RetroBurn", "Simulated DVD Writer", ConnectionType.USB, true));
+        return List.of(new DriveInfo(DRIVE, "RetroBurn", "Simulated DVD Writer", ConnectionType.USB, true, "SIM:"));
     }
 
     @Override

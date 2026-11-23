@@ -17,7 +17,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 |---|---|
 | `DriveId` (record) | Opaque drive address: `/dev/sr0` on Linux, the IMAPI2 unique id on Windows. |
 | `ConnectionType` (enum) | `USB`, `OTHER` (known not to be USB), `UNKNOWN`. The UI shows a badge only for `USB`. |
-| `DriveInfo` (record) | Id, vendor, product, connection type. |
+| `DriveInfo` (record) | Id, vendor, product, connection type, and `location`: what the user knows the drive by (`D:` on Windows, `/dev/sr0` on Linux, empty if unknown). `displayNameWithLocation()` gives "Vendor Product (D:)". |
 | `MediaFamily` (enum) | `CD`, `DVD`, `BD`. |
 | `MediaKind` (enum) | Inserted medium (`CD_R`, `DVD_PLUS_RW`, `BD_RE`, `NONE`, `UNKNOWN`, …) with family, writable and rewritable flags. |
 | `MediaState` (enum) | `BLANK`, `APPENDABLE`, `CLOSED`, `NO_MEDIA`, `UNKNOWN`. |
@@ -50,8 +50,9 @@ Differences from the HLD sketch (§4.2), decided here: `burnImage` takes a
 `Path` (no `ImageSource` type is needed yet); `verifyImage` returns nothing
 and throws on a mismatch instead of returning a `VerifyReport`, because the
 only outcome the UI acts on is "matches" or "does not, at byte N"; `eject` is
-added. `burnTree` (writing a `DiscTree` without an image file first) comes
-with the data disc milestone (M4).
+added. `burnTree` (writing a `DiscTree` without an image file first) is not
+needed: data discs are burned from an image ([ADR-0013](../adr/0013-data-discs-burned-from-an-image.md),
+proposed).
 
 Every long operation honours its `CancelToken` within 5 seconds, with two
 exceptions: a started Windows erase cannot be cancelled, and a burn ends only
