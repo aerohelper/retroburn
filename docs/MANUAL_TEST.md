@@ -7,7 +7,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 | | |
 |---|---|
-| Status | Draft: data disc, Burn ISO, Create ISO, erase, audio CD, MP3 disc, video DVD and covers. Extended as each project type is built. |
+| Status | Draft: data disc, Burn ISO, Create ISO, erase, audio CD, MP3 disc, video DVD, covers and themes. Extended as each project type is built. |
 
 Automated tests cover the models, parsers, pipelines and engines (see
 [TEST_STRATEGY.md](TEST_STRATEGY.md)). This checklist covers what needs a
@@ -25,7 +25,7 @@ change to the screens or an engine.
   name (for example `Grüße.txt`), and one empty folder.
 - Start the app with `./mvnw javafx:run`, or from an installed build.
 - Write down the OS version, drive model and media brand in the results
-  table (section 10).
+  table (section 11).
 
 Features the drive cannot test (for example Blu-ray on a DVD writer) are
 written down as "not tested — no drive", not skipped silently.
@@ -130,7 +130,17 @@ a disc to try the cut-outs against. Record measurements in
 | COVER-7 | Print the CD front, the back inlay, the DVD wrap and two disc labels at 100 %; cut them out. | Each fits its case; spines fold on the fold marks; the label fits the disc with the 41 mm hole. |
 | COVER-8 | Choose a font marked as not allowing PDF embedding (if the computer has one) and export PDF. | The export stops and names the font; printing still works. |
 
-## 9. USB and power
+## 9. Themes and sounds
+
+| # | Steps | Expected |
+|---|---|---|
+| THEME-1 | View → Theme → Y2K on the home screen, then open each screen and a dialog (About, a confirm). | Everything restyles at once: gradient menu bar, bevelled buttons, VT323 headings; dialogs match. Restarting keeps Y2K. |
+| THEME-2 | Burn to the DVD+RW in Y2K. | The disc spins up and keeps turning; the progress bar is a green LED bar; spin-up, then a quiet loop, then a success chime; on the result screen the disc slows to a stop. |
+| THEME-3 | Burn again and cancel. | The loop stops; no chime; the disc stops quickly. |
+| THEME-4 | View → Sounds off, then burn. | Silent. Classic with Sounds untouched is silent too. |
+| THEME-5 | View → Animate the disc off (and, separately, the system's reduce-motion setting on). | The disc stays still. |
+
+## 10. USB and power
 
 Run these on the DVD+RW only.
 
@@ -141,7 +151,7 @@ Run these on the DVD+RW only.
 | USB-3 | During a burn, leave the laptop idle past its sleep timeout. | The computer stays awake; the progress view shows the sleep note (Linux: a warning if sleep could not be blocked). |
 | USB-4 | Unplug the drive during a burn. | Result "The drive was disconnected or lost power…" with details; the app stays usable; replugging shows the drive again. |
 
-## 10. Results
+## 11. Results
 
 Copy this table into the pull request or release checklist.
 
@@ -149,7 +159,7 @@ Copy this table into the pull request or release checklist.
 |---|---|---|---|---|---|
 | | | | | | |
 
-## 11. Automated real-disc test
+## 12. Automated real-disc test
 
 Separate from this checklist, `WindowsRealDiscTest` burns, verifies and
 erases the inserted rewritable disc through the engine, without the screens.

@@ -17,3 +17,5 @@ images — including in tests and screenshots.
 |---|---|---|---|
 | `src/main/resources/fonts/lato/Lato-Regular.ttf`, `Lato-Bold.ttf` | Łukasz Dziedzic | Google Fonts repository, `ofl/lato` (unchanged) | OFL-1.1 (`credits/licenses/lato-OFL.txt`) |
 | `src/main/resources/fonts/vt323/VT323-Regular.ttf` | The VT323 Project Authors | Google Fonts repository, `ofl/vt323` (unchanged) | OFL-1.1 (`credits/licenses/vt323-OFL.txt`) |
+| `src/main/resources/themes/classic/sounds/*.wav`, `src/main/resources/themes/y2k/sounds/*.wav` | Chetan and contributors | Original, made by `tools/sounds/GenerateSounds.java` (ADR-0017) | GPL-3.0-or-later |
+| Theme stylesheets and the spinning disc drawing (`themes/*/theme.css`, `theme.DiscAnimation`) | Chetan and contributors | Original | GPL-3.0-or-later |

@@ -83,16 +83,17 @@ then reuses the Video DVD steps (menu, spumux, dvdauthor, image, burn, verify).
 
 | File | Purpose |
 |---|---|
-| `theme.properties` | Display name, author, licence, whether sounds default on |
-| `theme.css` | JavaFX CSS using the token names in [UX_SPEC.md](ux/UX_SPEC.md) |
-| `sounds/` | `spin-up`, `burning-loop`, `success`, `error` (original or CC0) |
-| `images/` | Disc art and other assets |
+| `theme.properties` | `name`, `author`, `license`, `soundsDefault` (`true`/`false`), `fonts` (comma-separated resource paths) |
+| `theme.css` | JavaFX CSS using the token names in [UX_SPEC.md](ux/UX_SPEC.md); may start with `@import "../classic/theme.css";` and override tokens; styles the disc through `.disc-surface`, `.disc-sheen`, `.disc-sheen-2`, `.disc-hub`, `.disc-hole` |
+| `sounds/` | `spin-up.wav`, `burning-loop.wav`, `success.wav`, `error.wav`: PCM WAV, original or CC0 (`tools/sounds/GenerateSounds.java` makes the built-in ones) |
 
-Every asset is listed in `assets/CREDITS.md`. No Java changes are needed; at
-most one small class for a special animation.
+Every asset is listed in `assets/CREDITS.md`. Add the theme's id to
+`ThemeRegistry.IDS`; `ThemeContrastTest` and `ThemeFilesTest` then check
+it. See [LLD-themes.md](design/LLD-themes.md).
 
 **Worked example:** a `millennium-blue` theme copies `y2k`, changes colour
-tokens and swaps the disc art.
+tokens and the disc's colours, and reuses the `y2k` sounds by copying
+them.
 
 ---
 

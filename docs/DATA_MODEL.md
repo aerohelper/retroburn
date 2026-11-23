@@ -52,6 +52,9 @@ Folders are resolved per OS by `AppPaths` (see
 | `video.afterTitle` | `MENU`/`NEXT` | `MENU` | What plays after a title. |
 | `design.paper` | `A4`/`LETTER`/empty | empty | Paper for covers and labels; empty follows the computer's country (Letter in the US, Canada, Mexico and the Philippines). |
 | `design.imageNoticeShown` | `true`/`false` | `false` | The note about image rights has been shown once. |
+| `appearance.theme` | `classic`/`y2k` | `classic` | Theme; an unknown id falls back to `classic`. |
+| `appearance.sounds` | `ON`/`OFF`/empty | empty | Sounds; empty follows the theme (on in `y2k`). |
+| `appearance.animateDisc` | `true`/`false` | `true` | Whether the disc on the progress screen moves (it also stays still when the system asks for reduced motion). |
 | `audio.normalizeLoudness` | `true`/`false` | `false` | Even out loudness (FFmpeg `loudnorm`, −16 LUFS) while converting audio CD tracks. |
 | `jobs.keepTemporaryFiles` | `true`/`false` | `false` | Keep job work folders after success or cancel. |
 | `jobs.workDirectory` | path | (platform work folder) | Where job work folders are created. |

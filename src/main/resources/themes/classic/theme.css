@@ -234,3 +234,27 @@
 .result-drive-lost {
     -fx-text-fill: -rb-error;
 }
+
+.progress-top {
+    -fx-spacing: 14;
+    -fx-alignment: center-left;
+}
+
+/* The spinning disc on the progress and result screens (theme.DiscAnimation). */
+.disc-surface {
+    -fx-fill: radial-gradient(center 50% 50%, radius 50%, #F2F4F7 0%, #C9CFD8 70%, #AEB6C2 100%);
+    -fx-stroke: #8A94A3;
+}
+
+.disc-sheen {
+    -fx-fill: rgba(255, 255, 255, 0.45);
+}
+
+.disc-hub {
+    -fx-fill: #DDE2E8;
+    -fx-stroke: #8A94A3;
+}
+
+.disc-hole {
+    -fx-fill: -rb-bg;
+}

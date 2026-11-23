@@ -9,6 +9,8 @@ import io.aerohelper.retroburn.pipeline.Pipeline;
 import io.aerohelper.retroburn.pipeline.PipelineEvent;
 import io.aerohelper.retroburn.pipeline.PipelineListener;
 import io.aerohelper.retroburn.pipeline.PipelineStep;
+import io.aerohelper.retroburn.theme.DiscAnimation;
+import io.aerohelper.retroburn.theme.DiscMotion;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayDeque;
@@ -56,6 +58,7 @@ final class ProgressView implements PipelineListener {
     private final VBox root;
     private final Instant started = Instant.now();
     private final Timeline clock;
+    private final DiscAnimation disc;
 
     // Written by background threads, read on the JavaFX thread.
     private final Object lock = new Object();
@@ -68,8 +71,11 @@ final class ProgressView implements PipelineListener {
     private boolean sleepWarning;
     private final AtomicBoolean redrawPending = new AtomicBoolean();
 
-    ProgressView(Messages messages, Pipeline pipeline, CancelToken cancel, Window owner, String title) {
+    ProgressView(
+            Messages messages, Pipeline pipeline, CancelToken cancel, Window owner, String title, DiscAnimation disc) {
         this.messages = messages;
+        this.disc = disc;
+        disc.setState(DiscMotion.State.SPIN_UP);
         this.cancel = cancel;
         this.owner = owner;
 
@@ -102,7 +108,9 @@ final class ProgressView implements PipelineListener {
         HBox bottom = new HBox(keepAwake, spacer, cancelButton);
         bottom.getStyleClass().add("progress-bottom");
 
-        root = new VBox(heading, new HBox(bar, percent), details, elapsed, steps, warning, bottom);
+        HBox top = new HBox(disc.node(), heading);
+        top.getStyleClass().add("progress-top");
+        root = new VBox(top, new HBox(bar, percent), details, elapsed, steps, warning, bottom);
         root.getStyleClass().add("progress-view");
 
         clock = new Timeline(new KeyFrame(javafx.util.Duration.seconds(1), event -> redraw()));
@@ -113,6 +121,11 @@ final class ProgressView implements PipelineListener {
 
     Node node() {
         return root;
+    }
+
+    /** The spinning disc, handed on to the result screen so it slows down from its current speed. */
+    DiscAnimation disc() {
+        return disc;
     }
 
     void close() {
