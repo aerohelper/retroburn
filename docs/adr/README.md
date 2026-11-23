@@ -25,6 +25,7 @@ record that supersedes the old one.
 | [0011](0011-jackson-3-for-json.md) | Jackson 3 for JSON | Accepted |
 | [0012](0012-formatting-and-header-checks.md) | Automated formatting, licence headers and coverage in the build | Accepted |
 | [0013](0013-data-discs-burned-from-an-image.md) | Data discs are burned from an image and verified against it | Proposed |
+| [0014](0014-cd-text-on-windows-through-cdrdao.md) | CD-Text on Windows through cdrdao | Proposed |
 
 Statuses: **Proposed** (awaiting owner review or a spike), **Accepted**,
 **Superseded by NNNN**, **Rejected**.

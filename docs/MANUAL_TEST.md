@@ -7,7 +7,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 | | |
 |---|---|
-| Status | Draft: data disc, Burn ISO, Create ISO and erase. Extended as each project type is built. |
+| Status | Draft: data disc, Burn ISO, Create ISO, erase and audio CD. Extended as each project type is built. |
 
 Automated tests cover the models, parsers, pipelines and engines (see
 [TEST_STRATEGY.md](TEST_STRATEGY.md)). This checklist covers what needs a
@@ -66,7 +66,25 @@ written down as "not tested — no drive", not skipped silently.
 | ERASE-2 | Erase disc… → Full on a CD-RW or DVD-RW, if available. | Runs without a percentage; ends with success. |
 | ERASE-3 | Erase disc… with a CD-R inserted. | "Erase disc…" is not shown in the drive bar. |
 
-## 5. USB and power
+## 5. Audio CD
+
+Needs a blank CD-R (or a CD-RW) and a few music files in different formats
+(MP3, FLAC, M4A), one with a non-Latin title and one shorter than
+4 seconds. **Not run yet: no CD at hand.**
+
+| # | Steps | Expected |
+|---|---|---|
+| AUDIO-1 | Add the files. | Titles and performers come from the tags (or the file name); the album fills in when all tracks share it; the minutes bar adds up. |
+| AUDIO-2 | Rename, reorder and remove tracks. | The table and the minutes follow. |
+| AUDIO-3 | With CD-Text on, keep the non-Latin title (Linux). | The problem is listed under the table and Burn is blocked; entering a Latin title clears it. |
+| AUDIO-4 | Keep the track shorter than 4 seconds. | Burn is blocked naming that track. |
+| AUDIO-5 | Insert the DVD+RW and press Burn. | "Audio CDs need a CD-R or CD-RW." |
+| AUDIO-6 | Burn to a CD-R on Linux with CD-Text on. | Converting, writing and checking the track list tick through; the CD plays in a CD player with 2-second gaps; a CD-Text player (or `cdrskin dev=… cdtext_to_v07t=out.v07t`) shows the names. |
+| AUDIO-7 | Burn to a CD-R on Windows. | Same, without CD-Text; the confirm dialog says CD-Text can't be written. |
+| AUDIO-8 | Cancel during writing (CD-RW). | "Stopped"; the disc can be erased and reused. |
+| AUDIO-9 | Burn with "Even out loudness". | Tracks play at similar loudness. |
+
+## 6. USB and power
 
 Run these on the DVD+RW only.
 
@@ -77,7 +95,7 @@ Run these on the DVD+RW only.
 | USB-3 | During a burn, leave the laptop idle past its sleep timeout. | The computer stays awake; the progress view shows the sleep note (Linux: a warning if sleep could not be blocked). |
 | USB-4 | Unplug the drive during a burn. | Result "The drive was disconnected or lost power…" with details; the app stays usable; replugging shows the drive again. |
 
-## 6. Results
+## 7. Results
 
 Copy this table into the pull request or release checklist.
 
@@ -85,7 +103,7 @@ Copy this table into the pull request or release checklist.
 |---|---|---|---|---|---|
 | | | | | | |
 
-## 7. Automated real-disc test
+## 8. Automated real-disc test
 
 Separate from this checklist, `WindowsRealDiscTest` burns, verifies and
 erases the inserted rewritable disc through the engine, without the screens.

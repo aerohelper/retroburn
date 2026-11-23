@@ -3,6 +3,7 @@
 package io.aerohelper.retroburn.platform.linux;
 
 import io.aerohelper.retroburn.common.OperatingSystem;
+import io.aerohelper.retroburn.engine.AudioCdEngine;
 import io.aerohelper.retroburn.engine.BurnEngine;
 import io.aerohelper.retroburn.engine.DiscImageBuilder;
 import io.aerohelper.retroburn.platform.AppPaths;
@@ -40,6 +41,7 @@ public final class LinuxPlatform implements PlatformServices {
     private final ToolLocator toolLocator;
     private final SysfsOpticalDrives sysfs;
     private final XorrisoEngine engine;
+    private final CdrskinAudioEngine audioEngine;
     private final XorrisoImageBuilder imageBuilder;
     private final SleepInhibitor sleepInhibitor;
     private final PowerStatus powerStatus;
@@ -61,6 +63,7 @@ public final class LinuxPlatform implements PlatformServices {
         this.toolLocator = new OverridingToolLocator(toolOverrides, pathSearch);
         this.sysfs = new SysfsOpticalDrives(Path.of("/sys/block"));
         this.engine = new XorrisoEngine(runner, toolLocator, sysfs);
+        this.audioEngine = new CdrskinAudioEngine(runner, toolLocator);
         this.imageBuilder = new XorrisoImageBuilder(runner, toolLocator, appPaths.work());
         this.sleepInhibitor = new SystemdSleepInhibitor(runner, pathSearch.locateExecutable("systemd-inhibit"));
         this.powerStatus = new SysfsPowerStatus(Path.of("/sys/class/power_supply"));
@@ -108,6 +111,11 @@ public final class LinuxPlatform implements PlatformServices {
     @Override
     public BurnEngine burnEngine() {
         return engine;
+    }
+
+    @Override
+    public AudioCdEngine audioCdEngine() {
+        return audioEngine;
     }
 
     @Override

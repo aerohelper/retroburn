@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 package io.aerohelper.retroburn.ui;
 
+import io.aerohelper.retroburn.audio.CdAudio;
 import io.aerohelper.retroburn.common.ByteSizes;
 import io.aerohelper.retroburn.common.Messages;
 import javafx.scene.Node;
@@ -62,6 +63,29 @@ final class CapacityBar {
         } else {
             setState("capacity-under");
             text.setText(sizes);
+        }
+    }
+
+    /**
+     * Length of audio against the disc, as "mm:ss of mm:ss".
+     *
+     * @param capacitySectors the disc's length; 0 when no disc is known, which compares with 80 minutes
+     */
+    void showTime(long sectors, long capacitySectors) {
+        long capacity = capacitySectors > 0 ? capacitySectors : CdAudio.SECTORS_80_MINUTES;
+        double fraction = (double) sectors / capacity;
+        bar.setProgress(Math.min(1, fraction));
+        String times =
+                messages.format("capacity.of", CdAudio.minutesAndSeconds(sectors), CdAudio.minutesAndSeconds(capacity));
+        if (fraction > 1) {
+            setState("capacity-over");
+            text.setText(messages.format("capacity.overTime", times));
+        } else if (fraction >= NEAR_FULL) {
+            setState("capacity-near-full");
+            text.setText(messages.format("capacity.nearFull", times));
+        } else {
+            setState("capacity-under");
+            text.setText(times);
         }
     }
 

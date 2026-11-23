@@ -74,6 +74,15 @@ sealed interface HelperEvent {
     /** The operation succeeded; always the last event. */
     record Result() implements HelperEvent {}
 
+    /** A disc's table of contents: track start LBAs, their control nibbles, and the lead-out LBA. */
+    record Toc(List<Long> starts, List<Integer> controls, long leadOut) implements HelperEvent {
+
+        public Toc {
+            starts = List.copyOf(starts);
+            controls = List.copyOf(controls);
+        }
+    }
+
     /**
      * The operation failed; always the last event.
      *

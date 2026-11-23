@@ -59,6 +59,15 @@ final class HelperEventParser {
                 new HelperEvent.Ready(text(node, "powershell"), text(node, "clr"), text(node, "languageMode"));
             case "log" -> new HelperEvent.Log(text(node, "text"));
             case "result" -> new HelperEvent.Result();
+            case "toc" ->
+                new HelperEvent.Toc(
+                        numbers(node.path("starts")).stream()
+                                .map(Number::longValue)
+                                .toList(),
+                        numbers(node.path("controls")).stream()
+                                .map(Number::intValue)
+                                .toList(),
+                        node.path("leadOut").asLong(-1));
             case "error" ->
                 new HelperEvent.Error(
                         text(node, "code"),
@@ -72,6 +81,18 @@ final class HelperEventParser {
     private static String text(JsonNode node, String field) {
         JsonNode value = node.get(field);
         return value != null && value.isString() ? value.stringValue() : "";
+    }
+
+    private static List<Number> numbers(JsonNode array) {
+        List<Number> values = new ArrayList<>();
+        if (array.isArray()) {
+            for (JsonNode value : array.values()) {
+                if (value.isNumber()) {
+                    values.add(value.numberValue());
+                }
+            }
+        }
+        return values;
     }
 
     private static List<String> texts(JsonNode array) {

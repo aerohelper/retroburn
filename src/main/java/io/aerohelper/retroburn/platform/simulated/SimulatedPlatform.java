@@ -3,6 +3,7 @@
 package io.aerohelper.retroburn.platform.simulated;
 
 import io.aerohelper.retroburn.common.OperatingSystem;
+import io.aerohelper.retroburn.engine.AudioCdEngine;
 import io.aerohelper.retroburn.engine.BurnEngine;
 import io.aerohelper.retroburn.engine.DiscImageBuilder;
 import io.aerohelper.retroburn.platform.AppPaths;
@@ -34,6 +35,7 @@ public final class SimulatedPlatform implements PlatformServices {
     private final AppPaths appPaths;
     private final SimulatedBurnEngine engine = new SimulatedBurnEngine();
     private final SimulatedImageBuilder imageBuilder = new SimulatedImageBuilder();
+    private final SimulatedAudioEngine audioEngine = new SimulatedAudioEngine();
 
     /**
      * @param hostOperatingSystem the OS the app is actually running on
@@ -76,6 +78,11 @@ public final class SimulatedPlatform implements PlatformServices {
     @Override
     public BurnEngine burnEngine() {
         return engine;
+    }
+
+    @Override
+    public AudioCdEngine audioCdEngine() {
+        return audioEngine;
     }
 
     @Override

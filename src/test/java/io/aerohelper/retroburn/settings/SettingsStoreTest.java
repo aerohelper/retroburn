@@ -33,7 +33,8 @@ class SettingsStoreTest {
                 Optional.of(folder.resolve("work")),
                 Map.of(ExternalTool.XORRISO, folder.resolve("bin/xorriso")),
                 false,
-                false);
+                false,
+                new Settings.Audio(false, true));
         SettingsStore store = new SettingsStore(folder);
 
         store.save(changed);

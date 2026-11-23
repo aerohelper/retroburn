@@ -28,12 +28,13 @@ jobs:
           java-version: "25"
           cache: maven
 
-      # The Linux integration tests build real ISO images and probe the real tools.
+      # The Linux integration tests build real ISO images and probe the real tools. cdrdao is
+      # only used to check the TOC files RetroBurn writes for Windows CD-Text (ADR-0014).
       - name: Install external tools (Linux)
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y xorriso cdrskin genisoimage ffmpeg dvdauthor
+          sudo apt-get install -y xorriso cdrskin genisoimage ffmpeg dvdauthor cdrdao
 
       # Compiles, runs unit, integration and architecture tests, and checks formatting, licence
       # headers, credits completeness and coverage.

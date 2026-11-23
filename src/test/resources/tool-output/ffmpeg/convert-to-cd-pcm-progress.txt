@@ -1,0 +1,25 @@
+$ ffmpeg -nostdin -hide_banner -loglevel error -y -i /tmp/tone.flac -map 0:a:0 -vn -sn -dn -ac 2 -ar 44100 -c:a pcm_s16le -f s16le -progress pipe:1 -nostats /tmp/01.pcm
+bitrate=N/A
+total_size=0
+out_time_us=0
+out_time_ms=0
+out_time=00:00:00.000000
+dup_frames=0
+drop_frames=0
+speed=   0x
+progress=continue
+bitrate=1411.3kbits/s
+total_size=970200
+out_time_us=5499637
+out_time_ms=5499637
+out_time=00:00:05.499637
+dup_frames=0
+drop_frames=0
+speed= 651x
+progress=end
+Nov 01, 2026 11:56:18 AM io.aerohelper.retroburn.tools.ProcessRunner run
+INFO: Finished (exit 0): /usr/bin/ffprobe -v error -print_format json -show_format -show_streams /tmp/junit-1049275797313629536/01.wav
+Nov 01, 2026 11:56:18 AM io.aerohelper.retroburn.tools.ProcessRunner start
+INFO: Starting: /usr/bin/ffmpeg -nostdin -hide_banner -loglevel error -y -i /tmp/junit-1049275797313629536/tone.flac -map 0:a:0 -vn -sn -dn -ac 2 -ar 44100 -af loudnorm=I=-16:TP=-1.5:LRA=11 -c:a pcm_s16le -f s16le -progress pipe:1 -nostats /tmp/junit-1049275797313629536/01.pcm
+Nov 01, 2026 11:56:18 AM io.aerohelper.retroburn.tools.ProcessRunner run
+[exit 0]

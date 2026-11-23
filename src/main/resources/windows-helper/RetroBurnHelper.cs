@@ -55,6 +55,8 @@ namespace RetroBurn.Helper
                     case "burn-image":
                         operations.BurnImage(request.Text("drive"), request.Text("image"), request.Bool("closeMedia"));
                         break;
+                    case "burn-audio": operations.BurnAudio(request.Text("drive"), request.List("tracks")); break;
+                    case "read-toc": operations.ReadToc(request.Text("drive")); break;
                     case "blank": operations.Blank(request.Text("drive"), request.Bool("full")); break;
                     case "verify-image": operations.VerifyImage(request.Text("drive"), request.Text("image")); break;
                     case "eject": operations.Eject(request.Text("drive")); break;
@@ -324,6 +326,7 @@ namespace RetroBurn.Helper
     sealed class Operations
     {
         const int SectorSize = 2048;
+        const int AudioSectorSize = 2352;
         const int ProgressIntervalMilliseconds = 250;
 
         // HRESULT "There is no media in the device." (observed with the tray open).
@@ -606,6 +609,143 @@ namespace RetroBurn.Helper
             {
                 throw new HelperError("CANCELLED", "Stopped on request");
             }
+        }
+
+        // IMAPI_FORMAT2_TAO_WRITE_ACTION, by value.
+        static readonly string[] AudioStages = { "unknown", "preparing", "writing", "finishing", "verifying" };
+
+        // HRESULTs of IDiscFormat2TrackAtOnce::AddAudioTrack (Microsoft Learn).
+        const int TaoNotEnoughSpace = unchecked((int)0xC0AA0509);
+        const int TaoTrackLimit = unchecked((int)0xC0AA0508);
+
+        /// <summary>
+        /// Writes CD audio WAV files (44-byte header, then samples in whole 2352-byte sectors) as
+        /// track-at-once audio tracks and closes the disc. IMAPI2 adds the 2-second gaps.
+        /// </summary>
+        public void BurnAudio(string drive, ArrayList tracks)
+        {
+            dynamic recorder = Imapi.FindRecorder(drive);
+            dynamic tao = Com.Create("IMAPI2.MsftDiscFormat2TrackAtOnce");
+            tao.Recorder = recorder;
+            tao.ClientName = "RetroBurn";
+            RequireMedia(tao, recorder);
+            List<string> paths = new List<string>();
+            List<long> sectors = new List<long>();
+            long total = 0;
+            foreach (object track in tracks)
+            {
+                string path = track as string;
+                if (path == null)
+                {
+                    throw new HelperError("BAD_REQUEST", "Tracks must be file paths");
+                }
+                long size = new FileInfo(path).Length - PcmStream.WavHeaderBytes;
+                if (size <= 0 || size % AudioSectorSize != 0)
+                {
+                    throw new HelperError("BAD_REQUEST", "Not a CD audio WAV file: " + path);
+                }
+                paths.Add(path);
+                sectors.Add(size / AudioSectorSize);
+                total += size / AudioSectorSize;
+            }
+            try
+            {
+                recorder.AcquireExclusiveAccess(true, "RetroBurn");
+            }
+            catch (COMException e)
+            {
+                throw new HelperError("DRIVE_BUSY", e.Message.Trim(), e.ErrorCode);
+            }
+            bool cancelled = false;
+            long before = 0;
+            TaoSink sink = new TaoSink(progress => ReportAudio(progress, before, total));
+            Events.Connection connection = Events.Connect(tao, Events.TrackAtOnceEvents, sink);
+            try
+            {
+                input.OnClose(() =>
+                {
+                    cancelled = true;
+                    try
+                    {
+                        tao.CancelAddTrack();
+                    }
+                    catch (Exception e)
+                    {
+                        output.Log("CancelAddTrack failed: " + Com.Unwrap(e).Message.Trim());
+                    }
+                });
+                tao.PrepareMedia();
+                try
+                {
+                    for (int i = 0; i < paths.Count; i++)
+                    {
+                        if (cancelled)
+                        {
+                            break;
+                        }
+                        output.Log("Track " + (i + 1) + " of " + paths.Count + ": " + sectors[i] + " sectors");
+                        tao.AddAudioTrack(new PcmStream(paths[i]));
+                        before += sectors[i];
+                        output.Emit("progress", "stage", "writing", "done", before, "total", total);
+                    }
+                }
+                finally
+                {
+                    // Closes the disc; also after a cancel, so the drive is left usable.
+                    tao.ReleaseMedia();
+                }
+            }
+            catch (COMException e)
+            {
+                if (cancelled)
+                {
+                    throw new HelperError("CANCELLED", e.Message.Trim(), e.ErrorCode);
+                }
+                if (e.ErrorCode == TaoNotEnoughSpace)
+                {
+                    throw new HelperError("NOT_ENOUGH_SPACE", e.Message.Trim(), e.ErrorCode);
+                }
+                if (e.ErrorCode == TaoTrackLimit)
+                {
+                    throw new HelperError("TOO_MANY_TRACKS", e.Message.Trim(), e.ErrorCode);
+                }
+                throw;
+            }
+            finally
+            {
+                input.OnClose(() => { });
+                connection.Dispose();
+                recorder.ReleaseExclusiveAccess();
+            }
+            if (cancelled)
+            {
+                throw new HelperError("CANCELLED", "Stopped on request");
+            }
+        }
+
+        void ReportAudio(dynamic progress, long before, long total)
+        {
+            int action = (int)progress.CurrentAction;
+            string stage = action >= 0 && action < AudioStages.Length ? AudioStages[action] : "action-" + action;
+            long done = before + Math.Max(0L, (long)(int)progress.LastWrittenLba - (int)progress.StartLba);
+            output.Emit("progress", "stage", stage, "done", Math.Min(done, total), "total", total,
+                "track", (int)progress.CurrentTrackNumber, "elapsedSeconds", (int)progress.ElapsedTime,
+                "remainingSeconds", (int)progress.RemainingTime);
+        }
+
+        /// <summary>Emits the disc's table of contents: each track's start and the lead-out, as LBAs.</summary>
+        public void ReadToc(string drive)
+        {
+            dynamic recorder = Imapi.FindRecorder(drive);
+            string volume = Imapi.Volume(recorder);
+            if (volume.Length == 0)
+            {
+                throw new HelperError("DRIVE_NOT_FOUND", "The drive has no drive letter, so its TOC cannot be read");
+            }
+            List<long> starts = new List<long>();
+            List<int> controls = new List<int>();
+            long leadOut = Storage.ReadToc(volume, starts, controls);
+            output.Emit("toc", "starts", starts, "controls", controls, "leadOut", leadOut);
         }
 
         void ReportWrite(dynamic progress)
@@ -901,6 +1041,55 @@ namespace RetroBurn.Helper
             }
         }
 
+        // IOCTL_CDROM_READ_TOC (ntddcdrm.h): CTL_CODE(IOCTL_CDROM_BASE 0x2, 0x0000, METHOD_BUFFERED,
+        // FILE_READ_ACCESS). Returns CDROM_TOC: Length[2], FirstTrack, LastTrack, then 8-byte
+        // TRACK_DATA entries (Reserved, Control:4|Adr:4, TrackNumber, Reserved1, Address[4] as 0,M,S,F),
+        // the last one being the lead-out (track 0xAA).
+        const uint IoctlCdromReadToc = 0x00024000;
+
+        /// <summary>Fills each track's start LBA and control nibble; returns the lead-out's LBA.</summary>
+        public static long ReadToc(string volume, List<long> starts, List<int> controls)
+        {
+            using (SafeFileHandle device = CreateFile("\\\\.\\" + volume, GenericRead, FileShareReadWrite, IntPtr.Zero,
+                OpenExisting, 0, IntPtr.Zero))
+            {
+                if (device.IsInvalid)
+                {
+                    throw new HelperError("NO_MEDIA", "The disc could not be opened (Windows error "
+                        + Marshal.GetLastWin32Error() + ")");
+                }
+                byte[] toc = new byte[4 + 100 * 8];
+                int returned;
+                if (!DeviceIoControl(device, IoctlCdromReadToc, null, 0, toc, toc.Length, out returned, IntPtr.Zero))
+                {
+                    throw new HelperError("NO_MEDIA", "The disc's table of contents could not be read (Windows error "
+                        + Marshal.GetLastWin32Error() + ")");
+                }
+                int first = toc[2];
+                int last = toc[3];
+                long leadOut = -1;
+                for (int i = 0; i <= last - first + 1 && 4 + i * 8 + 8 <= returned; i++)
+                {
+                    int offset = 4 + i * 8;
+                    long lba = ((toc[offset + 5] * 60L) + toc[offset + 6]) * 75L + toc[offset + 7] - 150;
+                    if (toc[offset + 2] == 0xAA)
+                    {
+                        leadOut = lba;
+                    }
+                    else
+                    {
+                        starts.Add(lba);
+                        controls.Add(toc[offset + 1] >> 4);
+                    }
+                }
+                if (leadOut < 0)
+                {
+                    throw new HelperError("NO_MEDIA", "The table of contents has no lead-out");
+                }
+                return leadOut;
+            }
+        }
+
         /// <summary>
         /// Opens the whole disc for reading, waiting up to 60 s for Windows to recognise a fresh disc.
         /// Extended DASD access lets reads go past the ISO 9660 volume into IMAPI2's UDF structures.
@@ -931,6 +1120,90 @@ namespace RetroBurn.Helper
             }
             throw new HelperError("NO_MEDIA", "The disc could not be read (Windows error " + lastError + ")");
         }
+    }
+
+    /// <summary>
+    /// A read-only COM stream over the samples of a CD audio WAV file, skipping its 44-byte header:
+    /// AddAudioTrack wants "raw audio samples ... without the header" (Microsoft Learn).
+    /// </summary>
+    [ComVisible(true), ClassInterface(ClassInterfaceType.None)]
+    public sealed class PcmStream : ComTypes.IStream
+    {
+        public const int WavHeaderBytes = 44;
+
+        readonly string path;
+        readonly FileStream file;
+        readonly long length;
+
+        public PcmStream(string path)
+        {
+            this.path = path;
+            file = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 1 << 16);
+            length = file.Length - WavHeaderBytes;
+            file.Position = WavHeaderBytes;
+        }
+
+        public void Read(byte[] buffer, int count, IntPtr bytesRead)
+        {
+            int total = 0;
+            while (total < count)
+            {
+                int read = file.Read(buffer, total, count - total);
+                if (read <= 0)
+                {
+                    break;
+                }
+                total += read;
+            }
+            if (bytesRead != IntPtr.Zero)
+            {
+                Marshal.WriteInt32(bytesRead, total);
+            }
+        }
+
+        public void Seek(long offset, int origin, IntPtr newPosition)
+        {
+            long position;
+            switch (origin)
+            {
+                case 0: position = offset; break;
+                case 1: position = file.Position - WavHeaderBytes + offset; break;
+                case 2: position = length + offset; break;
+                default: throw new ArgumentException("Unknown seek origin " + origin);
+            }
+            file.Position = WavHeaderBytes + Math.Max(0L, Math.Min(position, length));
+            if (newPosition != IntPtr.Zero)
+            {
+                Marshal.WriteInt64(newPosition, file.Position - WavHeaderBytes);
+            }
+        }
+
+        public void Stat(out ComTypes.STATSTG statistics, int flags)
+        {
+            statistics = new ComTypes.STATSTG();
+            statistics.type = 2; // STGTY_STREAM
+            statistics.cbSize = length;
+            statistics.grfMode = 0; // STGM_READ
+            if ((flags & 1) == 0) // STATFLAG_NONAME not set
+            {
+                statistics.pwcsName = Path.GetFileName(path);
+            }
+        }
+
+        public void Clone(out ComTypes.IStream copy)
+        {
+            PcmStream clone = new PcmStream(path);
+            clone.file.Position = file.Position;
+            copy = clone;
+        }
+
+        public void Write(byte[] buffer, int count, IntPtr written) { throw new UnauthorizedAccessException(); }
+        public void SetSize(long size) { throw new UnauthorizedAccessException(); }
+        public void CopyTo(ComTypes.IStream target, long count, IntPtr read, IntPtr written) { throw new NotSupportedException(); }
+        public void Commit(int flags) { }
+        public void Revert() { }
+        public void LockRegion(long offset, long count, int type) { throw new NotSupportedException(); }
+        public void UnlockRegion(long offset, long count, int type) { throw new NotSupportedException(); }
     }
 
     static class Native
@@ -1027,10 +1300,40 @@ namespace RetroBurn.Helper
         }
     }
 
+    [ComImport, Guid("2735413F-7F64-5B0F-8F00-5D77AFBE261E"), InterfaceType(ComInterfaceType.InterfaceIsIDispatch)]
+    public interface DDiscFormat2TrackAtOnceEvents
+    {
+        [DispId(0x200)]
+        void Update([MarshalAs(UnmanagedType.IDispatch)] object sender, [MarshalAs(UnmanagedType.IDispatch)] object progress);
+    }
+
+    [ComVisible(true), ClassInterface(ClassInterfaceType.None)]
+    public sealed class TaoSink : DDiscFormat2TrackAtOnceEvents
+    {
+        readonly Action<object> onUpdate;
+
+        public TaoSink(Action<object> onUpdate)
+        {
+            this.onUpdate = onUpdate;
+        }
+
+        public void Update(object sender, object progress)
+        {
+            try
+            {
+                onUpdate(progress);
+            }
+            catch (Exception)
+            {
+            }
+        }
+    }
+
     static class Events
     {
         public static readonly Guid DataEvents = new Guid("2735413C-7F64-5B0F-8F00-5D77AFBE261E");
         public static readonly Guid EraseEvents = new Guid("2735413A-7F64-5B0F-8F00-5D77AFBE261E");
+        public static readonly Guid TrackAtOnceEvents = new Guid("2735413F-7F64-5B0F-8F00-5D77AFBE261E");
 
         /// <summary>Subscribes a sink to a COM object's events until the connection is disposed.</summary>
         public static Connection Connect(object source, Guid eventInterface, object sink)

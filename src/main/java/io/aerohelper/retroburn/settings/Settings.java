@@ -20,6 +20,7 @@ import java.util.Optional;
  * @param toolPaths user-chosen executables for external tools
  * @param verifyAfterBurn compare the disc with what was written after each burn
  * @param showUsbTip show the advice for USB drives before burning
+ * @param audio settings for audio CDs
  */
 public record Settings(
         boolean preventSleepWhileBurning,
@@ -27,24 +28,51 @@ public record Settings(
         Optional<Path> workDirectory,
         Map<ExternalTool, Path> toolPaths,
         boolean verifyAfterBurn,
-        boolean showUsbTip) {
+        boolean showUsbTip,
+        Audio audio) {
 
     public Settings {
         Objects.requireNonNull(workDirectory, "workDirectory");
         toolPaths = Map.copyOf(toolPaths);
+        Objects.requireNonNull(audio, "audio");
+    }
+
+    /**
+     * Audio CD settings.
+     *
+     * @param cdText write CD-Text when the system can
+     * @param normalizeLoudness even out loudness while converting tracks
+     */
+    public record Audio(boolean cdText, boolean normalizeLoudness) {
+
+        public static Audio defaults() {
+            return new Audio(true, false);
+        }
     }
 
     /** Settings for a first start. */
     public static Settings defaults() {
-        return new Settings(true, false, Optional.empty(), Map.of(), true, true);
+        return new Settings(true, false, Optional.empty(), Map.of(), true, true, Audio.defaults());
     }
 
     public Settings withVerifyAfterBurn(boolean verify) {
-        return new Settings(preventSleepWhileBurning, keepTemporaryFiles, workDirectory, toolPaths, verify, showUsbTip);
+        return new Settings(
+                preventSleepWhileBurning, keepTemporaryFiles, workDirectory, toolPaths, verify, showUsbTip, audio);
     }
 
     public Settings withShowUsbTip(boolean show) {
         return new Settings(
-                preventSleepWhileBurning, keepTemporaryFiles, workDirectory, toolPaths, verifyAfterBurn, show);
+                preventSleepWhileBurning, keepTemporaryFiles, workDirectory, toolPaths, verifyAfterBurn, show, audio);
+    }
+
+    public Settings withAudio(Audio changed) {
+        return new Settings(
+                preventSleepWhileBurning,
+                keepTemporaryFiles,
+                workDirectory,
+                toolPaths,
+                verifyAfterBurn,
+                showUsbTip,
+                changed);
     }
 }

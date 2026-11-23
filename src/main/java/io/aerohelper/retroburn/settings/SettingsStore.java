@@ -40,6 +40,8 @@ public final class SettingsStore {
     static final String KEY_TOOL_PATH_PREFIX = "tools.path.";
     static final String KEY_VERIFY_AFTER_BURN = "burn.verify";
     static final String KEY_SHOW_USB_TIP = "burn.showUsbTip";
+    static final String KEY_AUDIO_CD_TEXT = "audio.cdText";
+    static final String KEY_AUDIO_NORMALIZE = "audio.normalizeLoudness";
 
     private static final Logger LOG = Logger.getLogger(SettingsStore.class.getName());
 
@@ -104,7 +106,14 @@ public final class SettingsStore {
                 path(properties.getProperty(KEY_WORK_DIRECTORY)),
                 toolPaths,
                 bool(properties.getProperty(KEY_VERIFY_AFTER_BURN), defaults.verifyAfterBurn()),
-                bool(properties.getProperty(KEY_SHOW_USB_TIP), defaults.showUsbTip()));
+                bool(properties.getProperty(KEY_SHOW_USB_TIP), defaults.showUsbTip()),
+                new Settings.Audio(
+                        bool(
+                                properties.getProperty(KEY_AUDIO_CD_TEXT),
+                                defaults.audio().cdText()),
+                        bool(
+                                properties.getProperty(KEY_AUDIO_NORMALIZE),
+                                defaults.audio().normalizeLoudness())));
     }
 
     static Properties toProperties(Settings settings) {
@@ -114,6 +123,10 @@ public final class SettingsStore {
         properties.setProperty(KEY_KEEP_TEMPORARY_FILES, Boolean.toString(settings.keepTemporaryFiles()));
         properties.setProperty(KEY_VERIFY_AFTER_BURN, Boolean.toString(settings.verifyAfterBurn()));
         properties.setProperty(KEY_SHOW_USB_TIP, Boolean.toString(settings.showUsbTip()));
+        properties.setProperty(
+                KEY_AUDIO_CD_TEXT, Boolean.toString(settings.audio().cdText()));
+        properties.setProperty(
+                KEY_AUDIO_NORMALIZE, Boolean.toString(settings.audio().normalizeLoudness()));
         settings.workDirectory().ifPresent(folder -> properties.setProperty(KEY_WORK_DIRECTORY, folder.toString()));
         settings.toolPaths()
                 .forEach((tool, path) -> properties.setProperty(KEY_TOOL_PATH_PREFIX + toolKey(tool), path.toString()));

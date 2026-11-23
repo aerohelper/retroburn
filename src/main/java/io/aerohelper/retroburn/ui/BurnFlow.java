@@ -23,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
@@ -49,6 +50,8 @@ final class BurnFlow {
      * @param needsWorkSpace the image is built in the work folder first
      * @param title heading of the progress view
      * @param successText the result text on success
+     * @param planner turns the checks' inputs into a plan; {@link BurnPreCheck#check} unless the
+     *     project adds rules of its own
      */
     record Job(
             JobKind kind,
@@ -56,7 +59,19 @@ final class BurnFlow {
             boolean needsWorkSpace,
             PipelineBuilder pipeline,
             String title,
-            String successText) {}
+            String successText,
+            Function<BurnPreCheck.Request, BurnPlan> planner) {
+
+        Job(
+                JobKind kind,
+                long bytesToWrite,
+                boolean needsWorkSpace,
+                PipelineBuilder pipeline,
+                String title,
+                String successText) {
+            this(kind, bytesToWrite, needsWorkSpace, pipeline, title, successText, BurnPreCheck::check);
+        }
+    }
 
     private final UiServices services;
     private final Navigation navigation;
@@ -129,9 +144,9 @@ final class BurnFlow {
     }
 
     private void confirmAndRun(DriveBar driveBar, Job job, BurnPreCheck.Request request) {
-        BurnPlan plan = BurnPreCheck.check(request);
+        BurnPlan plan = job.planner().apply(request);
         Optional<ConfirmBurnDialog.Choice> choice = new ConfirmBurnDialog(messages)
-                .show(navigation.window(), plan, verify -> BurnPreCheck.check(withVerify(request, verify)));
+                .show(navigation.window(), plan, verify -> job.planner().apply(withVerify(request, verify)));
         if (choice.isEmpty()) {
             return;
         }

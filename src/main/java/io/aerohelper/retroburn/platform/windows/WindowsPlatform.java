@@ -3,6 +3,7 @@
 package io.aerohelper.retroburn.platform.windows;
 
 import io.aerohelper.retroburn.common.OperatingSystem;
+import io.aerohelper.retroburn.engine.AudioCdEngine;
 import io.aerohelper.retroburn.engine.BurnEngine;
 import io.aerohelper.retroburn.engine.DiscImageBuilder;
 import io.aerohelper.retroburn.platform.AppPaths;
@@ -39,6 +40,7 @@ public final class WindowsPlatform implements PlatformServices {
     private final ToolLocator toolLocator;
     private final HelperClient helper;
     private final Imapi2Engine engine;
+    private final Imapi2AudioEngine audioEngine;
     private final Imapi2ImageBuilder imageBuilder;
     private final SleepInhibitor sleepInhibitor;
     private final PowerStatus powerStatus;
@@ -63,6 +65,7 @@ public final class WindowsPlatform implements PlatformServices {
         HelperFiles helperFiles = new HelperFiles(appPaths.data().resolve("helper"));
         this.helper = new HelperClient(runner, HelperClient.powerShell(powerShell(environment), helperFiles::script));
         this.engine = new Imapi2Engine(helper);
+        this.audioEngine = new Imapi2AudioEngine(helper);
         this.imageBuilder = new Imapi2ImageBuilder(helper);
         this.sleepInhibitor = new ExecutionStateSleepInhibitor(helper);
         this.powerStatus = new HelperPowerStatus(helper);
@@ -132,6 +135,11 @@ public final class WindowsPlatform implements PlatformServices {
     @Override
     public BurnEngine burnEngine() {
         return engine;
+    }
+
+    @Override
+    public AudioCdEngine audioCdEngine() {
+        return audioEngine;
     }
 
     @Override

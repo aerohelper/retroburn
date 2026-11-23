@@ -57,6 +57,8 @@ public final class AppContext implements AutoCloseable {
     private final Path workRoot;
     private final AtomicReference<Map<Feature, FeatureAvailability>> features = new AtomicReference<>(Map.of());
     /** Short background work for the screens: reading discs, scanning sizes, preparing jobs. */
+    private final ProcessRunner processRunner;
+
     private final ExecutorService background = Executors.newVirtualThreadPerTaskExecutor();
     /** One job at a time, on its own thread (HLD section 7: "pipeline-runner"). */
     private final ExecutorService jobs = Executors.newSingleThreadExecutor(runnable -> {
@@ -77,6 +79,7 @@ public final class AppContext implements AutoCloseable {
         this.appInfo = Objects.requireNonNull(appInfo, "appInfo");
         this.messages = Objects.requireNonNull(messages, "messages");
         this.componentRegistry = Objects.requireNonNull(componentRegistry, "componentRegistry");
+        this.processRunner = Objects.requireNonNull(processRunner, "processRunner");
         this.toolProbe = new ToolProbe(platform.toolLocator(), processRunner);
         Path workRoot = settingsStore
                 .current()
@@ -190,7 +193,15 @@ public final class AppContext implements AutoCloseable {
     /** What the screens need, as one object. */
     public UiServices uiServices() {
         return new UiServices(
-                messages, platform, settingsStore, pipelineRunner, features::get, () -> workRoot, background, jobs);
+                messages,
+                platform,
+                settingsStore,
+                pipelineRunner,
+                processRunner,
+                features::get,
+                () -> workRoot,
+                background,
+                jobs);
     }
 
     /** Stops background threads; a running job's processes are stopped with the JVM. */

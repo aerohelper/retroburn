@@ -28,3 +28,14 @@ All notable changes to RetroBurn are recorded here. The format follows
 - Linux: drive and media detection and ISO image creation with GNU xorriso,
   drive hot-plug and USB detection, battery detection, and keeping the
   computer awake during burns with systemd-inhibit.
+- Windows: drive and media detection, burning, erasing, image creation and
+  verification through the Windows Image Mastering API (IMAPI2), hot-plug and
+  USB detection, battery detection and keeping the computer awake.
+- Data discs, Burn ISO, Create ISO and erasing from the screens: drive bar
+  with USB badge, capacity bar, checks before burning (disc fits, USB and
+  battery advice), confirmation, progress with cancel, and a result screen
+  with details. Data discs are burned from an image and compared with it.
+- Audio CDs: music in any format FFmpeg reads, titles from tags, reordering,
+  length against 74 or 80 minutes, optional loudness levelling, CD-Text on
+  Linux (cdrskin), track-at-once on Windows (IMAPI2, no CD-Text yet), and a
+  check of the burned disc's track list.
