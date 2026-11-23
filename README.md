@@ -42,7 +42,8 @@ RetroBurn makes no network connections and collects no data.
 
 ## Installing
 
-Packages are attached to each [GitHub Release](../../releases):
+Packages are attached to each [GitHub Release](../../releases). Until the
+first release is published, build RetroBurn from source (see below).
 
 - **Windows 10/11**: `RetroBurn-<version>.msi`, or the portable
   `RetroBurn-<version>-windows-portable.zip` (unzip and run
@@ -57,6 +58,20 @@ Packages are attached to each [GitHub Release](../../releases):
 
 Each release also has a CycloneDX SBOM and the source of every program
 bundled in the Windows packages.
+
+## Using RetroBurn
+
+1. Plug in your disc drive and start RetroBurn.
+2. On **What do you want to make?**, pick a card: Data disc, Burn ISO,
+   Create ISO, Audio CD, MP3 disc, Video DVD or Cover & label.
+3. Add your files, check the capacity bar, insert a disc and press
+   **Burn disc**.
+4. Read the confirmation — it names the drive and says if the disc will be
+   erased — and press **Burn**. RetroBurn writes the disc and, by default,
+   reads it back to check every byte.
+
+The [user guide](docs/USER_GUIDE.md) walks through every kind of disc, covers
+and labels, themes and burn reels, and has a troubleshooting table.
 
 ## Building and running
 

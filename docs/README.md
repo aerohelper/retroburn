@@ -5,17 +5,21 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 # RetroBurn documentation
 
-Start with the Solution Architecture Document for the big picture, then the
-High-Level Design for how the code is organised. Low-level designs (one per
-module) are added before each module is built.
+**Using RetroBurn?** Read the [user guide](USER_GUIDE.md).
+
+**Working on RetroBurn?** Start with the Solution Architecture Document for the
+big picture, then the High-Level Design for how the code is organised, then the
+low-level design of the module you want to change. Each module's design was
+written before the module was built and updated after it.
 
 | Document | What it answers |
 |---|---|
+| [USER_GUIDE.md](USER_GUIDE.md) | How to install RetroBurn, burn each kind of disc, make covers and reels, and fix common problems. |
 | [architecture/SAD.md](architecture/SAD.md) | What RetroBurn is, who it is for, what it must do, how it is deployed, how it stays license-compliant. |
 | [architecture/HLD.md](architecture/HLD.md) | Layers, modules, data flow per project type, platform abstraction, pipeline, threading and error handling. |
 | [adr/](adr/) | Architecture Decision Records — why things are the way they are. |
 | [EXTENSIBILITY.md](EXTENSIBILITY.md) | How to add a platform, project type, theme, template or reel scene. |
-| [PORTING.md](PORTING.md) | How to port RetroBurn to another operating system, step by step (draft). |
+| [PORTING.md](PORTING.md) | How to port RetroBurn to another operating system, step by step. |
 | [SECURITY_THREAT_MODEL.md](SECURITY_THREAT_MODEL.md) | What can go wrong security-wise and how the design prevents it. |
 | [RISKS.md](RISKS.md) | Project risk register. |
 | [GLOSSARY.md](GLOSSARY.md) | Optical-disc and project terms (SAO, CD-Text, UDF, IFO, …). |
@@ -35,11 +39,12 @@ module) are added before each module is built.
 | [design/LLD-audio-cd.md](design/LLD-audio-cd.md) | Audio CDs: CD-Text rules, FFmpeg conversion, cdrskin and IMAPI2 burning. |
 | [design/LLD-mp3-disc.md](design/LLD-mp3-disc.md) | MP3 discs: car stereo naming, layouts, conversion and playlists. |
 | [design/LLD-video-dvd.md](design/LLD-video-dvd.md) | Video DVDs: TV standards, fit-to-disc bitrate, menus, dvdauthor and images. |
+| [design/LLD-cover-designer.md](design/LLD-cover-designer.md) | Covers and labels: templates, documents, undo, fonts, rendering, PDF and PNG export, printing. |
+| [design/LLD-themes.md](design/LLD-themes.md) | Themes, generated sounds and the spinning disc. |
+| [design/LLD-burn-reel.md](design/LLD-burn-reel.md) | Burn sessions and the burn reel: timeline, scenes, soundtrack and FFmpeg encoding. |
+| [design/LLD-packaging.md](design/LLD-packaging.md) | Packages, the bundled Windows tools and the release workflow. |
+| [PRINT_TEMPLATES.md](PRINT_TEMPLATES.md) | Cover and label sizes, their sources and test-print results. |
 | [DATA_MODEL.md](DATA_MODEL.md) | File formats and schema versions. |
 
 Diagrams are written in Mermaid so they render on GitHub and can be edited as
 plain text.
-
-Documents still to come (added in the milestone that needs them): porting
-guide, manual test checklist, print templates, and one `design/LLD-<module>.md`
-per further module.

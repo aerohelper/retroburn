@@ -11,8 +11,14 @@ All notable changes to RetroBurn are recorded here. The format follows
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-23
+
+First release.
+
 ### Added
 
+- User guide: installing, every kind of disc, covers and labels, themes and
+  burn reels, troubleshooting and where RetroBurn keeps its files.
 - Architecture and design documentation: solution architecture, high-level
   design, decision records, threat model, risk register, glossary, UX
   specification and extensibility guide.
