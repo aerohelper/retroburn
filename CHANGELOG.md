@@ -11,7 +11,7 @@ All notable changes to RetroBurn are recorded here. The format follows
 
 ## [Unreleased]
 
-## [0.1.0] - 2026-11-09
+## [0.1.0] - 2026-11-23
 
 First release.
 
