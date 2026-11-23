@@ -112,7 +112,7 @@ thread:
    options.
 3. `DriveWatcher.resume()` in `finally`.
 4. On failure, `BurnEngine.listDrives()` once: if the drive is missing, the
-   result is **drive lost** (the U4-style message in the UX spec: "The drive
+   result is **drive lost** (the "Drive lost" message in the UX spec's wording table: "The drive
    was disconnected or lost power…") with the original error kept in "Show
    details"; otherwise the failure as reported.
 
