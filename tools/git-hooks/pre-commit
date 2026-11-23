@@ -1,0 +1,17 @@
+#!/bin/sh
+# SPDX-FileCopyrightText: 2026 Chetan and contributors
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Refuses commits that contain private planning documents.
+# Install once per clone:  git config core.hooksPath tools/git-hooks
+
+blocked=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '(^|/)REQUIREMENTS\.md$|^\.private/')
+
+if [ -n "$blocked" ]; then
+    echo "Commit refused: these files are private and must never be committed:" >&2
+    echo "$blocked" | sed 's/^/  /' >&2
+    echo "Unstage them with: git restore --staged <file>" >&2
+    exit 1
+fi
+
+exit 0

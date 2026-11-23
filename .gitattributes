@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: 2026 Chetan and contributors
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+# Store text with LF line endings in the repository and check it out the same way on every OS,
+# so builds, golden files and formatting checks behave identically on Linux and Windows.
+* text=auto eol=lf
+
+# Windows scripts need CRLF to run reliably in cmd.exe.
+*.cmd text eol=crlf
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+# Keep the licence text exactly as published.
+LICENSE -text
+
+# Binary assets
+*.png binary
+*.jpg binary
+*.ico binary
+*.ttf binary
+*.otf binary
+*.wav binary
+*.ogg binary
+*.iso binary
+*.zip binary
