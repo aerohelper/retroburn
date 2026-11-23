@@ -19,6 +19,7 @@ import io.aerohelper.retroburn.platform.PowerStatus.PowerSource;
 import io.aerohelper.retroburn.project.DataCompilation;
 import io.aerohelper.retroburn.project.ImageSizeEstimate;
 import io.aerohelper.retroburn.project.TreeSizeScanner;
+import io.aerohelper.retroburn.testsupport.Mp3PlanFixture;
 import io.aerohelper.retroburn.tools.ProcessRequest;
 import io.aerohelper.retroburn.tools.ProcessResult;
 import io.aerohelper.retroburn.tools.ProcessRunner;
@@ -209,6 +210,21 @@ class WindowsHelperIntegrationTest {
         assertTrue(estimate >= actual, "estimate " + estimate + " < image " + actual);
         assertTrue(estimate < actual * 2, "estimate " + estimate + " far above image " + actual);
         assertEquals("Holiday 2026", volumeLabel(image));
+    }
+
+    @Test
+    void anMp3DiscImageHasCarNamesAndTheMp3sUnchanged() throws IOException {
+        Mp3PlanFixture fixture = Mp3PlanFixture.create(folder.resolve("music"));
+        assertEquals(
+                Mp3PlanFixture.expectedPaths(), List.copyOf(fixture.expected().keySet()));
+        Path image = folder.resolve("mp3.iso");
+
+        new Imapi2ImageBuilder(helper)
+                .buildDataImage(fixture.tree(), new ImageOptions("MP3 DISC"), image, event -> {}, new CancelToken());
+
+        Map<String, String> expected = new TreeMap<>();
+        fixture.expected().forEach((discPath, source) -> expected.put(discPath, sha256(source)));
+        assertEquals(expected, mountedChecksums(image));
     }
 
     private String volumeLabel(Path image) {

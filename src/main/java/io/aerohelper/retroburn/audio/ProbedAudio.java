@@ -35,18 +35,45 @@ public record ProbedAudio(
     }
 
     /**
-     * Title, artist, album and album artist, each empty when the file has no such tag.
+     * Tags, each empty when the file has none.
      *
      * @param title the track's title
      * @param artist the track's artist
      * @param album the album's title
      * @param albumArtist the album's artist
+     * @param track the track number as tagged, for example "3" or "3/12"
+     * @param disc the disc number as tagged, for example "1/2"
      */
     public record AudioTags(
-            Optional<String> title, Optional<String> artist, Optional<String> album, Optional<String> albumArtist) {
+            Optional<String> title,
+            Optional<String> artist,
+            Optional<String> album,
+            Optional<String> albumArtist,
+            Optional<String> track,
+            Optional<String> disc) {
+
+        public AudioTags(
+                Optional<String> title, Optional<String> artist, Optional<String> album, Optional<String> albumArtist) {
+            this(title, artist, album, albumArtist, Optional.empty(), Optional.empty());
+        }
 
         public static AudioTags none() {
             return new AudioTags(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
+        }
+
+        /** The track number's leading whole number ("3/12" gives 3), or 0 when there is none. */
+        public int trackNumber() {
+            return leadingNumber(track);
+        }
+
+        /** The disc number's leading whole number, or 0 when there is none. */
+        public int discNumber() {
+            return leadingNumber(disc);
+        }
+
+        private static int leadingNumber(Optional<String> value) {
+            String digits = value.orElse("").strip().replaceFirst("^(\\d{1,4}).*$", "$1");
+            return digits.matches("\\d{1,4}") ? Integer.parseInt(digits) : 0;
         }
     }
 }

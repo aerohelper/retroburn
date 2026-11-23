@@ -42,6 +42,11 @@ public final class SettingsStore {
     static final String KEY_SHOW_USB_TIP = "burn.showUsbTip";
     static final String KEY_AUDIO_CD_TEXT = "audio.cdText";
     static final String KEY_AUDIO_NORMALIZE = "audio.normalizeLoudness";
+    static final String KEY_MP3_LAYOUT = "mp3.layout";
+    static final String KEY_MP3_CAR = "mp3.carCompat";
+    static final String KEY_MP3_CONVERT = "mp3.convert";
+    static final String KEY_MP3_BITRATE = "mp3.bitrate";
+    static final String KEY_MP3_PLAYLISTS = "mp3.playlists";
 
     private static final Logger LOG = Logger.getLogger(SettingsStore.class.getName());
 
@@ -113,7 +118,17 @@ public final class SettingsStore {
                                 defaults.audio().cdText()),
                         bool(
                                 properties.getProperty(KEY_AUDIO_NORMALIZE),
-                                defaults.audio().normalizeLoudness())));
+                                defaults.audio().normalizeLoudness())),
+                new Settings.Mp3(
+                        properties.getProperty(KEY_MP3_LAYOUT, defaults.mp3().layout()),
+                        bool(properties.getProperty(KEY_MP3_CAR), defaults.mp3().carCompat()),
+                        bool(
+                                properties.getProperty(KEY_MP3_CONVERT),
+                                defaults.mp3().convert()),
+                        properties.getProperty(KEY_MP3_BITRATE, defaults.mp3().bitrate()),
+                        bool(
+                                properties.getProperty(KEY_MP3_PLAYLISTS),
+                                defaults.mp3().playlists())));
     }
 
     static Properties toProperties(Settings settings) {
@@ -127,6 +142,12 @@ public final class SettingsStore {
                 KEY_AUDIO_CD_TEXT, Boolean.toString(settings.audio().cdText()));
         properties.setProperty(
                 KEY_AUDIO_NORMALIZE, Boolean.toString(settings.audio().normalizeLoudness()));
+        properties.setProperty(KEY_MP3_LAYOUT, settings.mp3().layout());
+        properties.setProperty(KEY_MP3_CAR, Boolean.toString(settings.mp3().carCompat()));
+        properties.setProperty(KEY_MP3_CONVERT, Boolean.toString(settings.mp3().convert()));
+        properties.setProperty(KEY_MP3_BITRATE, settings.mp3().bitrate());
+        properties.setProperty(
+                KEY_MP3_PLAYLISTS, Boolean.toString(settings.mp3().playlists()));
         settings.workDirectory().ifPresent(folder -> properties.setProperty(KEY_WORK_DIRECTORY, folder.toString()));
         settings.toolPaths()
                 .forEach((tool, path) -> properties.setProperty(KEY_TOOL_PATH_PREFIX + toolKey(tool), path.toString()));

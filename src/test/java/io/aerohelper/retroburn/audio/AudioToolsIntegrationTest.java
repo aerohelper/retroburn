@@ -113,6 +113,55 @@ class AudioToolsIntegrationTest {
     }
 
     @Test
+    void conversionToMp3WritesId3v23AndId3v1() throws IOException {
+        Path ffmpeg = require(ExternalTool.FFMPEG);
+        Path ffprobe = require(ExternalTool.FFPROBE);
+        Path source = folder.resolve("tone.flac");
+        run(
+                ffmpeg,
+                List.of(
+                        "-nostdin",
+                        "-hide_banner",
+                        "-loglevel",
+                        "error",
+                        "-y",
+                        "-f",
+                        "lavfi",
+                        "-i",
+                        "sine=frequency=440:duration=3",
+                        "-metadata",
+                        "title=Song of Joy",
+                        "-metadata",
+                        "artist=Felix",
+                        source.toString()));
+        AudioTools tools = new AudioTools(runner, locator);
+        for (Mp3Encoding.Bitrate bitrate : Mp3Encoding.Bitrate.values()) {
+            Path mp3 = folder.resolve(bitrate + ".mp3");
+            tools.toMp3(source, mp3, Duration.ofSeconds(3), bitrate, fraction -> {}, new CancelToken());
+
+            byte[] bytes = Files.readAllBytes(mp3);
+            // ID3v2 header: "ID3", then the major version byte.
+            assertEquals("ID3", new String(bytes, 0, 3, java.nio.charset.StandardCharsets.ISO_8859_1));
+            assertEquals(3, bytes[3], bitrate + ": ID3v2 version");
+            // ID3v1: the last 128 bytes start with "TAG".
+            assertEquals(
+                    "TAG",
+                    new String(bytes, bytes.length - 128, 3, java.nio.charset.StandardCharsets.ISO_8859_1),
+                    bitrate + ": ID3v1");
+            ProbedAudio probed = FfprobeJsonParser.parse(
+                            String.join("\n", run(ffprobe, FfmpegAudio.probeArguments(mp3))))
+                    .orElseThrow();
+            assertEquals("mp3", probed.codec());
+            assertEquals(Optional.of("Song of Joy"), probed.tags().title());
+            System.out.println(bitrate + ": " + bytes.length + " bytes, estimate "
+                    + Mp3Encoding.estimatedBytes(Duration.ofSeconds(3), bitrate));
+            assertTrue(
+                    bytes.length <= Mp3Encoding.estimatedBytes(Duration.ofSeconds(3), bitrate) + 4096,
+                    bitrate.toString());
+        }
+    }
+
+    @Test
     void fileWithoutSoundHasNoAudio() {
         Path ffmpeg = require(ExternalTool.FFMPEG);
         Path ffprobe = require(ExternalTool.FFPROBE);
