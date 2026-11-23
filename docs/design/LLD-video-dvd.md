@@ -91,10 +91,10 @@ asks. Buttons are named `t1`…`t6`, `all`, `prev`, `next`.
 
 Templates (`classic`, `y2k`, `minimal`) are data: background top and
 bottom colours, text colour, highlight colour, font family and size, and
-whether thumbnails get a frame. No logos. Until bundled fonts arrive
-with the skins (M9), the templates use the JDK's logical fonts
-(`SansSerif`, `Serif`, `Monospaced`), so the menu text can look slightly
-different between systems.
+whether thumbnails get a frame. No logos. The templates use the bundled
+fonts (`classic` and `minimal`: Lato; `y2k`: VT323) through
+`video.MenuFonts`, so menus look the same on every system. Until the
+retro skins milestone they used the JDK's logical fonts.
 
 ## 5. FFmpeg (`video.FfmpegVideo`)
 

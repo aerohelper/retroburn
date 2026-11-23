@@ -75,7 +75,7 @@ Root package: `io.aerohelper.retroburn` ([ADR-0007](../adr/0007-package-root.md)
 | `app` | Entry point, composition root, navigation, home screen | `RetroBurnApplication`, `AppContext`, `Navigator` |
 | `ui` | One view per project type; shared drive bar, confirmation, progress and result views | `DriveBar`, `ConfirmBurnDialog`, `ProgressView`, `ResultView`, `*CompilationView` |
 | `theme` | Theme registry, CSS loading, sounds, spinning-disc animation | `Theme`, `ThemeRegistry`, `SoundPlayer`, `DiscAnimation` |
-| `project` | Project types and their models; `.rbproj` load/save | `ProjectType`, `Project` (sealed), `ProjectTypeRegistry`, `ProjectFileStore` |
+| `project` | Project models, pre-checks and job factories | `DataCompilation`, `AudioCompilation`, `Mp3Compilation`, `DvdProject`, `JobKind`, `BurnPreCheck`, `*JobFactory`, `BurnJob` |
 | `pipeline` | Turns a project into ordered, weighted, cancellable steps; owns the work folder | `Pipeline`, `PipelineStep`, `StepContext`, `PipelineRunner`, `DiskSpaceCheck` |
 | `engine` | OS-neutral contracts and value types for drives and burning | `BurnEngine`, `AudioCdEngine`, `DiscImageBuilder`, `DriveInfo`, `MediaInfo`, `DriveCapabilities`, `BurnEvent` |
 | `platform` | The `PlatformServices` interface and its implementations | `PlatformServices`, `DriveWatcher`, `SleepInhibitor`, `PowerStatus`, `AppPaths`, `ToolLocator` |
@@ -246,26 +246,22 @@ copied unless transcoded.
 
 ### 4.3 Projects and pipelines
 
+As built (v0.1): each kind of project has an immutable model
+(`DataCompilation`, `AudioCompilation`, `Mp3Compilation`, `DvdProject`), a
+`JobKind`, and a job factory (`BurnJobFactory`, `AudioJobFactory`,
+`Mp3JobFactory`, `DvdJobFactory`) that turns the model into a `Pipeline` of
+weighted, cancellable `PipelineStep`s; `BurnPreCheck` says what blocks a
+burn. Each has one screen in `ui` and one card on the home screen. The
+planned `ProjectType` registry and `.rbproj` project files were not needed
+for v0.1 (see [EXTENSIBILITY.md](../EXTENSIBILITY.md) section 3).
+
 ```java
-public sealed interface Project
-        permits DataProject, AudioCdProject, Mp3Project, DvdVideoProject, IsoBurnProject, IsoCreateProject {}
-
-public interface ProjectType {
-    String id();                                    // "data", "audio-cd", ...
-    Set<MediaKind> supportedMedia();                // drives the mismatch messages
-    Set<ToolRequirement> requiredTools();           // drives feature gating
-    Pipeline buildPipeline(Project project, PipelineEnvironment environment);
-}
-
 public interface PipelineStep {
-    String displayName();                           // "Converting tracks"
+    UserMessage name();                             // "Converting the tracks"
     double weight();                                // share of overall progress
-    void run(StepContext context) throws RetroBurnException;  // must honour context.cancelToken()
+    void run(StepContext context);                  // must honour the cancel token
 }
 ```
-
-All project types are registered in one place, `ProjectTypeRegistry`, which is
-filled by `AppContext`.
 
 ### 4.4 Events
 
@@ -443,8 +439,8 @@ classDiagram
 At startup (in the background, after the first window shows) `ToolLocator`
 finds each tool and `ToolCapabilityProbe` reads its version and relevant
 capabilities (e.g. whether FFmpeg has an MP3 encoder or which H.264 encoder is
-available). Each `ProjectType` declares its `ToolRequirement`s; the home screen
-and views disable exactly the dependent features and explain why.
+available). Each platform's `featureRequirements()` lists what each `Feature`
+needs; the screens disable exactly the dependent features and explain why.
 
 | Missing | Disabled |
 |---|---|
@@ -539,10 +535,10 @@ Summarised here, detailed in [EXTENSIBILITY.md](../EXTENSIBILITY.md).
 |---|---|---|
 | `PlatformServices` | New `platform.<os>` package | One line in `AppContext` |
 | `BurnEngine` / `AudioCdEngine` / `DiscImageBuilder` | New implementation in a platform package | None outside that platform |
-| `ProjectType` + `PipelineStep`s | New project model, steps and one view | One registration line |
+| Project type | New model, job factory with `PipelineStep`s, one screen | A `JobKind`, a home card |
 | `Theme` | CSS + assets + sounds in `themes/<name>/` | None |
-| `MenuTemplate` | Data file + images (optionally one small class) | None |
-| `PrintTemplate` | Data file | None |
+| `MenuTemplate` | A template constant | `MenuTemplate.named` and the screen's choice list |
+| `PrintTemplate` | Data file | Its id in `PrintTemplates.IDS` |
 | `ReelScene` | One small class | One registration line |
 
 ---

@@ -1,0 +1,168 @@
+# SPDX-FileCopyrightText: 2026 Chetan and contributors
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+# Builds RetroBurn's packages (docs/design/LLD-packaging.md). On pull requests that touch packaging
+# it is a dry run: the packages are workflow artefacts. On a pushed tag vX.Y.Z (done by the owner)
+# it also creates the GitHub Release with every asset, checksums and the SBOM.
+
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  pull_request:
+    paths:
+      - "packaging/**"
+      - "windows-tools/**"
+      - ".github/workflows/release.yml"
+      - ".github/workflows/windows-tools.yml"
+
+permissions:
+  contents: read
+
+# A newer push to the same pull request replaces a dry run still in progress; tag builds always finish.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  windows-tools:
+    uses: ./.github/workflows/windows-tools.yml
+
+  version:
+    name: Version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: version
+        name: From the tag (which must match the pom), or the pom without -SNAPSHOT for a dry run
+        run: |
+          pom="$(sed -n 's:^    <version>\(.*\)</version>$:\1:p' pom.xml | head -n 1)"
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            version="${GITHUB_REF#refs/tags/v}"
+            if [ "$pom" != "$version" ]; then
+              echo "::error::The tag says $version but pom.xml says $pom"
+              exit 1
+            fi
+          else
+            version="${pom%-SNAPSHOT}"
+          fi
+          test -n "$version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Version $version"
+
+  linux-package:
+    name: Debian package
+    needs: version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "25"
+          cache: maven
+      - name: Build
+        run: packaging/package.sh deb ${{ needs.version.outputs.version }}
+      - name: Show the package
+        run: |
+          dpkg-deb --info dist/*.deb
+          dpkg-deb --contents dist/*.deb | awk '{print $6}' | grep -vE '/runtime/(lib|conf|legal)/' | head -n 60
+      - uses: actions/upload-artifact@v6
+        with:
+          name: package-deb
+          path: dist/
+          retention-days: 7
+
+  windows-package:
+    name: Windows installer and portable zip
+    needs: [version, windows-tools]
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "25"
+          cache: maven
+      - uses: actions/download-artifact@v7
+        with:
+          name: windows-tools-bundle
+          path: windows-tools-bundle
+      # jpackage makes the .msi with the WiX Toolset.
+      - name: Install WiX
+        run: |
+          dotnet tool install --global wix --version 5.0.2
+          wix extension add --global WixToolset.Util.wixext/5.0.2
+          wix extension add --global WixToolset.UI.wixext/5.0.2
+          wix --version
+      - name: Build
+        run: packaging/package.sh windows ${{ needs.version.outputs.version }} windows-tools-bundle
+      - name: Show the app image
+        run: |
+          ls target/package/image/RetroBurn target/package/image/RetroBurn/tools
+          du -sh target/package/image/RetroBurn dist/*
+      - uses: actions/upload-artifact@v6
+        with:
+          name: package-windows
+          path: dist/
+          retention-days: 7
+
+  sbom:
+    name: SBOM
+    needs: [version, windows-tools]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "25"
+          cache: maven
+      - uses: actions/download-artifact@v7
+        with:
+          name: windows-tools-bundle
+          path: windows-tools-bundle
+      - name: CycloneDX SBOM of the Java libraries, plus the bundled Windows tools
+        run: |
+          ./mvnw -B -q org.cyclonedx:cyclonedx-maven-plugin:2.9.3:makeBom -DoutputFormat=json -DoutputName=bom
+          mkdir -p dist
+          python3 packaging/sbom-tools.py target/bom.json windows-tools-bundle/manifest.tsv \
+            dist/retroburn-${{ needs.version.outputs.version }}.cdx.json
+      - uses: actions/upload-artifact@v6
+        with:
+          name: sbom
+          path: dist/
+          retention-days: 7
+
+  publish:
+    name: GitHub Release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [version, linux-package, windows-package, sbom]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v7
+        with:
+          path: artefacts
+      - name: Collect the assets
+        run: |
+          version="${{ needs.version.outputs.version }}"
+          mkdir -p release
+          cp artefacts/package-deb/* artefacts/package-windows/* artefacts/sbom/* release/
+          (cd artefacts/windows-tools-sources && zip -qr "../../release/windows-tools-sources-${version}.zip" .)
+          (cd release && sha256sum * > SHA256SUMS)
+          awk -v v="$version" 'index($0, "## [" v "]") == 1 {on=1; next} on && index($0, "## [") == 1 {exit} on' CHANGELOG.md > notes.md
+          test -s notes.md || echo "See CHANGELOG.md." > notes.md
+          ls -l release
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" release/* --title "RetroBurn ${{ needs.version.outputs.version }}" --notes-file notes.md

@@ -7,7 +7,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 | | |
 |---|---|
-| Status | Draft: data disc, Burn ISO, Create ISO, erase, audio CD, MP3 disc, video DVD, covers, themes and burn reels. Extended as each project type is built. |
+| Status | Draft: data disc, Burn ISO, Create ISO, erase, audio CD, MP3 disc, video DVD, covers, themes, burn reels and installing. Extended as each project type is built. |
 
 Automated tests cover the models, parsers, pipelines and engines (see
 [TEST_STRATEGY.md](TEST_STRATEGY.md)). This checklist covers what needs a
@@ -25,7 +25,7 @@ change to the screens or an engine.
   name (for example `Grüße.txt`), and one empty folder.
 - Start the app with `./mvnw javafx:run`, or from an installed build.
 - Write down the OS version, drive model and media brand in the results
-  table (section 12).
+  table (section 13).
 
 Features the drive cannot test (for example Blu-ray on a DVD writer) are
 written down as "not tested — no drive", not skipped silently.
@@ -70,7 +70,8 @@ written down as "not tested — no drive", not skipped silently.
 
 Needs a blank CD-R (or a CD-RW) and a few music files in different formats
 (MP3, FLAC, M4A), one with a non-Latin title and one shorter than
-4 seconds. **Not run yet: a CD-RW is on order.** Steps that say CD-R can
+4 seconds. **Engine checks done on a CD-RW (Windows, see Results); the screens
+and CD players not yet.** Steps that say CD-R can
 be run on the CD-RW; many older CD players and some car stereos cannot
 read CD-RW, so a playback failure there points at the disc type first.
 
@@ -153,7 +154,22 @@ the tool settings) and a phone to play the result.
 | REEL-4 | Start a reel and press Cancel. | "Stopped. No reel was saved."; no partial file in the Videos folder. |
 | REEL-5 | Check the data folder after a few burns. | `sessions/` holds one JSON file per burn; nothing is sent anywhere. |
 
-## 11. USB and power
+## 11. Installing
+
+Use a clean machine or virtual machine where possible, and the packages from
+the release dry run or the release.
+
+| # | Steps | Expected |
+|---|---|---|
+| INST-1 | Windows: run `RetroBurn-<v>.msi` (SmartScreen may warn: the installer is not signed). | Installs to the chosen folder; Start menu entry "RetroBurn"; the app starts. |
+| INST-2 | Windows: Help → Open-source licenses. | FFmpeg, dvdauthor and the libraries of the bundled tools are listed; `tools\licenses\` exists in the install folder. |
+| INST-3 | Windows: with no FFmpeg on `PATH`, open MP3 disc and Video DVD, and make a demo burn reel. | Nothing says FFmpeg is missing; the reel is made with the bundled FFmpeg (libx264). |
+| INST-4 | Windows: unzip the portable zip elsewhere and run `RetroBurn.exe`. | Same as INST-1 to INST-3, without installing. |
+| INST-5 | Ubuntu: `sudo apt install ./retroburn_<v>_amd64.deb`. | xorriso, cdrskin, genisoimage, FFmpeg and dvdauthor are installed with it; RetroBurn appears in the menu and starts. |
+| INST-6 | Burn the DVD+RW once from each installed package (DATA-7). | As from source. |
+| INST-7 | Uninstall on both. | The app and its files go; settings and reels in the user's folders stay. |
+
+## 12. USB and power
 
 Run these on the DVD+RW only.
 
@@ -164,15 +180,16 @@ Run these on the DVD+RW only.
 | USB-3 | During a burn, leave the laptop idle past its sleep timeout. | The computer stays awake; the progress view shows the sleep note (Linux: a warning if sleep could not be blocked). |
 | USB-4 | Unplug the drive during a burn. | Result "The drive was disconnected or lost power…" with details; the app stays usable; replugging shows the drive again. |
 
-## 12. Results
+## 13. Results
 
 Copy this table into the pull request or release checklist.
 
 | OS and version | Drive | Media | Steps run | Failures (step, what happened) | Date |
 |---|---|---|---|---|---|
+| Windows 11 Pro 10.0.26200 | Slimtype eBAU108 (USB) | CD-RW 80 min | Through the engines (`WindowsRealCdRwTest`): data burn and verify of 49 MB (116 s, DATA-6 on CD-RW), quick erase (26 s), cancelling an audio CD (stopped in 3.2 s, AUDIO-8), full erase (507 s, ERASE-2), 3-track audio CD (52 s) with the track list read back and matching (AUDIO-7's check) | Erasing a CD-RW with data was refused ("The disc in the drive cannot be written"): fixed, see LLD-windows-platform 5.5. Not yet: playback in a CD player, the screens | 2026-11-17 |
 | | | | | | |
 
-## 13. Automated real-disc test
+## 14. Automated real-disc test
 
 Separate from this checklist, `WindowsRealDiscTest` burns, verifies and
 erases the inserted rewritable disc through the engine, without the screens.

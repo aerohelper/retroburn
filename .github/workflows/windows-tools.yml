@@ -2,13 +2,15 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 # Builds the external tools RetroBurn may bundle on Windows from pinned source (ADR-0006), and
-# checks them against the files RetroBurn writes: cdrdao for the CD-Text spike (ADR-0014), and
-# dvdauthor with spumux for video DVDs.
+# checks them against the files RetroBurn writes: cdrdao for the CD-Text spike (ADR-0014),
+# dvdauthor with spumux for video DVDs, and FFmpeg. The bundle job collects what the installer
+# ships, with licences and corresponding source (ADR-0019). release.yml calls this workflow.
 
 name: Windows tools
 
 on:
   workflow_dispatch:
+  workflow_call:
   pull_request:
     paths:
       - "windows-tools/**"
@@ -55,10 +57,19 @@ jobs:
           ./cdrdao.exe show-toc disc.toc
           ./cdrdao.exe toc-size disc.toc
 
+      # Only now: inside the MSYS2 shell a second copy of msys-2.0.dll next to the program clashes with
+      # the shell's own. Outside MSYS2 the copies let the build run on its own, for the CD-Text tests
+      # on a real writer (ADR-0014).
+      - name: Add the MSYS runtime DLLs next to the program
+        run: |
+          ldd out/cdrdao.exe | awk '$3 ~ /^\/usr\/bin\// {print $3}' | xargs -r -I{} cp {} out/
+          ls out
+
       - uses: actions/upload-artifact@v6
         with:
           name: cdrdao-windows
           path: out/
+          retention-days: 3
 
   dvdauthor:
     name: Build dvdauthor and spumux (MSYS2 UCRT64)
@@ -113,3 +124,107 @@ jobs:
         with:
           name: dvdauthor-windows
           path: out/
+          retention-days: 3
+
+  ffmpeg:
+    name: Build FFmpeg (MSYS2 UCRT64)
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            make
+            curl
+            tar
+            xz
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-pkgconf
+            mingw-w64-ucrt-x86_64-nasm
+            mingw-w64-ucrt-x86_64-libx264
+            mingw-w64-ucrt-x86_64-lame
+            mingw-w64-ucrt-x86_64-zlib
+
+      - name: Build
+        run: windows-tools/build-ffmpeg.sh out
+
+      - name: Encode what RetroBurn asks of FFmpeg
+        run: |
+          cd out
+          ./ffmpeg.exe -nostdin -hide_banner -loglevel error -y -f lavfi -i testsrc=size=1080x1920:rate=30:duration=2             -f lavfi -i sine=duration=2 -c:v libx264 -preset medium -crf 20 -pix_fmt yuv420p -c:a aac reel.mp4
+          ./ffmpeg.exe -nostdin -hide_banner -loglevel error -y -f lavfi -i sine=duration=2 -c:a libmp3lame -q:a 2             -id3v2_version 3 -write_id3v1 1 tone.mp3
+          ./ffmpeg.exe -nostdin -hide_banner -loglevel error -y -f lavfi -i testsrc=size=720x576:rate=25:duration=2             -f lavfi -i sine=duration=2 -target pal-dvd -c:a ac3 -b:a 192k -shortest title.mpg
+          for file in reel.mp4 tone.mp3 title.mpg; do
+            ./ffprobe.exe -v error -show_entries stream=codec_name,width,height -of csv=p=0 "$file"
+          done
+          rm -f reel.mp4 tone.mp3 title.mpg
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: ffmpeg-windows
+          path: out/
+          retention-days: 3
+
+  bundle:
+    name: Collect the bundled tools with licences and source
+    needs: [dvdauthor, ffmpeg]
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v7
+
+      # The same runtime packages as the builds, so ldd and pacman can name each DLL's package.
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            curl
+            mingw-w64-ucrt-x86_64-libpng
+            mingw-w64-ucrt-x86_64-freetype
+            mingw-w64-ucrt-x86_64-libxml2
+            mingw-w64-ucrt-x86_64-libdvdread
+            mingw-w64-ucrt-x86_64-fribidi
+            mingw-w64-ucrt-x86_64-fontconfig
+            mingw-w64-ucrt-x86_64-libx264
+            mingw-w64-ucrt-x86_64-lame
+            mingw-w64-ucrt-x86_64-zlib
+
+      - uses: actions/download-artifact@v7
+        with:
+          name: dvdauthor-windows
+          path: dvdauthor-out
+
+      - uses: actions/download-artifact@v7
+        with:
+          name: ffmpeg-windows
+          path: ffmpeg-out
+
+      - name: Bundle
+        run: windows-tools/bundle.sh dvdauthor-out ffmpeg-out bundle/tools bundle/sources
+
+      - name: The bundled tools start
+        run: |
+          bundle/tools/ffmpeg.exe -hide_banner -version | head -n 1
+          bundle/tools/ffprobe.exe -hide_banner -version | head -n 1
+          bundle/tools/dvdauthor.exe -h 2>&1 | head -n 1 || true
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: windows-tools-bundle
+          path: bundle/tools/
+          retention-days: 3
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: windows-tools-sources
+          path: bundle/sources/
+          retention-days: 3

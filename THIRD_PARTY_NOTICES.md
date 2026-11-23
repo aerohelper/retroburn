@@ -24,6 +24,15 @@ sync; a build test fails if a runtime dependency is missing from the register.
 | Lato font (Regular, Bold) | Cover designer text | Łukasz Dziedzic | OFL-1.1 | https://github.com/google/fonts/tree/main/ofl/lato | Linux, Windows |
 | VT323 font | Cover designer and the y2k skin | The VT323 Project Authors | OFL-1.1 | https://github.com/google/fonts/tree/main/ofl/vt323 | Linux, Windows |
 
+| FFmpeg 9.0.2 with x264 and LAME | Audio and video conversion, thumbnails, burn reels | The FFmpeg developers; x264 by VideoLAN; the LAME project | GPL-2.0-or-later | https://ffmpeg.org/ | Windows (bundled) |
+| dvdauthor and spumux 0.7.2 | Video DVD authoring and menu buttons | Scott Smith, Lawrence D'Oliveiro and contributors | GPL-2.0-or-later | https://github.com/ldo/dvdauthor | Windows (bundled) |
+| Libraries of the bundled tools (MSYS2 builds) | Used by the bundled FFmpeg and dvdauthor | See `credits/licenses/windows-tools-libraries.txt` | MIT, BSD-3-Clause, LGPL-2.1-or-later, GPL-2.0-or-later, GPL-3.0-or-later WITH GCC-exception-3.1, FTL, Zlib, libpng, bzip2 | https://www.msys2.org/ | Windows (bundled) |
+
+The bundled Windows tools are built from pinned source by `windows-tools/`; their
+corresponding source, the MSYS2 source package of every library, and the build
+scripts are published with every release as `windows-tools-sources-<version>.zip`,
+and the installed `tools\licenses\` folder holds every licence text.
+
 The OpenJDK runtime image also carries the third-party notices of the JDK
 modules it contains, in its `legal/` folder.
 
@@ -100,6 +109,20 @@ The verbatim NOTICE files are in `src/main/resources/credits/notices/`. The
 full PDFBox and FontBox licence files, which list the terms of every
 external component they contain, are in `src/main/resources/credits/licenses/`.
 
+## Used from the operating system (not distributed)
+
+| Component | Used for | Authors | Licence (SPDX) | Homepage | Platforms |
+|---|---|---|---|---|---|
+| GNU xorriso | Burns data discs and images, erases and reads discs | Thomas Schmitt and the libburnia project | GPL-3.0-or-later | https://www.gnu.org/software/xorriso/ | Linux |
+| cdrskin | Burns audio CDs with CD-Text | Thomas Schmitt and the libburnia project | GPL-2.0-or-later | https://dev.lovelyhq.com/libburnia/web/wiki/Cdrskin | Linux |
+| genisoimage (cdrkit) | Builds DVD-Video disc images | The cdrkit project, based on mkisofs by Jörg Schilling | GPL-2.0-only | https://salsa.debian.org/debian/cdrkit | Linux |
+| FFmpeg | Converts audio and video, thumbnails, burn reels | The FFmpeg developers | GPL-2.0-or-later (as built by the distribution) | https://ffmpeg.org/ | Linux |
+| dvdauthor and spumux | Video DVD authoring and menu buttons | Scott Smith, Lawrence D'Oliveiro and contributors | GPL-2.0-or-later | https://github.com/ldo/dvdauthor | Linux |
+| Windows Image Mastering API (IMAPI2) | Drives, burning, erasing, disc images | Microsoft Corporation | Part of Windows | https://learn.microsoft.com/windows/win32/imapi/disc-mastering-api | Windows |
+
+The Linux package declares these as dependencies; they come from your
+distribution with their own licences and sources.
+
 ## Build and test tools (not distributed)
 
 | Component | Used for | Licence (SPDX) | Homepage |
@@ -116,8 +139,5 @@ external component they contain, are in `src/main/resources/credits/licenses/`.
 
 ## Planned components
 
-These will be registered here, in the in-app credits and with their licence
-texts when the features using them are built: GNU xorriso, cdrskin,
-genisoimage (Linux); the Windows Image Mastering API (Windows, part of the OS);
-FFmpeg, dvdauthor and spumux (both; bundled on Windows with their
-corresponding source published); cdrdao (Windows, if adopted).
+cdrdao (Windows) will be registered here, in the in-app credits and with its
+licence texts if the Windows CD-Text work (ADR-0014) adopts it.

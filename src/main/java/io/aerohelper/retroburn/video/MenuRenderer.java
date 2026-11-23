@@ -77,9 +77,9 @@ public final class MenuRenderer {
             g.setPaint(new GradientPaint(0, 0, template.top(), 0, height, template.bottom()));
             g.fillRect(0, 0, width, height);
             g.setColor(template.text());
-            g.setFont(new Font(template.font(), Font.BOLD, height / 14));
+            g.setFont(MenuFonts.font(template.font(), Font.BOLD, height / 14f));
             drawCentred(g, discTitle, width / 2, height * 13 / 100, width - width / 6);
-            Font labelFont = new Font(template.font(), Font.PLAIN, height / 30);
+            Font labelFont = MenuFonts.font(template.font(), Font.PLAIN, height / 30f);
             for (MenuLayout.Button button : page.buttons()) {
                 MenuLayout.Rect area = button.area();
                 MenuLayout.Rect thumb = page.thumbnails().get(button.name());
@@ -105,7 +105,7 @@ public final class MenuRenderer {
                             thumb.y() + thumb.height() + labelFont.getSize() + 8,
                             thumb.width());
                 } else {
-                    g.setFont(labelFont.deriveFont(Font.BOLD));
+                    g.setFont(MenuFonts.font(template.font(), Font.BOLD, labelFont.getSize2D()));
                     drawCentred(
                             g,
                             button.label(),
