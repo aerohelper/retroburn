@@ -165,6 +165,11 @@ public final class DriveBar {
         emptyLabel.setVisible(none);
         emptyLabel.setManaged(none);
         refresh.setDisable(none);
+        if (none) {
+            // No selection change fires when there was none before, so clear the badge and Erase here.
+            media.set(null);
+            showMedia(null, null);
+        }
         if (keep.isPresent()) {
             // Same drive as before: the selection listener did not fire, so read the disc anyway.
             readMedia();

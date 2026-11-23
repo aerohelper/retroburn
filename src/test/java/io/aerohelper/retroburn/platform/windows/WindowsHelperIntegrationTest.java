@@ -19,10 +19,12 @@ import io.aerohelper.retroburn.platform.PowerStatus.PowerSource;
 import io.aerohelper.retroburn.project.DataCompilation;
 import io.aerohelper.retroburn.project.ImageSizeEstimate;
 import io.aerohelper.retroburn.project.TreeSizeScanner;
+import io.aerohelper.retroburn.testsupport.IsoImage;
 import io.aerohelper.retroburn.testsupport.Mp3PlanFixture;
 import io.aerohelper.retroburn.tools.ProcessRequest;
 import io.aerohelper.retroburn.tools.ProcessResult;
 import io.aerohelper.retroburn.tools.ProcessRunner;
+import io.aerohelper.retroburn.video.VideoTsOrder;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,6 +37,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
@@ -225,6 +228,45 @@ class WindowsHelperIntegrationTest {
         Map<String, String> expected = new TreeMap<>();
         fixture.expected().forEach((discPath, source) -> expected.put(discPath, sha256(source)));
         assertEquals(expected, mountedChecksums(image));
+    }
+
+    @Test
+    void aDvdVideoImageHasUdf102NoJolietAndTheVideoTsFilesInDvdOrder() throws IOException {
+        Path dvd = folder.resolve("dvd");
+        Path videoTs = Files.createDirectories(dvd.resolve("VIDEO_TS"));
+        Files.createDirectories(dvd.resolve("AUDIO_TS"));
+        // Written in an order unlike the DVD order, with sizes that are not whole sectors.
+        List<String> names = List.of(
+                "VTS_01_0.BUP",
+                "VTS_01_2.VOB",
+                "VIDEO_TS.BUP",
+                "VTS_01_1.VOB",
+                "VTS_01_0.IFO",
+                "VIDEO_TS.VOB",
+                "VTS_01_0.VOB",
+                "VIDEO_TS.IFO");
+        for (int i = 0; i < names.size(); i++) {
+            writeRandom(videoTs.resolve(names.get(i)), 5000 + i * 7000L);
+        }
+        Path image = folder.resolve("dvd.iso");
+
+        new Imapi2ImageBuilder(helper).buildDvdVideoImage(dvd, "HOLIDAY", image, event -> {}, new CancelToken());
+
+        try (IsoImage iso = new IsoImage(image)) {
+            List<String> descriptors = iso.descriptorIdentifiers();
+            System.out.println("[dvd] descriptors " + descriptors);
+            assertTrue(descriptors.contains("CD001/1"), descriptors.toString());
+            assertTrue(descriptors.contains("NSR02"), "UDF 1.02 descriptor missing: " + descriptors);
+            assertFalse(descriptors.contains("CD001/2"), "Joliet must be left out: " + descriptors);
+            List<IsoImage.Entry> files = iso.list("/VIDEO_TS").stream()
+                    .sorted(Comparator.comparingLong(IsoImage.Entry::lba))
+                    .toList();
+            files.forEach(entry -> System.out.println("[dvd] " + entry));
+            assertEquals(
+                    VideoTsOrder.sort(names),
+                    files.stream().map(IsoImage.Entry::name).toList());
+            assertTrue(iso.list("/").stream().anyMatch(entry -> entry.name().equals("AUDIO_TS")));
+        }
     }
 
     private String volumeLabel(Path image) {

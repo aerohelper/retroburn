@@ -5,15 +5,21 @@ package io.aerohelper.retroburn.platform.windows;
 import io.aerohelper.retroburn.common.CancelToken;
 import io.aerohelper.retroburn.engine.BurnEvent;
 import io.aerohelper.retroburn.engine.BurnListener;
+import io.aerohelper.retroburn.engine.DiscEntry;
 import io.aerohelper.retroburn.engine.DiscImageBuilder;
 import io.aerohelper.retroburn.engine.DiscTree;
 import io.aerohelper.retroburn.engine.ImageOptions;
+import io.aerohelper.retroburn.video.VideoTsOrder;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 /**
  * Writes ISO 9660 + Joliet + UDF images with IMAPI2FS, which is part of Windows, so the result reads
@@ -39,10 +45,14 @@ final class Imapi2ImageBuilder implements DiscImageBuilder {
     @Override
     public void buildDataImage(
             DiscTree tree, ImageOptions options, Path target, BurnListener listener, CancelToken cancel) {
+        run(HelperRequest.buildImage(tree, options.volumeLabel(), target), target, listener, cancel);
+    }
+
+    private void run(HelperRequest request, Path target, BurnListener listener, CancelToken cancel) {
         boolean succeeded = false;
         try {
             helper.run(
-                    HelperRequest.buildImage(tree, options.volumeLabel(), target),
+                    request,
                     event -> {
                         switch (event) {
                             case HelperEvent.Progress progress ->
@@ -61,6 +71,32 @@ final class Imapi2ImageBuilder implements DiscImageBuilder {
                 deleteQuietly(target);
             }
         }
+    }
+
+    /**
+     * IMAPI2FS with ISO 9660 and UDF 1.02; the VIDEO_TS files are added in DVD order, since IMAPI2FS
+     * has no DVD-Video mode of its own (ADR-0015).
+     */
+    @Override
+    public void buildDvdVideoImage(
+            Path dvdFolder, String volumeLabel, Path target, BurnListener listener, CancelToken cancel) {
+        List<DiscEntry> entries = new ArrayList<>();
+        Path videoTs = dvdFolder.resolve("VIDEO_TS");
+        try (Stream<Path> files = Files.list(videoTs)) {
+            List<String> names = files.filter(Files::isRegularFile)
+                    .map(file -> file.getFileName().toString())
+                    .toList();
+            for (String name : VideoTsOrder.sort(names)) {
+                entries.add(new DiscEntry("/VIDEO_TS/" + name, videoTs.resolve(name)));
+            }
+        } catch (IOException e) {
+            throw new UncheckedIOException("Could not list " + videoTs, e);
+        }
+        Path audioTs = dvdFolder.resolve("AUDIO_TS");
+        if (Files.isDirectory(audioTs)) {
+            entries.add(new DiscEntry("/AUDIO_TS", audioTs));
+        }
+        run(HelperRequest.buildDvdImage(DiscTree.of(entries), volumeLabel, target), target, listener, cancel);
     }
 
     private static void deleteQuietly(Path file) {

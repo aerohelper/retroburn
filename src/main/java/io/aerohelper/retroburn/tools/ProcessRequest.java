@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
  * @param stdoutLines receives each stdout line, unless {@code stdoutSink} is set
  * @param stderrLines receives each stderr line
  * @param stdoutSink receives stdout unchanged, as bytes, instead of {@code stdoutLines}
+ * @param stdinFile a file the program reads as its standard input; otherwise it gets none
  */
 public record ProcessRequest(
         Path executable,
@@ -40,7 +41,8 @@ public record ProcessRequest(
         Charset charset,
         Consumer<String> stdoutLines,
         Consumer<String> stderrLines,
-        Optional<OutputStream> stdoutSink) {
+        Optional<OutputStream> stdoutSink,
+        Optional<Path> stdinFile) {
 
     public ProcessRequest {
         Objects.requireNonNull(executable, "executable");
@@ -52,6 +54,7 @@ public record ProcessRequest(
         Objects.requireNonNull(stdoutLines, "stdoutLines");
         Objects.requireNonNull(stderrLines, "stderrLines");
         Objects.requireNonNull(stdoutSink, "stdoutSink");
+        Objects.requireNonNull(stdinFile, "stdinFile");
     }
 
     public static Builder builder(Path executable, List<String> arguments) {
@@ -88,6 +91,7 @@ public record ProcessRequest(
         private Consumer<String> stdoutLines = line -> {};
         private Consumer<String> stderrLines = line -> {};
         private OutputStream stdoutSink;
+        private Path stdinFile;
 
         private Builder(Path executable, List<String> arguments) {
             this.executable = executable;
@@ -133,6 +137,12 @@ public record ProcessRequest(
             return this;
         }
 
+        /** Gives the program {@code file} as its standard input, for tools that read data from stdin. */
+        public Builder stdinFrom(Path file) {
+            this.stdinFile = file;
+            return this;
+        }
+
         public ProcessRequest build() {
             return new ProcessRequest(
                     executable,
@@ -143,7 +153,8 @@ public record ProcessRequest(
                     charset,
                     stdoutLines,
                     stderrLines,
-                    Optional.ofNullable(stdoutSink));
+                    Optional.ofNullable(stdoutSink),
+                    Optional.ofNullable(stdinFile));
         }
     }
 }

@@ -13,5 +13,7 @@ public enum JobKind {
     /** Music files: convert to CD audio in the work folder, burn, check the track list. */
     AUDIO_CD,
     /** Music files laid out for car stereos: convert what is not MP3, build an image, burn, verify. */
-    MP3_DISC
+    MP3_DISC,
+    /** Video files authored as a DVD-Video with menus: convert, author, build an image, burn, verify. */
+    VIDEO_DVD
 }

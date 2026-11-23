@@ -23,4 +23,14 @@ public interface DiscImageBuilder {
      * @throws io.aerohelper.retroburn.common.RetroBurnException on failure
      */
     void buildDataImage(DiscTree tree, ImageOptions options, Path target, BurnListener listener, CancelToken cancel);
+
+    /**
+     * Writes a DVD-Video image: ISO 9660 and UDF 1.02 with the VIDEO_TS files in the order players
+     * expect. See {@code docs/design/LLD-video-dvd.md} section 6.
+     *
+     * @param dvdFolder the folder holding {@code VIDEO_TS} (and {@code AUDIO_TS})
+     * @param volumeLabel the disc's name
+     * @param target the ISO file to create; replaced if it exists
+     */
+    void buildDvdVideoImage(Path dvdFolder, String volumeLabel, Path target, BurnListener listener, CancelToken cancel);
 }

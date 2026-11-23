@@ -312,6 +312,13 @@ namespace RetroBurn.Helper
             return (bool)value;
         }
 
+        /// <summary>A true/false field that may be missing, which counts as false.</summary>
+        public bool Flag(string name)
+        {
+            object value;
+            return values.TryGetValue(name, out value) && value is bool && (bool)value;
+        }
+
         public ArrayList List(string name)
         {
             ArrayList value = Value(name) as ArrayList;
@@ -334,6 +341,8 @@ namespace RetroBurn.Helper
 
         // FsiFileSystems: FsiFileSystemISO9660 | FsiFileSystemJoliet | FsiFileSystemUDF.
         const int IsoJolietUdf = 0x1 | 0x2 | 0x4;
+        const int IsoUdf = 0x1 | 0x4;
+        const int UdfRevisionDvdVideo = 0x102;
 
         // FsiItemType returned by IFileSystemImage.Exists: 0 means not found.
         const int FsiItemNotFound = 0;
@@ -424,7 +433,17 @@ namespace RetroBurn.Helper
         {
             string target = request.Text("target");
             dynamic image = Com.Create("IMAPI2FS.MsftFileSystemImage");
-            image.FileSystemsToCreate = IsoJolietUdf;
+            if (request.Flag("dvdVideo"))
+            {
+                // DVD-Video: ISO 9660 + UDF 1.02 (UDFRevision 0x102, listed in UDFRevisionsSupported),
+                // no Joliet. The files arrive in DVD order from RetroBurn (ADR-0015).
+                image.FileSystemsToCreate = IsoUdf;
+                image.UDFRevision = UdfRevisionDvdVideo;
+            }
+            else
+            {
+                image.FileSystemsToCreate = IsoJolietUdf;
+            }
             image.FreeMediaBlocks = 0; // 0 means no size limit (the default is a 650 MB CD).
             image.VolumeName = request.Text("volumeLabel");
             dynamic root = image.Root;

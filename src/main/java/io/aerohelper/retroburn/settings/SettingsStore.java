@@ -47,6 +47,10 @@ public final class SettingsStore {
     static final String KEY_MP3_CONVERT = "mp3.convert";
     static final String KEY_MP3_BITRATE = "mp3.bitrate";
     static final String KEY_MP3_PLAYLISTS = "mp3.playlists";
+    static final String KEY_VIDEO_STANDARD = "video.tvStandard";
+    static final String KEY_VIDEO_CHAPTERS = "video.chapterMinutes";
+    static final String KEY_VIDEO_TEMPLATE = "video.template";
+    static final String KEY_VIDEO_AFTER = "video.afterTitle";
 
     private static final Logger LOG = Logger.getLogger(SettingsStore.class.getName());
 
@@ -128,7 +132,24 @@ public final class SettingsStore {
                         properties.getProperty(KEY_MP3_BITRATE, defaults.mp3().bitrate()),
                         bool(
                                 properties.getProperty(KEY_MP3_PLAYLISTS),
-                                defaults.mp3().playlists())));
+                                defaults.mp3().playlists())),
+                new Settings.Video(
+                        properties.getProperty(
+                                KEY_VIDEO_STANDARD, defaults.video().tvStandard()),
+                        integer(
+                                properties.getProperty(KEY_VIDEO_CHAPTERS),
+                                defaults.video().chapterMinutes()),
+                        properties.getProperty(
+                                KEY_VIDEO_TEMPLATE, defaults.video().template()),
+                        properties.getProperty(KEY_VIDEO_AFTER, defaults.video().afterTitle())));
+    }
+
+    private static int integer(String value, int fallback) {
+        try {
+            return value == null ? fallback : Integer.parseInt(value.strip());
+        } catch (NumberFormatException e) {
+            return fallback;
+        }
     }
 
     static Properties toProperties(Settings settings) {
@@ -148,6 +169,11 @@ public final class SettingsStore {
         properties.setProperty(KEY_MP3_BITRATE, settings.mp3().bitrate());
         properties.setProperty(
                 KEY_MP3_PLAYLISTS, Boolean.toString(settings.mp3().playlists()));
+        properties.setProperty(KEY_VIDEO_STANDARD, settings.video().tvStandard());
+        properties.setProperty(
+                KEY_VIDEO_CHAPTERS, Integer.toString(settings.video().chapterMinutes()));
+        properties.setProperty(KEY_VIDEO_TEMPLATE, settings.video().template());
+        properties.setProperty(KEY_VIDEO_AFTER, settings.video().afterTitle());
         settings.workDirectory().ifPresent(folder -> properties.setProperty(KEY_WORK_DIRECTORY, folder.toString()));
         settings.toolPaths()
                 .forEach((tool, path) -> properties.setProperty(KEY_TOOL_PATH_PREFIX + toolKey(tool), path.toString()));

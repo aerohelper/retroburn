@@ -43,3 +43,8 @@ All notable changes to RetroBurn are recorded here. The format follows
   converted with FFmpeg (128 to 320 kbps or VBR), layouts by folder, by
   artist and album or flat, car stereo mode (safe short names, track-number
   prefixes, two folder levels, ID3v2.3 and ID3v1 tags), and playlists.
+- Video DVDs: up to 99 videos in any format FFmpeg reads, PAL or NTSC,
+  16:9 or 4:3, a bitrate that fills the disc, chapters every few minutes,
+  menus with thumbnails, "Play all" and pages in three templates, and
+  burning, Create ISO or saving the VIDEO_TS folder (dvdauthor and spumux;
+  genisoimage on Linux, IMAPI2 with UDF 1.02 on Windows).

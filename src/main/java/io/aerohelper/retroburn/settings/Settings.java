@@ -22,6 +22,7 @@ import java.util.Optional;
  * @param showUsbTip show the advice for USB drives before burning
  * @param audio settings for audio CDs
  * @param mp3 settings for MP3 discs
+ * @param video settings for video DVDs
  */
 public record Settings(
         boolean preventSleepWhileBurning,
@@ -31,13 +32,36 @@ public record Settings(
         boolean verifyAfterBurn,
         boolean showUsbTip,
         Audio audio,
-        Mp3 mp3) {
+        Mp3 mp3,
+        Video video) {
 
     public Settings {
         Objects.requireNonNull(workDirectory, "workDirectory");
         toolPaths = Map.copyOf(toolPaths);
         Objects.requireNonNull(audio, "audio");
         Objects.requireNonNull(mp3, "mp3");
+        Objects.requireNonNull(video, "video");
+    }
+
+    /**
+     * Video DVD settings, kept as names like {@link Mp3}.
+     *
+     * @param tvStandard PAL or NTSC; empty for the computer's country
+     * @param chapterMinutes a chapter every so many minutes, 0 for none
+     * @param template classic, y2k or minimal
+     * @param afterTitle MENU or NEXT
+     */
+    public record Video(String tvStandard, int chapterMinutes, String template, String afterTitle) {
+
+        public Video {
+            Objects.requireNonNull(tvStandard, "tvStandard");
+            Objects.requireNonNull(template, "template");
+            Objects.requireNonNull(afterTitle, "afterTitle");
+        }
+
+        public static Video defaults() {
+            return new Video("", 5, "classic", "MENU");
+        }
     }
 
     /**
@@ -77,12 +101,29 @@ public record Settings(
 
     /** Settings for a first start. */
     public static Settings defaults() {
-        return new Settings(true, false, Optional.empty(), Map.of(), true, true, Audio.defaults(), Mp3.defaults());
+        return new Settings(
+                true,
+                false,
+                Optional.empty(),
+                Map.of(),
+                true,
+                true,
+                Audio.defaults(),
+                Mp3.defaults(),
+                Video.defaults());
     }
 
     public Settings withVerifyAfterBurn(boolean verify) {
         return new Settings(
-                preventSleepWhileBurning, keepTemporaryFiles, workDirectory, toolPaths, verify, showUsbTip, audio, mp3);
+                preventSleepWhileBurning,
+                keepTemporaryFiles,
+                workDirectory,
+                toolPaths,
+                verify,
+                showUsbTip,
+                audio,
+                mp3,
+                video);
     }
 
     public Settings withShowUsbTip(boolean show) {
@@ -94,7 +135,8 @@ public record Settings(
                 verifyAfterBurn,
                 show,
                 audio,
-                mp3);
+                mp3,
+                video);
     }
 
     public Settings withAudio(Audio changed) {
@@ -106,7 +148,8 @@ public record Settings(
                 verifyAfterBurn,
                 showUsbTip,
                 changed,
-                mp3);
+                mp3,
+                video);
     }
 
     public Settings withMp3(Mp3 changed) {
@@ -118,6 +161,20 @@ public record Settings(
                 verifyAfterBurn,
                 showUsbTip,
                 audio,
+                changed,
+                video);
+    }
+
+    public Settings withVideo(Video changed) {
+        return new Settings(
+                preventSleepWhileBurning,
+                keepTemporaryFiles,
+                workDirectory,
+                toolPaths,
+                verifyAfterBurn,
+                showUsbTip,
+                audio,
+                mp3,
                 changed);
     }
 }

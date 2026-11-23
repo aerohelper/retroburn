@@ -85,6 +85,7 @@ public final class ProcessRunner {
     private static Process start(String programName, ProcessRequest request) {
         ProcessBuilder builder = new ProcessBuilder(request.command());
         request.workingDirectory().ifPresent(folder -> builder.directory(folder.toFile()));
+        request.stdinFile().ifPresent(file -> builder.redirectInput(file.toFile()));
         LOG.info(() -> "Starting: " + request.commandLine());
         try {
             return builder.start();

@@ -148,6 +148,7 @@ final class ConfirmBurnDialog {
             case ERASE -> "confirm.heading.erase";
             case AUDIO_CD -> "confirm.heading.audioCd";
             case MP3_DISC -> "confirm.heading.mp3Disc";
+            case VIDEO_DVD -> "confirm.heading.videoDvd";
         };
     }
 }

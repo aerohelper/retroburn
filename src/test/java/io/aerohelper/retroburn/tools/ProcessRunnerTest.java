@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 package io.aerohelper.retroburn.tools;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -14,16 +15,19 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 class ProcessRunnerTest {
 
@@ -184,6 +188,20 @@ class ProcessRunnerTest {
             assertEquals((byte) (i % 251), data[i], "byte " + i);
         }
         assertEquals(List.of("binary done"), stderr);
+    }
+
+    @Test
+    void feedsAFileAsStandardInput(@TempDir Path folder) throws IOException {
+        byte[] data = new byte[70_000];
+        new Random(3).nextBytes(data);
+        Path input = Files.write(folder.resolve("in.bin"), data);
+        ByteArrayOutputStream sink = new ByteArrayOutputStream();
+
+        ProcessResult result =
+                runner.run(request("copy-stdin").stdinFrom(input).stdoutTo(sink).build(), CancelToken.none());
+
+        assertTrue(result.succeeded(), result.technicalDetail());
+        assertArrayEquals(data, sink.toByteArray());
     }
 
     @Test
